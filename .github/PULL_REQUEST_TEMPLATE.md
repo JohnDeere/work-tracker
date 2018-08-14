@@ -1,0 +1,8 @@
+- [ ] I have followed the [Contribution Guidelines](../blob/master/.github/CONTTRIBUTING.md).
+- [ ] My code follows the code style of this project.
+- [ ] I have added tests to cover my changes.
+- [ ] All new and existing tests passed. (Has passed ```mvn clean verify``` locally.)
+- [ ] pom.xml version follows the [Semantic Versioning](https://semver.org/) rules.
+- [ ] I have updated the documentation as necessary.
+- [ ] I have added myself to the [Contributors File](../blob/master/CONTRIBUTORS.md).
+- [ ] I know all contributors must sign the Contributor License Agreement.
