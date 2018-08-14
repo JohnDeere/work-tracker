@@ -186,6 +186,7 @@
                 <version>1.6.7</version>
                 <extensions>true</extensions>
                 <configuration>
+                    <stagingProgressTimeoutMinutes>10</stagingProgressTimeoutMinutes>
                     <serverId>ossrh</serverId>
                     <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                     <autoReleaseAfterClose>true</autoReleaseAfterClose>
