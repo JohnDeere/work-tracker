@@ -29,7 +29,7 @@ limitations under the License.
     <modules>
         <module>java-example</module>
         <module>spring-example</module>
-        <module>spring-boot-example</module>
+        <!--<module>spring-boot-example</module>-->
     </modules>
 
     <build>
