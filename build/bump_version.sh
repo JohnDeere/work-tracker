@@ -16,7 +16,7 @@
 #
 
 VERSION=$1
-CURRENT_VERSION=$(grep -o "\([0-9\.]*-SNAPSHOT\)" pom.xml)
+CURRENT_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep "^\([0-9\.]*-SNAPSHOT\)$")
 
 REGEX="([0-9]+)\.([0-9]+)\.([0-9]+)(-SNAPSHOT)?"
 
