@@ -29,7 +29,7 @@ limitations under the License.
     <modules>
         <module>java-example</module>
         <module>spring-example</module>
-        <!--<module>spring-boot-example</module>-->
+        <module>spring-boot-example</module>
     </modules>
 
     <build>
@@ -40,6 +40,13 @@ limitations under the License.
                 <version>2.8.2</version>
                 <configuration>
                     <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <configuration>
+                    <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
                 </configuration>
             </plugin>
         </plugins>
