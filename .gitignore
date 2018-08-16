@@ -21,3 +21,6 @@
 **/.DS_Store
 
 print/*
+
+pom.xml.releaseBackup
+release.properties
