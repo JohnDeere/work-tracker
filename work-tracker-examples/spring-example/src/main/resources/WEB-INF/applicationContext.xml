@@ -15,10 +15,5 @@
     <context:component-scan base-package="com.deere.isg.worktracker"/>
     <context:component-scan base-package="com.deere.isg.worktracker.spring"/>
 
-    <mvc:interceptors>
-        <bean class="com.deere.isg.worktracker.spring.SpringLoggerHandlerInterceptor"/>
-        <bean class="com.deere.isg.worktracker.spring.SpringRequestBouncerHandlerInterceptor"/>
-    </mvc:interceptors>
-
     <task:executor id="executor" pool-size="20"/>
 </beans>

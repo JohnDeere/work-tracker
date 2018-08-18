@@ -55,6 +55,33 @@ public class WorkTrackerContextListener extends WorkContextListener {
 ```
 
 In your web.xml, add the following:
+
+- **Bundled Version:**
+
+```xml
+<!-- filters -->
+<filter>
+    <filter-name>workTrackerFilter</filter-name>
+    <filter-class>com.deere.isg.worktracker.servlet.WorkTrackerFilter</filter-class>
+</filter>
+
+<!-- filter mappings -->
+<filter-mapping>
+    <filter-name>workTrackerFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+</filter-mapping>
+
+<!-- listeners -->
+<!-- add your workTrackerContextListener -->
+<listener>
+    <listener-class>com.example.WorkTrackerContextListener</listener-class>
+</listener>
+```
+The `WorkTrackerFilter` bundles HttpWorkFilter, LoggerFilter, RequestBouncerFilter, and ZombieFilter. You can also overwrite the HttpWorFilter by creating a subclass that calls `super(BaseFilter)` in the constructor
+
+- **Detached Version:**
+
+Alternatively, you can add filters individually like this:
 ```xml
 <!-- filters -->
 <filter>
@@ -62,15 +89,15 @@ In your web.xml, add the following:
     <filter-class>com.deere.isg.worktracker.servlet.HttpWorkFilter</filter-class>
 </filter>
 
-<filter>
-    <filter-name>requestBouncerFilter</filter-name>
-    <filter-class>com.deere.isg.worktracker.servlet.RequestBouncerFilter</filter-class>
-</filter>
-
 <!-- if you intend to have user authentication, your filter should go before this LoggerFilter -->
 <filter>
     <filter-name>loggerFilter</filter-name>
     <filter-class>com.deere.isg.worktracker.servlet.LoggerFilter</filter-class>
+</filter>
+
+<filter>
+    <filter-name>requestBouncerFilter</filter-name>
+    <filter-class>com.deere.isg.worktracker.servlet.RequestBouncerFilter</filter-class>
 </filter>
 
 <filter>
@@ -85,12 +112,12 @@ In your web.xml, add the following:
 </filter-mapping>
 
 <filter-mapping>
-    <filter-name>requestBouncerFilter</filter-name>
+    <filter-name>loggerFilter</filter-name>
     <url-pattern>/*</url-pattern>
 </filter-mapping>
 
 <filter-mapping>
-    <filter-name>loggerFilter</filter-name>
+    <filter-name>requestBouncerFilter</filter-name>
     <url-pattern>/*</url-pattern>
 </filter-mapping>
 
