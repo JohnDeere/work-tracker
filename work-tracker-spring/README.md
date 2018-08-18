@@ -15,10 +15,17 @@ See [releases](../../../releases/latest) for the latest release
       <version>0.1.4</version>
   </dependency>
   <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${logging.version}</version>
+  </dependency>
+  <dependency>
     <groupId>com.deere.isg.devops.work-tracker</groupId>
     <artifactId>work-tracker-spring</artifactId>
     <version>${work-tracker.version}</version>
-  </dependency>
+  </dependency
+```
+```xml
   <!-- Spring libraries -->
   <dependency>
       <groupId>org.springframework</groupId>
@@ -36,12 +43,9 @@ See [releases](../../../releases/latest) for the latest release
       <version>${servlet.version}</version>
       <scope>provided</scope>
   </dependency>
+```
+```xml
   <!-- logging libraries and bridges, ref: https://www.slf4j.org/legacy.html -->
-  <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>${logging.version}</version>
-  </dependency>
   <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jcl-over-slf4j</artifactId>
@@ -85,6 +89,55 @@ public class WorkTrackerContextListener extends WorkContextListener {
 If you don't need `Flood Sensor` and/or `Zombie` protection, you can omit `withHttpFloodSensor` and/or `withZombieDetector` to remove those features. You will also need to remove their respective filters from `web.xml`.
 
 **Add the filters and listeners in `web.xml`**
+
+- **Bundled Version:**
+
+```xml
+<context-param>
+    <param-name>logbackConfigLocation</param-name>
+    <param-value>classpath:logback.groovy</param-value>
+</context-param>
+<!-- filters -->
+<filter>
+    <filter-name>workTrackerFilter</filter-name>
+    <filter-class>com.example.WorkFilterProxy</filter-class>
+</filter>
+
+<!-- filter mappings -->
+<filter-mapping>
+    <filter-name>workTrackerFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+</filter-mapping>
+
+<!-- listeners -->
+<listener>
+    <listener-class>ch.qos.logback.ext.spring.web.LogbackConfigListener</listener-class>
+</listener>
+
+<listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+</listener>
+<!-- add your workTrackerContextListener -->
+<listener>
+    <listener-class>com.example.WorkTrackerContextListener</listener-class>
+</listener>
+```
+The `WorkTrackerFilterProxy` bundles HttpWorkFilter, LoggerFilter, RequestBouncerFilter, and ZombieFilter. You can also overwrite the HttpWorFilter and add your own `WorkFilter` by creating a subclass that calls `super(BaseFilter)` in the constructor just like `WorkFilterProxy`:
+
+```java
+public class WorkFilterProxy extends WorkTrackerFilterProxy {
+
+    public WorkFilterProxy(){
+       super(new SpringWorkFilter());
+    }
+}
+```
+
+See [example](./work-tracker-examples/spring-example/src/main/java/com/deere/example/WorkFilterProxy.java)
+
+- **Detached Version:**
+
+Alternatively, you can add filters individually like this:
 ```xml
 <context-param>
     <param-name>logbackConfigLocation</param-name>
@@ -181,6 +234,7 @@ public class WorkFilter extends AbstractSpringWorkFilter<UserSpringWork> {
 }
 ```
 
+Add this `WorkFilter` in your `WorkTrackerFilter` subclass. Alternatively, the detached version will look like this:
 ```xml
 <filter>
     <filter-name>workFilter</filter-name>
@@ -208,7 +262,7 @@ Then add the `SpringWorkPostAuthFilter` to the filter list in `web.xml` after th
 </filter-mapping>
 ```
 
-Then your configuration will need `UserSpringWork` as the type, example:
+Finally, your configuration will need `UserSpringWork` as the type, example:
 ```java
 @Configuration
 public class WorkTrackerContextListener extends WorkContextListener {

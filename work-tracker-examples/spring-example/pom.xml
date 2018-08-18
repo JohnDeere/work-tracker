@@ -96,6 +96,15 @@ limitations under the License.
         <finalName>work-tracker-spring-example</finalName>
         <plugins>
             <plugin>
+                <groupId>com.mycila.maven-license-plugin</groupId>
+                <artifactId>maven-license-plugin</artifactId>
+                <version>1.8.0</version>
+                <configuration>
+                    <!-- Template location -->
+                    <header>${basedir}/../../build/fileHeader.txt</header>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>${jetty.version}</version>

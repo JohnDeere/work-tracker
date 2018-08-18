@@ -19,6 +19,7 @@ package com.deere.example;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,7 +40,9 @@ public class HelloWorldController {
     private Logger logger = LoggerFactory.getLogger(HelloWorldController.class);
 
     @Autowired
-    public HelloWorldController(WorkContext context, Executor mdcExecutor, RestTemplate restTemplate) {
+    public HelloWorldController(WorkContext context,
+                                @Qualifier("mdcExecutor") Executor mdcExecutor,
+                                RestTemplate restTemplate) {
         this.context = context;
         this.mdcExecutor = mdcExecutor;
         this.restTemplate = restTemplate;
@@ -76,7 +79,7 @@ public class HelloWorldController {
     @GetMapping("/user/{id}/role/{role}")
     @SuppressWarnings("Duplicates")
     public String userRole(@PathVariable("id") String user,
-            @PathVariable("role") String role) {
+                           @PathVariable("role") String role) {
         return user + ", " + role;
     }
 
