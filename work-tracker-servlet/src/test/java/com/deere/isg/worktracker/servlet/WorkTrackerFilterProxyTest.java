@@ -38,7 +38,7 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
 
-public class WorkTrackerFilterTest {
+public class WorkTrackerFilterProxyTest {
     private static final List<BaseFilter> SPY_FILTERS = Arrays.asList(
             spy(HttpWorkFilter.class),
             spy(LoggerFilter.class),
@@ -46,7 +46,7 @@ public class WorkTrackerFilterTest {
             spy(ZombieFilter.class)
     );
 
-    private WorkTrackerFilter workTrackerFilter;
+    private WorkTrackerFilterProxy workTrackerFilter;
     private FilterConfig filterConfig;
     private OutstandingWork<HttpWork> outstanding;
     private HttpFloodSensor<HttpWork> floodSensor;
@@ -60,7 +60,7 @@ public class WorkTrackerFilterTest {
 
         ServletContext context = mock(ServletContext.class);
 
-        workTrackerFilter = new WorkTrackerFilter();
+        workTrackerFilter = new WorkTrackerFilterProxy();
 
         filterConfig = mock(FilterConfig.class);
         when(filterConfig.getServletContext()).thenReturn(context);
@@ -94,15 +94,10 @@ public class WorkTrackerFilterTest {
 
     @Test
     public void destroysFilters() {
-        List<BaseFilter> mockFilters = Arrays.asList(
-                mock(HttpWorkFilter.class),
-                mock(LoggerFilter.class)
-        );
-
-        WorkTrackerFilter trackerFilter = new WorkTrackerFilter(mockFilters);
+        WorkTrackerFilterProxy trackerFilter = new WorkTrackerFilterProxy(SPY_FILTERS);
         trackerFilter.destroy();
 
-        for (BaseFilter filter : mockFilters) {
+        for (BaseFilter filter : SPY_FILTERS) {
             verify(filter).destroy();
         }
     }
@@ -113,7 +108,7 @@ public class WorkTrackerFilterTest {
         HttpServletResponse response = mock(HttpServletResponse.class);
         FilterChain filterChain = mock(FilterChain.class);
 
-        WorkTrackerFilter workFilter = new WorkTrackerFilter(SPY_FILTERS);
+        WorkTrackerFilterProxy workFilter = new WorkTrackerFilterProxy(SPY_FILTERS);
         workFilter.init(filterConfig);
         workFilter.doFilter(
                 request,

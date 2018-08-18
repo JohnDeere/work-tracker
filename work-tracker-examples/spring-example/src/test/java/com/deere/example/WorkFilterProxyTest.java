@@ -15,21 +15,23 @@
  */
 
 
-package com.deere.isg.worktracker.spring;
+package com.deere.example;
 
 import com.deere.isg.worktracker.servlet.LoggerFilter;
 import com.deere.isg.worktracker.servlet.RequestBouncerFilter;
 import com.deere.isg.worktracker.servlet.ZombieFilter;
+import com.deere.isg.worktracker.spring.SpringWorkFilter;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.instanceOf;
 
-public class SpringWorkTrackerFilterTest {
+public class WorkFilterProxyTest {
+
     @Test
     public void hasDefaultFilters() {
-        SpringWorkTrackerFilter filter = new SpringWorkTrackerFilter();
+        WorkFilterProxy filter = new WorkFilterProxy();
         assertThat(filter.getFilters(), contains(
                 instanceOf(SpringWorkFilter.class),
                 instanceOf(LoggerFilter.class),
@@ -37,5 +39,4 @@ public class SpringWorkTrackerFilterTest {
                 instanceOf(ZombieFilter.class)
         ));
     }
-
 }

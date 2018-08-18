@@ -24,19 +24,19 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-public class WorkTrackerFilter implements Filter {
+public class WorkTrackerFilterProxy implements Filter {
 
     private List<BaseFilter> filters;
 
-    public WorkTrackerFilter() {
+    public WorkTrackerFilterProxy() {
         this(new HttpWorkFilter());
     }
 
-    public WorkTrackerFilter(BaseFilter workFilter) {
+    public WorkTrackerFilterProxy(BaseFilter workFilter) {
         this(Arrays.asList(
                 workFilter,
                 new LoggerFilter(),
@@ -45,7 +45,7 @@ public class WorkTrackerFilter implements Filter {
         ));
     }
 
-    public WorkTrackerFilter(List<BaseFilter> filters) {
+    public WorkTrackerFilterProxy(List<BaseFilter> filters) {
         this.filters = filters;
     }
 
@@ -70,7 +70,7 @@ public class WorkTrackerFilter implements Filter {
     }
 
     public List<BaseFilter> getFilters() {
-        return new ArrayList<>(filters);
+        return Collections.unmodifiableList(filters);
     }
 
     private static class WorkTrackerFilterChain implements FilterChain {

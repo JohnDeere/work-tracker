@@ -100,7 +100,7 @@ If you don't need `Flood Sensor` and/or `Zombie` protection, you can omit `withH
 <!-- filters -->
 <filter>
     <filter-name>workTrackerFilter</filter-name>
-    <filter-class>com.deere.isg.worktracker.spring.SpringWorkTrackerFilter</filter-class>
+    <filter-class>com.example.WorkFilterProxy</filter-class>
 </filter>
 
 <!-- filter mappings -->
@@ -122,18 +122,18 @@ If you don't need `Flood Sensor` and/or `Zombie` protection, you can omit `withH
     <listener-class>com.example.WorkTrackerContextListener</listener-class>
 </listener>
 ```
-The `WorkTrackerFilter` bundles HttpWorkFilter, LoggerFilter, RequestBouncerFilter, and ZombieFilter. You can also overwrite the HttpWorFilter by creating a subclass that calls `super(BaseFilter)` in the constructor
-
-If you create your own `WorkFilter` that extends    `AbstractSpringWorkFilter`, i.e. for supporting `updateUserInformation`, you can add that to the `super()` instead:
+The `WorkTrackerFilterProxy` bundles HttpWorkFilter, LoggerFilter, RequestBouncerFilter, and ZombieFilter. You can also overwrite the HttpWorFilter and add your own `WorkFilter` by creating a subclass that calls `super(BaseFilter)` in the constructor just like `WorkFilterProxy`:
 
 ```java
-public class AppWorkTrackerFilter extends SpringWorkTrackerFilter {
+public class WorkFilterProxy extends WorkTrackerFilterProxy {
 
-    public AppWorkTrackerFilter(){
-       super(new WorkFilter());
+    public WorkFilterProxy(){
+       super(new SpringWorkFilter());
     }
 }
 ```
+
+See [example](./work-tracker-examples/spring-example/src/main/java/com/deere/example/WorkFilterProxy.java)
 
 - **Detached Version:**
 

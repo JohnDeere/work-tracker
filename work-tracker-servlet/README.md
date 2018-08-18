@@ -62,7 +62,7 @@ In your web.xml, add the following:
 <!-- filters -->
 <filter>
     <filter-name>workTrackerFilter</filter-name>
-    <filter-class>com.deere.isg.worktracker.servlet.WorkTrackerFilter</filter-class>
+    <filter-class>com.deere.isg.worktracker.servlet.WorkTrackerFilterProxy</filter-class>
 </filter>
 
 <!-- filter mappings -->
@@ -77,7 +77,7 @@ In your web.xml, add the following:
     <listener-class>com.example.WorkTrackerContextListener</listener-class>
 </listener>
 ```
-The `WorkTrackerFilter` bundles HttpWorkFilter, LoggerFilter, RequestBouncerFilter, and ZombieFilter. You can also overwrite the HttpWorFilter by creating a subclass that calls `super(BaseFilter)` in the constructor
+The `WorkTrackerFilterProxy` bundles HttpWorkFilter, LoggerFilter, RequestBouncerFilter, and ZombieFilter. You can also overwrite the HttpWorFilter by creating a subclass that calls `super(BaseFilter)` in the constructor
 
 - **Detached Version:**
 

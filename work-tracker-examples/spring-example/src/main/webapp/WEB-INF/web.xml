@@ -30,14 +30,14 @@ limitations under the License.
 
     <!-- filters -->
     <filter>
-        <filter-name>springWorkTrackerFilter</filter-name>
-        <filter-class>com.deere.isg.worktracker.spring.SpringWorkTrackerFilter</filter-class>
+        <filter-name>workTrackerFilter</filter-name>
+        <filter-class>com.deere.example.WorkFilterProxy</filter-class>
     </filter>
 
 
     <!-- filter mappings -->
     <filter-mapping>
-        <filter-name>springWorkTrackerFilter</filter-name>
+        <filter-name>workTrackerFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 

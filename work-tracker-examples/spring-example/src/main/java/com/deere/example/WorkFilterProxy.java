@@ -14,24 +14,15 @@
  * limitations under the License.
  */
 
-package com.deere.isg.worktracker.spring;
 
-import com.deere.isg.worktracker.servlet.BaseFilter;
-import com.deere.isg.worktracker.servlet.WorkTrackerFilter;
+package com.deere.example;
 
-import java.util.List;
+import com.deere.isg.worktracker.servlet.WorkTrackerFilterProxy;
+import com.deere.isg.worktracker.spring.SpringWorkFilter;
 
-public class SpringWorkTrackerFilter extends WorkTrackerFilter {
+public class WorkFilterProxy extends WorkTrackerFilterProxy {
 
-    public SpringWorkTrackerFilter() {
-        this(new SpringWorkFilter());
-    }
-
-    public SpringWorkTrackerFilter(BaseFilter workFilter) {
-        super(workFilter);
-    }
-
-    public SpringWorkTrackerFilter(List<BaseFilter> filters) {
-        super(filters);
+    public WorkFilterProxy() {
+        super(new SpringWorkFilter());
     }
 }

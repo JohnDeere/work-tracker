@@ -26,7 +26,7 @@ limitations under the License.
     <!-- filters -->
     <filter>
         <filter-name>workTrackerFilter</filter-name>
-        <filter-class>com.deere.isg.worktracker.servlet.WorkTrackerFilter</filter-class>
+        <filter-class>com.deere.isg.worktracker.servlet.WorkTrackerFilterProxy</filter-class>
     </filter>
 
     <!-- filter mappings -->
