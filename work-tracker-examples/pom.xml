@@ -47,11 +47,34 @@
                 <artifactId>maven-license-plugin</artifactId>
                 <version>1.8.0</version>
                 <configuration>
-                    <skip>true</skip>
+                    <!-- Template location -->
+                    <header>build/exampleHeader.txt</header>
+                    <properties>
+                        <!-- Values to be substituted in template -->
+                        <h_inceptionYear>${inceptionYear}</h_inceptionYear>
+                        <h_currentYear>${currentYear}</h_currentYear>
+                        <h_copyrightOwner>${copyrightOwner}</h_copyrightOwner>
+                    </properties>
+                    <strictCheck>true</strictCheck>
+                    <excludes>
+                        <exclude>**/*.html</exclude>
+                        <exclude>**/*.xml</exclude>
+                        <exclude>**/*.txt</exclude>
+                        <exclude>**/*.log</exclude>
+                        <exclude>**/*.md</exclude>
+                        <exclude>**/*.yml</exclude>
+                        <exclude>.idea/**</exclude>
+                        <exclude>.github/**</exclude>
+                        <exclude>.git*</exclude>
+                        <exclude>LICENSE</exclude>
+                    </excludes>
                 </configuration>
                 <executions>
                     <execution>
-                        <phase>none</phase>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
