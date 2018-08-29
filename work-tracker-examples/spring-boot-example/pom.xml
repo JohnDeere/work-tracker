@@ -9,10 +9,6 @@
 
     <artifactId>spring-boot-example</artifactId>
 
-    <properties>
-        <maven.javadoc.skip>true</maven.javadoc.skip>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.deere.isg.work-tracker</groupId>
