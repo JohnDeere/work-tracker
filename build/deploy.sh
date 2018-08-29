@@ -17,6 +17,6 @@
 
 pushd ..
 mvn clean verify
-mvn -DskipTests release:prepare
-mvn -DskipTests release:perform
+mvn -DskipTests release:prepare -P ossrh
+mvn -DskipTests release:perform -P ossrh
 popd
