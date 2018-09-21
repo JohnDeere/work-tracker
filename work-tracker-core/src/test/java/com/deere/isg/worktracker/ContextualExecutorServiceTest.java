@@ -40,9 +40,6 @@ public class ContextualExecutorServiceTest extends ExecutorTestHelper {
         createExecutor();
         contextualExecutor = new ContextualExecutorService(executorService);
         callable = new MockCallable();
-        if (Thread.currentThread().isInterrupted()) {
-            Assume.assumeFalse(Thread.interrupted());
-        }
     }
 
     @After
@@ -73,6 +70,7 @@ public class ContextualExecutorServiceTest extends ExecutorTestHelper {
 
     @Test
     public void addsMetadataToMDCSubmit() throws Exception {
+        resetInterruptOrIgnoreTest();
         Future<String> future = contextualExecutor.submit(callable);
         String output = future.get();
 
@@ -83,6 +81,7 @@ public class ContextualExecutorServiceTest extends ExecutorTestHelper {
 
     @Test
     public void addsMetadataToMDCSubmitRunnableWithResult() throws Exception {
+        resetInterruptOrIgnoreTest();
         Future<String> future = contextualExecutor.submit(runnable, "test");
         String output = future.get();
 
@@ -93,6 +92,7 @@ public class ContextualExecutorServiceTest extends ExecutorTestHelper {
 
     @Test
     public void addsMetadataToMDCSubmitRunnable() throws Exception {
+        resetInterruptOrIgnoreTest();
         Future<?> future = contextualExecutor.submit(runnable);
         String output = (String) future.get();
 
@@ -107,6 +107,7 @@ public class ContextualExecutorServiceTest extends ExecutorTestHelper {
 
     @Test
     public void addsMetadataToMDCInvokeAll() throws Exception {
+        resetInterruptOrIgnoreTest();
         String output = contextualExecutor.invokeAll(Collections.singleton(callable)).get(0).get();
 
         awaitTermination();
@@ -116,6 +117,7 @@ public class ContextualExecutorServiceTest extends ExecutorTestHelper {
 
     @Test
     public void addsMetadataToMDCInvokeAllWithTimeout() throws Exception {
+        resetInterruptOrIgnoreTest();
         String output = contextualExecutor.invokeAll(Collections.singleton(callable), 10, TimeUnit.SECONDS).get(0).get();
 
         awaitTermination();
@@ -125,6 +127,7 @@ public class ContextualExecutorServiceTest extends ExecutorTestHelper {
 
     @Test
     public void addsMetadataToMDCInvokeAny() throws Exception {
+        resetInterruptOrIgnoreTest();
         String output = contextualExecutor.invokeAny(Collections.singleton(callable));
 
         awaitTermination();
@@ -134,6 +137,7 @@ public class ContextualExecutorServiceTest extends ExecutorTestHelper {
 
     @Test
     public void addsMetadataToMDCInvokeAnyWithTimeout() throws Exception {
+        resetInterruptOrIgnoreTest();
         String output = contextualExecutor.invokeAny(Collections.singleton(callable), 10, TimeUnit.SECONDS);
 
         awaitTermination();
@@ -147,6 +151,12 @@ public class ContextualExecutorServiceTest extends ExecutorTestHelper {
         assertThat(match, is(true));
         assertThat(output, is("test"));
         assertThat(task.getValue("task_class_name"), containsString(taskClassName));
+    }
+
+    private void resetInterruptOrIgnoreTest() {
+        if (Thread.currentThread().isInterrupted() && !Thread.interrupted()) {
+            Assume.assumeFalse(Thread.interrupted());
+        }
     }
 
 }
