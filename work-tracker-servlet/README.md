@@ -35,19 +35,8 @@ See [releases](../../../releases/latest) for the latest release
 public class WorkTrackerContextListener extends WorkContextListener {
     public WorkTrackerContextListener() {
         super(new WorkConfig.Builder<>(new OutstandingWork<>())
-                .withHttpFloodSensor()
-                .withZombieDetector()
-                .build()
-        );
-    }
-}
-
-```
-**Note:** `Flood Sensor` and `Zombie Detector` are optional. If your application does not require them, you can omit them as the following:
-```java
-public class WorkTrackerContextListener extends WorkContextListener {
-    public WorkTrackerContextListener() {
-        super(new WorkConfig.Builder<>(new OutstandingWork<>())
+                .withHttpFloodSensor() //Optional, omit if not required
+                .withZombieDetector() //Optional, omit if not required
                 .build()
         );
     }
@@ -67,12 +56,6 @@ In your web.xml, add the following:
     <filter-class>com.deere.isg.worktracker.servlet.RequestBouncerFilter</filter-class>
 </filter>
 
-<!-- if you intend to have user authentication, your filter should go before this LoggerFilter -->
-<filter>
-    <filter-name>loggerFilter</filter-name>
-    <filter-class>com.deere.isg.worktracker.servlet.LoggerFilter</filter-class>
-</filter>
-
 <filter>
     <filter-name>zombieFilter</filter-name>
     <filter-class>com.deere.isg.worktracker.servlet.ZombieFilter</filter-class>
@@ -90,11 +73,6 @@ In your web.xml, add the following:
 </filter-mapping>
 
 <filter-mapping>
-    <filter-name>loggerFilter</filter-name>
-    <url-pattern>/*</url-pattern>
-</filter-mapping>
-
-<filter-mapping>
     <filter-name>zombieFilter</filter-name>
     <url-pattern>/*</url-pattern>
 </filter-mapping>
@@ -107,7 +85,7 @@ In your web.xml, add the following:
 ```
 
 ## Connection Limits
-Request Bouncer requires Connection Limits to determine whether to reject a work if the work exceeds a particular limit. By default, `ConnectionLimits` provides limits for `same session`, `same user`, `same service` and the `total`. You can also provide your own limits as follows:
+Request Bouncer requires Connection Limits to determine whether to reject a work if the work exceeds a particular limit. By default, `ConnectionLimits` provides limits for `same session`, `same user`, `same service` and `total`. You can also provide your own limits as follows:
 
 ```java
 public class WorkTrackerContextListener extends WorkContextListener {
@@ -147,8 +125,7 @@ We provide a WorkHttpServlet that displays all the outstanding work that are cur
 </servlet-mapping>
 ```
 
-## Extra Features
-- **MdcExecutor**
+## Executor with Metadata
 Track your background tasks with the `MdcExecutor`. Example:
 
 ```java

@@ -39,8 +39,11 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
 import static net.logstash.logback.argument.StructuredArguments.keyValue;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class WorkLoggerTest {
@@ -109,6 +112,41 @@ public class WorkLoggerTest {
         assertThat(messageCaptor.getValue(), is("End of Request: status_code=" +
                 statusCode + ", url=" + TEST_URI));
         assertThat(saCaptor.getAllValues(), is(endInfo));
+    }
+
+    @Test
+    public void logEndExcluded() {
+        when(request.getRequestURI()).thenReturn("/test/something/cool");
+
+        final HttpWork work = TestWorkUtils.createWork();
+        workLogger.excludeUrls("/test/**");
+
+        workLogger.logEnd(request, response, work);
+        verify(logger, never()).info(anyString(), any(Object[].class));
+    }
+
+    @Test
+    public void logStartExcluded() {
+        when(request.getRequestURI()).thenReturn("/test/something/cool");
+
+        final HttpWork work = TestWorkUtils.createWork();
+        workLogger.excludeUrls("/test/**");
+
+        workLogger.logStart(request, work);
+        verify(logger, never()).info(anyString(), any(Object[].class));
+    }
+
+    @Test
+    public void excludesUrls() {
+        workLogger.excludeUrls("/**", "/", "");
+        assertThat(workLogger.getExcludeUrls(), empty());
+
+        workLogger.excludeUrls((String[]) null);
+        assertThat(workLogger.getExcludeUrls(), empty());
+
+        workLogger.excludeUrls("/test/**", "/thing/*", "/another/", "/yet");
+        assertThat(workLogger.getExcludeUrls(), containsInAnyOrder("/test/", "/thing/", "/another/", "/yet"));
+
     }
 
     @Test

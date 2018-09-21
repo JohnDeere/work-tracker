@@ -89,6 +89,12 @@ public class HelloWorldControllerTest {
     }
 
     @Test
+    public void loggingIgnored() {
+        assertThat(controller.ignoreLogging(), is("Add URL Patterns to the Configurer by setting " +
+                "`excludePathPatterns` to ignore logging"));
+    }
+
+    @Test
     public void saysCheese() {
         assertThat(controller.sayCheese(), is("Cheese"));
     }

@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.Logger;
 import org.slf4j.MDC;
 
 import javax.servlet.FilterChain;
@@ -37,7 +38,7 @@ import java.io.IOException;
 import static com.deere.isg.worktracker.servlet.TestWorkUtils.createWork;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AbstractHttpWorkFilterTest {
@@ -73,6 +74,9 @@ public class AbstractHttpWorkFilterTest {
         filter.doFilter(request, response, chain);
 
         verify(chain).doFilter(request, response);
+
+        verify(logger).logStart(request, TEST_WORK);
+        verify(logger).logEnd(request, response, TEST_WORK);
     }
 
     @Test
@@ -80,6 +84,9 @@ public class AbstractHttpWorkFilterTest {
         filter.doFilter(request, response, chain);
 
         verifyEmptyMDC();
+
+        verify(logger).logStart(request, TEST_WORK);
+        verify(logger).logEnd(request, response, TEST_WORK);
     }
 
     @Test
@@ -89,6 +96,7 @@ public class AbstractHttpWorkFilterTest {
                 throw new RuntimeException();
             });
         } catch (RuntimeException e) {
+            verify(logger).logStart(request, TEST_WORK);
             verify(logger).logEnd(request, response, TEST_WORK);
             verifyEmptyMDC();
         }
@@ -101,6 +109,23 @@ public class AbstractHttpWorkFilterTest {
         nullFilter.doFilter(request, response, chain);
         verify(chain).doFilter(request, response);
 
+        verify(logger, never()).logStart(request, TEST_WORK);
+        verify(logger, never()).logEnd(request, response, TEST_WORK);
+
+    }
+
+    @Test
+    public void doesNotLogIfExcludedUrl() throws IOException, ServletException {
+        WorkLogger workLogger = WorkLogger.getLogger();
+        Logger mockLogger = mock(Logger.class);
+        workLogger.setLogger(mockLogger);
+        workLogger.excludeUrls("/tests/");
+        filter.setLogger(workLogger);
+
+        when(request.getRequestURI()).thenReturn("/tests/something");
+        filter.doFilter(request, response, chain);
+
+        verify(mockLogger, never()).info(anyString(), any(Object[].class));
     }
 
     private void verifyEmptyMDC() {
@@ -108,6 +133,9 @@ public class AbstractHttpWorkFilterTest {
     }
 
     private class MockHttpWorkFilter extends AbstractHttpWorkFilter<HttpWork> {
+        MockHttpWorkFilter() {
+            setLogger(logger);
+        }
         @Override
         public OutstandingWork<HttpWork> getOutstanding() {
             return outstanding;
@@ -120,6 +148,9 @@ public class AbstractHttpWorkFilterTest {
     }
 
     private class MockNullHttpWorkFilter extends AbstractHttpWorkFilter<HttpWork> {
+        MockNullHttpWorkFilter() {
+            setLogger(logger);
+        }
         @Override
         protected HttpWork createWork(ServletRequest request) {
             return TEST_WORK;

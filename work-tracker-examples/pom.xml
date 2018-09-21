@@ -30,7 +30,7 @@
             <plugin>
                 <groupId>com.mycila.maven-license-plugin</groupId>
                 <artifactId>maven-license-plugin</artifactId>
-                <version>1.8.0</version>
+                <version>${maven-license-plugin-version}</version>
                 <configuration>
                     <!-- Template location -->
                     <header>build/exampleHeader.txt</header>

@@ -91,6 +91,15 @@
                     </webApp>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>com.mycila.maven-license-plugin</groupId>
+                <artifactId>maven-license-plugin</artifactId>
+                <version>${maven-license-plugin-version}</version>
+                <configuration>
+                    <!-- Template location -->
+                    <header>${basedir}/../../build/exampleHeader.txt</header>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
