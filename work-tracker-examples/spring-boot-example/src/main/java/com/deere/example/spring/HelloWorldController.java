@@ -45,6 +45,12 @@ public class HelloWorldController {
         return "Hello " + name;
     }
 
+    @GetMapping(value = "/ignore", produces = MediaType.TEXT_PLAIN_VALUE)
+    public String ignoreLogging() {
+        return "Add URL Patterns to the Configurer by setting " +
+                "`excludePathPatterns` to ignore logging";
+    }
+
     @GetMapping(value = "/cheese", produces = MediaType.TEXT_PLAIN_VALUE)
     public String sayCheese() {
         return "Cheese";

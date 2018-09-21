@@ -25,7 +25,9 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.deere.isg.worktracker.Work.REQUEST_URL;
 import static com.deere.isg.worktracker.servlet.HttpUtils.getRequestUri;
@@ -39,6 +41,7 @@ import static net.logstash.logback.argument.StructuredArguments.keyValue;
 public class WorkLogger {
     private static WorkLogger instance = null;
     private Logger logger = LoggerFactory.getLogger(WorkLogger.class);
+    private List<String> excludeUrls = new ArrayList<>();
 
     private WorkLogger() {
     }
@@ -56,6 +59,9 @@ public class WorkLogger {
     }
 
     public void logStart(HttpServletRequest request, Work current) {
+        if (shouldExclude(request)) {
+            return;
+        }
         final String url = getRequestUri(request);
 
         List<StructuredArgument> startInfo = current != null ? current.getStartInfo() : new ArrayList<>();
@@ -65,6 +71,9 @@ public class WorkLogger {
     }
 
     public void logEnd(HttpServletRequest request, HttpServletResponse response, Work payload) {
+        if (shouldExclude(request)) {
+            return;
+        }
         final String url = getRequestUri(request);
         final int statusCode = response.getStatus();
 
@@ -77,5 +86,27 @@ public class WorkLogger {
 
     public void debug(String message) {
         logger.debug(message);
+    }
+
+    public void excludeUrls(String... excludeUrls) {
+        if (excludeUrls != null) {
+            this.excludeUrls = removeAsterisks(excludeUrls);
+        }
+    }
+
+    private List<String> removeAsterisks(String[] excludeUrls) {
+        return Arrays.stream(excludeUrls)
+                .map(u -> u.replaceAll("[\\*]+", ""))
+                .filter(u -> !u.isEmpty())
+                .filter(u -> !u.equals("/"))
+                .collect(Collectors.toList());
+    }
+
+    public List<String> getExcludeUrls() {
+        return new ArrayList<>(excludeUrls);
+    }
+
+    private boolean shouldExclude(HttpServletRequest httpRequest) {
+        return excludeUrls.stream().anyMatch(url -> httpRequest.getRequestURI().startsWith(url));
     }
 }

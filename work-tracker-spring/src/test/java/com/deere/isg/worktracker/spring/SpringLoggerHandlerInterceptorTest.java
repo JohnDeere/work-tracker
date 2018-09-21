@@ -40,7 +40,6 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SpringLoggerHandlerInterceptorTest {
-    private static final SpringWork TEST_WORK = createWork();
     @Mock
     private OutstandingWork<SpringWork> outstanding;
     @Mock
@@ -53,14 +52,17 @@ public class SpringLoggerHandlerInterceptorTest {
     private HttpServletRequest request;
     private HttpServletResponse response;
     private SpringLoggerHandlerInterceptor handlerInterceptor;
+    private SpringWork springWork;
 
     @Before
     public void setUp() {
+        springWork = createWork();
+
         Clock.freeze();
         request = new MockHttpServletRequest();
         response = new MockHttpServletResponse();
 
-        when(outstanding.current()).thenReturn(Optional.of(TEST_WORK));
+        when(outstanding.current()).thenReturn(Optional.of(springWork));
         when(context.getAttribute(OUTSTANDING_ATTR)).thenReturn(outstanding);
 
         handlerInterceptor = new SpringLoggerHandlerInterceptor();
@@ -74,10 +76,10 @@ public class SpringLoggerHandlerInterceptorTest {
     }
 
     @Test
-    public void preHandlerStartLogging() throws Exception {
+    public void startLogging() throws Exception {
         handlerInterceptor.preHandle(request, response, handler);
 
-        verify(logger).logStart(request, TEST_WORK);
+        verify(logger).logStart(request, springWork);
     }
 
     @Test
@@ -87,6 +89,6 @@ public class SpringLoggerHandlerInterceptorTest {
 
         handlerInterceptor.preHandle(request, response, handler);
 
-        verify(logger, never()).logStart(request, TEST_WORK);
+        verify(logger, never()).logStart(request, springWork);
     }
 }

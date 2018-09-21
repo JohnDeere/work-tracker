@@ -17,6 +17,7 @@
 
 package com.deere.isg.worktracker.servlet;
 
+import com.deere.isg.worktracker.OutstandingWork;
 import org.slf4j.MDC;
 
 import javax.servlet.FilterChain;
@@ -38,22 +39,31 @@ public abstract class AbstractHttpWorkFilter<W extends HttpWork>
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        W payload = null;
-        try {
-            payload = createWork(request);
+        W payload = createWork(request);
+        HttpServletRequest httpRequest = getHttpRequest(payload, request);
+        OutstandingWork<W> outstanding = getOutstanding();
 
-            HttpServletRequest httpRequest = getHttpRequest(payload, request);
-            if (getOutstanding() != null) {
-                getOutstanding().<IOException, ServletException>doInTransactionChecked(payload, () -> chain.doFilter(httpRequest, response));
+        try {
+            if (outstanding != null) {
+                outstanding.<IOException, ServletException>doInTransactionChecked(payload, () -> {
+                    doStartLog(payload, httpRequest);
+                    chain.doFilter(httpRequest, response);
+                });
             } else {
                 chain.doFilter(httpRequest, response);
             }
         } catch (ClassCastException e) {
             throw new ServletException(e);
         } finally {
-            logger.logEnd((HttpServletRequest) request, (HttpServletResponse) response, payload);
+            if (outstanding != null) {
+                logger.logEnd((HttpServletRequest) request, (HttpServletResponse) response, payload);
+            }
             MDC.clear();
         }
+    }
+
+    protected void doStartLog(W payload, HttpServletRequest httpRequest) {
+        logger.logStart(httpRequest, payload);
     }
 
     /**
@@ -78,7 +88,7 @@ public abstract class AbstractHttpWorkFilter<W extends HttpWork>
         return logger;
     }
 
-    protected void setLogger(WorkLogger logger) {
+    public void setLogger(WorkLogger logger) {
         this.logger = logger;
     }
 }

@@ -19,11 +19,7 @@ package com.deere.isg.worktracker.spring.boot;
 
 import com.deere.isg.worktracker.OutstandingWork;
 import com.deere.isg.worktracker.ZombieDetector;
-import com.deere.isg.worktracker.servlet.ConnectionLimits;
-import com.deere.isg.worktracker.servlet.HttpFloodSensor;
-import com.deere.isg.worktracker.servlet.RequestBouncerFilter;
-import com.deere.isg.worktracker.servlet.WorkConfig;
-import com.deere.isg.worktracker.servlet.ZombieFilter;
+import com.deere.isg.worktracker.servlet.*;
 import com.deere.isg.worktracker.spring.SpringLoggerHandlerInterceptor;
 import com.deere.isg.worktracker.spring.SpringRequestBouncerHandlerInterceptor;
 import com.deere.isg.worktracker.spring.SpringWork;
@@ -52,8 +48,8 @@ import static com.deere.isg.worktracker.spring.boot.WorkTrackerConfigurer.DATA_S
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.contains;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -76,7 +72,7 @@ public class WorkTrackerConfigurerTest {
     @Mock
     private Logger logger;
 
-    private WorkTrackerConfigurer<SpringWork> configurer;
+    private MockWorkTrackerConfiguration configurer;
     private MockFilterConfig config;
 
     @Before
@@ -204,13 +200,25 @@ public class WorkTrackerConfigurerTest {
 
     @Test
     public void interceptorsAdded() {
-        InterceptorRegistry registry = mock(InterceptorRegistry.class);
+        InterceptorRegistry registry = spy(InterceptorRegistry.class);
         configurer.setServletContext(config.getServletContext());
 
         configurer.addInterceptors(registry);
 
         verify(registry).addInterceptor(any(SpringLoggerHandlerInterceptor.class));
         verify(registry).addInterceptor(any(SpringRequestBouncerHandlerInterceptor.class));
+    }
+
+    @Test
+    public void excludeUrlPatterns() {
+        configurer.excludePathPatterns("/test/**");
+
+        assertThat(configurer.getExcludePathPatterns(), arrayContaining("/test/**"));
+    }
+
+    @Test(expected = AssertionError.class)
+    public void notNullExcludedUrls() {
+        configurer.excludePathPatterns((String[]) null);
     }
 
     @Test
@@ -228,16 +236,9 @@ public class WorkTrackerConfigurerTest {
     @Test
     public void filtersAreAdded() {
         assertThat(configurer.springWorkFilter(), instanceOf(SpringBootWorkFilter.class));
-        assertThat(configurer.springWorkFilter(), notNullValue());
-
         assertThat(configurer.requestBouncerFilter(), instanceOf(RequestBouncerFilter.class));
-        assertThat(configurer.requestBouncerFilter(), notNullValue());
-
         assertThat(configurer.zombieFilter(), instanceOf(ZombieFilter.class));
-        assertThat(configurer.zombieFilter(), notNullValue());
-
         assertThat(configurer.authFilter(), instanceOf(SpringWorkPostAuthFilter.class));
-        assertThat(configurer.authFilter(), notNullValue());
     }
 
     @Test

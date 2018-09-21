@@ -20,20 +20,8 @@ package com.deere.isg.worktracker.spring.boot;
 import ch.qos.logback.classic.ViewStatusMessagesServlet;
 import com.deere.isg.worktracker.OutstandingWork;
 import com.deere.isg.worktracker.ZombieDetector;
-import com.deere.isg.worktracker.servlet.ConnectionLimits;
-import com.deere.isg.worktracker.servlet.HttpFloodSensor;
-import com.deere.isg.worktracker.servlet.RequestBouncerFilter;
-import com.deere.isg.worktracker.servlet.WorkConfig;
-import com.deere.isg.worktracker.servlet.WorkContextListener;
-import com.deere.isg.worktracker.servlet.WorkHttpServlet;
-import com.deere.isg.worktracker.servlet.ZombieFilter;
-import com.deere.isg.worktracker.spring.KeyCleanser;
-import com.deere.isg.worktracker.spring.PathMetadataCleanser;
-import com.deere.isg.worktracker.spring.SpringLoggerHandlerInterceptor;
-import com.deere.isg.worktracker.spring.SpringRequestBouncerHandlerInterceptor;
-import com.deere.isg.worktracker.spring.SpringWork;
-import com.deere.isg.worktracker.spring.SpringWorkPostAuthFilter;
-import com.deere.isg.worktracker.spring.ZombieExceptionHandler;
+import com.deere.isg.worktracker.servlet.*;
+import com.deere.isg.worktracker.spring.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -101,6 +89,7 @@ public abstract class WorkTrackerConfigurer<W extends SpringWork> extends WebMvc
     private ServletContext context;
     private ApplicationContext applicationContext;
     private Logger logger = LoggerFactory.getLogger(WorkTrackerConfigurer.class);
+    private String[] excludeUrls = new String[0];
 
     @Bean
     @ConditionalOnMissingBean(Function.class)
@@ -188,27 +177,55 @@ public abstract class WorkTrackerConfigurer<W extends SpringWork> extends WebMvc
     }
 
     @Bean
+    public FilterRegistrationBean springWorkFilterRegistrationBean() {
+        WorkLogger logger = WorkLogger.getLogger();
+        logger.excludeUrls(getExcludePathPatterns());
+
+        SpringBootWorkFilter<W> filter = new SpringBootWorkFilter<>();
+        filter.setWorkFactory(workFactory());
+        filter.setKeyCleanser(keyCleanser());
+        filter.setLogger(logger);
+
+        return createFilter(filter, WORK_FILTER.getOrder(), "springWorkFilter");
+    }
+
+    @Bean
+    public FilterRegistrationBean requestBouncerFilterRegistrationBean() {
+        return createFilter(new RequestBouncerFilter(), FLOOD_SENSOR_FILTER.getOrder(), "requestBouncerFilter");
+    }
+
+    @Bean
+    public FilterRegistrationBean zombieFilterRegistrationBean() {
+        return createFilter(new ZombieFilter(), USER_POST_AUTH_FILTER.getOrder(), "authFilter");
+    }
+
+    @Bean
+    public FilterRegistrationBean authFilterRegistrationBean() {
+        return createFilter(new SpringWorkPostAuthFilter(), USER_POST_AUTH_FILTER.getOrder(), "authFilter");
+    }
+
+    @Bean
     @ConditionalOnMissingBean(SpringBootWorkFilter.class)
     public Filter springWorkFilter() {
-        return createFilter(new SpringBootWorkFilter<>(), WORK_FILTER.getOrder(), "springWorkFilter");
+        return springWorkFilterRegistrationBean().getFilter();
     }
 
     @Bean
     @ConditionalOnMissingBean(RequestBouncerFilter.class)
     public Filter requestBouncerFilter() {
-        return createFilter(new RequestBouncerFilter(), FLOOD_SENSOR_FILTER.getOrder(), "requestBouncerFilter");
+        return requestBouncerFilterRegistrationBean().getFilter();
     }
 
     @Bean
     @ConditionalOnMissingBean(ZombieFilter.class)
     public Filter zombieFilter() {
-        return createFilter(new ZombieFilter(), ZOMBIE_FILTER.getOrder(), "zombieFilter");
+        return zombieFilterRegistrationBean().getFilter();
     }
 
     @Bean
     @ConditionalOnMissingBean(SpringWorkPostAuthFilter.class)
     public Filter authFilter() {
-        return createFilter(new SpringWorkPostAuthFilter(), USER_POST_AUTH_FILTER.getOrder(), "authFilter");
+        return authFilterRegistrationBean().getFilter();
     }
 
     public ConnectionLimits<W> connectionLimits() {
@@ -272,14 +289,29 @@ public abstract class WorkTrackerConfigurer<W extends SpringWork> extends WebMvc
         return MIN_LIMIT - 1;
     }
 
-    protected Filter createFilter(Filter filter, int order, String name) {
+    /**
+     * Does not log start and end for the url patterns that excluded.
+     * By default it is empty
+     *
+     * @param excludeUrls url patterns that do not need start and end logging
+     */
+    protected void excludePathPatterns(String... excludeUrls) {
+        assert excludeUrls != null;
+        this.excludeUrls = excludeUrls;
+    }
+
+    public String[] getExcludePathPatterns() {
+        return excludeUrls;
+    }
+
+    private FilterRegistrationBean createFilter(Filter filter, int order, String name) {
         final FilterRegistrationBean filterBean = new FilterRegistrationBean();
         filterBean.setFilter(filter);
         filterBean.addUrlPatterns("/*");
         filterBean.setOrder(order);
         filterBean.setEnabled(true);
         filterBean.setName(name);
-        return filterBean.getFilter();
+        return filterBean;
     }
 
     void setLogger(Logger logger) {

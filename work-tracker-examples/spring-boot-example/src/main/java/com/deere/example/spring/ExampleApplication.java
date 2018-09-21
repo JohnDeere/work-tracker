@@ -63,6 +63,7 @@ public class ExampleApplication {
 
         public WorkTrackerConfig() {
             setLimit(30);
+            excludePathPatterns("/favicon.ico", "/ignore");
         }
 
         @Override

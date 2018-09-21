@@ -139,14 +139,8 @@ If you don't need `Flood Sensor` and/or `Zombie` protection, you can omit `withH
 **Add the interceptors in `applicationContext.xml`**
 ```xml
 <mvc:interceptors>
-    <mvc:interceptor>
-        <mvc:mapping path="/**"/>
-        <bean class="com.deere.isg.worktracker.spring.SpringLoggerHandlerInterceptor"/>
-    </mvc:interceptor>
-    <mvc:interceptor>
-        <mvc:mapping path="/**"/>
-        <bean class="com.deere.isg.worktracker.spring.SpringRequestBouncerHandlerInterceptor"/>
-    </mvc:interceptor>
+    <bean class="com.deere.isg.worktracker.spring.SpringLoggerHandlerInterceptor"/>
+    <bean class="com.deere.isg.worktracker.spring.SpringRequestBouncerHandlerInterceptor"/>
 </mvc:interceptors>
 ```
 
