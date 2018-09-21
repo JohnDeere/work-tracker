@@ -332,7 +332,7 @@ public Executor mdcExecutor(Executor executor) {
 @Autowiring
 private MdcExecutor mdcExecutor;
 //...
-mdcExecutor.executor(someRunnable);
+mdcExecutor.execute(someRunnable);
 ```
 
 ## Outstanding HttpServlet

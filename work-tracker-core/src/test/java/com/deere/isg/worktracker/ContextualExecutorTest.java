@@ -17,20 +17,17 @@
 
 package com.deere.isg.worktracker;
 
-import com.deere.clock.Clock;
 import net.logstash.logback.marker.SingleFieldAppendingMarker;
 import org.hamcrest.CustomMatcher;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.slf4j.Logger;
+import org.mockito.ArgumentMatchers;
 import org.slf4j.MDC;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
 import static net.logstash.logback.argument.StructuredArguments.kv;
@@ -39,36 +36,23 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class ContextualExecutorTest {
-    private static final Pattern UUID_PATTERN =
-            Pattern.compile("^[a-zA-Z0-9]{8}-([a-zA-Z0-9]{4}-){3}[a-zA-Z0-9]{12}$");
+public class ContextualExecutorTest extends ExecutorTestHelper {
     private static final String PARENT = "parent";
     private static final String TEST = "test";
 
-    private ExecutorService executorService;
     private ContextualExecutor contextualExecutor;
-    private MockRunnable runnable;
-    private Logger logger;
 
     @Before
     public void setUp() {
-        executorService = Executors.newSingleThreadExecutor();
+        createExecutor();
         contextualExecutor = new ContextualExecutor(executorService);
-
-        Clock.freeze();
-
-        runnable = new MockRunnable();
-        logger = mock(Logger.class);
     }
 
     @After
     public void tearDown() {
-        runnable.reset();
-        MDC.clear();
-        Clock.clear();
+        resetExecutor();
     }
 
     @Test
@@ -80,7 +64,7 @@ public class ContextualExecutorTest {
         boolean match = UUID_PATTERN.matcher(runnable.getValue("task_id")).matches();
 
         assertThat(match, is(true));
-        assertThat(runnable.getValue("task_class_name"), containsString("ContextualExecutorTest"));
+        assertThat(runnable.getValue("task_class_name"), containsString("MockRunnable"));
     }
 
     @Test
@@ -95,7 +79,7 @@ public class ContextualExecutorTest {
 
         verify(logger).info("Task started", kv("time_interval", "start"));
 
-        verify(logger).info(eq("Task ended"), eq(kv("time_interval", "end")), timeCapture.capture());
+        verify(logger).info(ArgumentMatchers.startsWith("Task ended after {} ms"), timeCapture.capture(), eq(kv("time_interval", "end")));
         assertThat(timeCapture.getValue().getFieldName(), is("elapsed_ms"));
         assertThat(timeCapture.getValue().toString(), matches(".*(\\d{4}).*"));
     }
@@ -136,21 +120,6 @@ public class ContextualExecutorTest {
         assertThat(map, hasEntry("key2", "value2"));
     }
 
-    @SuppressWarnings("Duplicates")
-    private void awaitTermination() {
-        executorService.shutdown();
-
-        synchronized (executorService) {
-            while (!executorService.isTerminated() && executorService.isShutdown()) {
-                try {
-                    Thread.sleep(1); //simulate awaitTermination
-                } catch (InterruptedException ignored) {
-                    Thread.interrupted();
-                }
-            }
-        }
-    }
-
     private CustomMatcher<String> matches(String regex) {
         return new CustomMatcher<String>(regex) {
             @Override
@@ -160,23 +129,5 @@ public class ContextualExecutorTest {
                         .matches();
             }
         };
-    }
-
-    private class MockRunnable implements Runnable {
-        private Map<String, String> mdcCopy;
-
-        @Override
-        public void run() {
-            mdcCopy = MDC.getCopyOfContextMap();
-            Clock.freeze(Clock.now().plus(1000));
-        }
-
-        public String getValue(String key) {
-            return mdcCopy.get(key);
-        }
-
-        public void reset() {
-            mdcCopy = null;
-        }
     }
 }

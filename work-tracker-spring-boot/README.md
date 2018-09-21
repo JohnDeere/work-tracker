@@ -205,7 +205,7 @@ public Executor mdcTaskExecutor(@Qualifier("taskExecutor") TaskExecutor executor
 @Autowiring
 private MdcExecutor mdcExecutor;
 //...
-mdcExecutor.executor(someRunnable);
+mdcExecutor.execute(someRunnable);
 ```
 ## Testing
 
