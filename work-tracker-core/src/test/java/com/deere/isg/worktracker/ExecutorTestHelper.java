@@ -49,6 +49,10 @@ class ExecutorTestHelper {
                 } catch (InterruptedException ignored) {
                     Thread.interrupted();
                 }
+
+                if (Thread.currentThread().isInterrupted()) {
+                    Thread.currentThread().interrupt();
+                }
             }
         }
     }

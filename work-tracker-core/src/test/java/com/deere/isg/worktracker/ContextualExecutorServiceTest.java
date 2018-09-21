@@ -1,12 +1,12 @@
 /**
  * Copyright 2018 Deere & Company
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,11 +17,13 @@
 package com.deere.isg.worktracker;
 
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -38,6 +40,9 @@ public class ContextualExecutorServiceTest extends ExecutorTestHelper {
         createExecutor();
         contextualExecutor = new ContextualExecutorService(executorService);
         callable = new MockCallable();
+        if (Thread.currentThread().isInterrupted()) {
+            Assume.assumeFalse(Thread.interrupted());
+        }
     }
 
     @After
@@ -68,7 +73,8 @@ public class ContextualExecutorServiceTest extends ExecutorTestHelper {
 
     @Test
     public void addsMetadataToMDCSubmit() throws Exception {
-        String output = contextualExecutor.submit(callable).get();
+        Future<String> future = contextualExecutor.submit(callable);
+        String output = future.get();
 
         awaitTermination();
 
@@ -77,7 +83,8 @@ public class ContextualExecutorServiceTest extends ExecutorTestHelper {
 
     @Test
     public void addsMetadataToMDCSubmitRunnableWithResult() throws Exception {
-        String output = contextualExecutor.submit(runnable, "test").get();
+        Future<String> future = contextualExecutor.submit(runnable, "test");
+        String output = future.get();
 
         awaitTermination();
 
@@ -86,7 +93,8 @@ public class ContextualExecutorServiceTest extends ExecutorTestHelper {
 
     @Test
     public void addsMetadataToMDCSubmitRunnable() throws Exception {
-        String output = (String) contextualExecutor.submit(runnable).get();
+        Future<?> future = contextualExecutor.submit(runnable);
+        String output = (String) future.get();
 
         awaitTermination();
 
