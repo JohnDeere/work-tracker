@@ -47,8 +47,12 @@ public class ContextualExecutor implements Executor {
 
     @Override
     public void execute(Runnable runnable) {
-        Map<String, String> parentMdc = cleanseParentMdc(MDC.getCopyOfContextMap());
+        Map<String, String> parentMdc = cleanseParentMdc();
         executor.execute(() -> wrap(parentMdc, runnable));
+    }
+
+    protected Map<String, String> cleanseParentMdc() {
+        return cleanseParentMdc(MDC.getCopyOfContextMap());
     }
 
     protected Map<String, String> cleanseParentMdc(Map<String, String> parentMdc) {
@@ -76,17 +80,33 @@ public class ContextualExecutor implements Executor {
         this.logger = logger;
     }
 
-    private void wrap(Map<String, String> parentMdc, Runnable runnable) {
-        long startTime = Clock.now().getMillis();
+    protected void wrap(Map<String, String> parentMdc, Runnable runnable) {
+        long startTime = nowInMillis();
         try {
-            Optional.ofNullable(parentMdc).orElse(emptyMap()).forEach(MDC::put);
-            addMetadataToMDC(getClassName(runnable));
-            taskStart();
+            beforeExecute(parentMdc, getClassName(runnable));
             runnable.run();
         } finally {
-            taskEnd(Clock.now().getMillis() - startTime);
-            MDC.clear();
+            afterExecute(startTime);
         }
+    }
+
+    protected final void beforeExecute(Map<String, String> parentMdc, String className) {
+        Optional.ofNullable(parentMdc).orElse(emptyMap()).forEach(MDC::put);
+        addMetadataToMDC(className);
+        taskStart();
+    }
+
+    protected final void afterExecute(long startTime) {
+        taskEnd(nowInMillis() - startTime);
+        MDC.clear();
+    }
+
+    protected long nowInMillis() {
+        return Clock.milliseconds();
+    }
+
+    protected String getClassName(Object object) {
+        return object != null ? object.getClass().getName() : null;
     }
 
     private void taskStart() {
@@ -94,8 +114,7 @@ public class ContextualExecutor implements Executor {
     }
 
     private void taskEnd(long elapsedMillis) {
-        logger.info("Task ended", kv(TASK_TIME_INTERVAL, "end"),
-                kv(TASK_ELAPSED_MS, elapsedMillis));
+        logger.info("Task ended after {} ms", kv(TASK_ELAPSED_MS, elapsedMillis), kv(TASK_TIME_INTERVAL, "end"));
     }
 
     private void addMetadataToMDC(String className) {
@@ -105,9 +124,5 @@ public class ContextualExecutor implements Executor {
             MDC.put(TASK_CLASS_NAME, className);
         }
 
-    }
-
-    private String getClassName(Runnable runnable) {
-        return runnable != null ? runnable.getClass().getName() : null;
     }
 }
