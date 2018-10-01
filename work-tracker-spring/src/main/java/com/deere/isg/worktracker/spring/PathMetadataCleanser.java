@@ -17,7 +17,7 @@
 
 package com.deere.isg.worktracker.spring;
 
-import com.deere.isg.worktracker.ContextualExecutor;
+import com.deere.isg.worktracker.ContextualTaskDecorator;
 import com.deere.isg.worktracker.Work;
 import com.deere.isg.worktracker.servlet.HttpWork;
 
@@ -89,8 +89,8 @@ public class PathMetadataCleanser implements KeyCleanser {
                 HttpWork.SESSION_ID,
                 HttpWork.PATH,
                 HttpWork.ACCEPT,
-                ContextualExecutor.TASK_CLASS_NAME,
-                ContextualExecutor.TASK_ID,
+                ContextualTaskDecorator.TASK_CLASS_NAME,
+                ContextualTaskDecorator.TASK_ID,
                 SpringWork.ENDPOINT,
                 ID,
                 UNDERSCORE_ID,

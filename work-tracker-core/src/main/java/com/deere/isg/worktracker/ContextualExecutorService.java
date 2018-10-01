@@ -31,7 +31,11 @@ public class ContextualExecutorService extends ContextualExecutor implements Exe
     private final ExecutorService executorService;
 
     public ContextualExecutorService(ExecutorService executorService) {
-        super(executorService);
+        this(executorService, new ContextualTaskDecorator());
+    }
+
+    public ContextualExecutorService(ExecutorService executorService, ContextualTaskDecorator decorator) {
+        super(executorService, decorator);
         this.executorService = executorService;
     }
 
@@ -63,19 +67,19 @@ public class ContextualExecutorService extends ContextualExecutor implements Exe
     @Override
     public <T> Future<T> submit(Callable<T> task) {
         Map<String, String> parentMdc = cleanseParentMdc();
-        return executorService.submit(() -> wrap(parentMdc, task));
+        return executorService.submit(taskDecorator.decorate(parentMdc, task));
     }
 
     @Override
     public <T> Future<T> submit(Runnable task, T result) {
         Map<String, String> parentMdc = cleanseParentMdc();
-        return executorService.submit(() -> wrap(parentMdc, task), result);
+        return executorService.submit(taskDecorator.decorate(parentMdc, task), result);
     }
 
     @Override
     public Future<?> submit(Runnable task) {
         Map<String, String> parentMdc = cleanseParentMdc();
-        return executorService.submit(() -> wrap(parentMdc, task));
+        return executorService.submit(taskDecorator.decorate(parentMdc, task));
     }
 
     @Override
@@ -104,17 +108,9 @@ public class ContextualExecutorService extends ContextualExecutor implements Exe
 
     private <T> List<Callable<T>> wrapTasks(Map<String, String> parentMdc, Collection<? extends Callable<T>> tasks) {
         return tasks.stream()
-                .map(t -> (Callable<T>) () -> wrap(parentMdc, t))
+                .map(t -> taskDecorator.decorate(parentMdc, t))
                 .collect(Collectors.toList());
     }
 
-    private <T> T wrap(Map<String, String> parentMdc, Callable<T> task) throws Exception {
-        long startTime = nowInMillis();
-        try {
-            beforeExecute(parentMdc, getClassName(task));
-            return task.call();
-        } finally {
-            afterExecute(startTime);
-        }
-    }
+
 }

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package com.deere.isg.worktracker;
 
 import net.logstash.logback.marker.SingleFieldAppendingMarker;
@@ -30,6 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import static com.deere.isg.worktracker.ExecutorTestUtils.UUID_PATTERN;
 import static net.logstash.logback.argument.StructuredArguments.kv;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
