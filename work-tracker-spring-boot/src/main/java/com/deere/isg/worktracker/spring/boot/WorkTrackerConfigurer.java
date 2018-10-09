@@ -138,7 +138,7 @@ public abstract class WorkTrackerConfigurer<W extends SpringWork> extends WebMvc
         if (limit != null) {
             builder.setHttpFloodSensorWithLimit(limit);
         } else {
-            logger.debug("Since 'Limit' or 'DataSource' is not set, " +
+            logger.warn("Since 'Limit' or 'DataSource' is not set, " +
                     "FloodSensor (DoS Protection) will not be available");
         }
 

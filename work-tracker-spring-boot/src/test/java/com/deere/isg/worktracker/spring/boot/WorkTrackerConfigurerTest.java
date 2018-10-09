@@ -112,7 +112,7 @@ public class WorkTrackerConfigurerTest {
         assertThat(config.getFloodSensor(), nullValue());
         assertThat(config.getDetector(), notNullValue());
 
-        verify(logger).debug(NO_FLOOD_SENSOR_WARNING);
+        verify(logger).warn(NO_FLOOD_SENSOR_WARNING);
     }
 
     @Test
@@ -124,7 +124,7 @@ public class WorkTrackerConfigurerTest {
         assertThat(config.getFloodSensor(), notNullValue());
         assertThat(config.getDetector(), notNullValue());
 
-        verify(logger, never()).debug(NO_FLOOD_SENSOR_WARNING);
+        verify(logger, never()).warn(NO_FLOOD_SENSOR_WARNING);
     }
 
     @Test
