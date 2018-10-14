@@ -296,7 +296,7 @@ public abstract class WorkTrackerConfigurer<W extends SpringWork> extends WebMvc
                 return connection.getMetaData().getMaxConnections();
             }
         } catch (Exception e) {
-            logger.warn("Could not find DataSource bean named '" + getDataSourceName() + "'");
+            logger.debug("Could not find DataSource bean named '" + getDataSourceName() + "'");
         }
 
         return MIN_LIMIT - 1;

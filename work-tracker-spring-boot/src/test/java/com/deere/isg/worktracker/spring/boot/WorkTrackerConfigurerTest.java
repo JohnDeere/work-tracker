@@ -132,7 +132,7 @@ public class WorkTrackerConfigurerTest {
         ConnectionLimits<SpringWork> limit = configurer.connectionLimits();
 
         assertThat(limit, nullValue());
-        verify(logger).warn(eq(NO_DATA_SOURCE_MSG + "'dataSource'"));
+        verify(logger).debug(eq(NO_DATA_SOURCE_MSG + "'dataSource'"));
     }
 
     @Test
@@ -141,7 +141,7 @@ public class WorkTrackerConfigurerTest {
         ConnectionLimits<SpringWork> limit = configurer.connectionLimits();
 
         assertThat(limit, nullValue());
-        verify(logger).warn(eq(NO_DATA_SOURCE_MSG + "'" + ANY_DATA_SOURCE + "'"));
+        verify(logger).debug(eq(NO_DATA_SOURCE_MSG + "'" + ANY_DATA_SOURCE + "'"));
     }
 
     @Test
