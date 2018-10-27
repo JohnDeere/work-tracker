@@ -89,6 +89,7 @@ public class ZombieDetectorTest {
 
     @Test
     public void longRunningWorksAreLogged() {
+        System.out.println("Starting longRunningWorksAreLogged");
         freezeClock(TimeUnit.MILLISECONDS.convert(30, TimeUnit.SECONDS));
 
         detector.doWork();
@@ -98,6 +99,8 @@ public class ZombieDetectorTest {
 
     @Test
     public void zombiesAreLogged() {
+
+        System.out.println("Starting zombiesAreLogged");
         freezeClockOffset(1L);
 
         detector.doWork();
@@ -107,6 +110,8 @@ public class ZombieDetectorTest {
 
     @Test
     public void zombiesAreKilled() {
+
+        System.out.println("Starting zombiesAreKilled");
         freezeClockOffset(1L);
 
         detector.doWork();
