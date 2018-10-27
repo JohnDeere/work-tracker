@@ -1,4 +1,6 @@
 [![Build Status](https://travis-ci.org/JohnDeere/work-tracker.svg?branch=master)](https://travis-ci.org/JohnDeere/work-tracker)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.deere.isg.work-tracker/work-tracker/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.deere.isg.work-tracker/work-tracker)
+[![DepShield Badge](https://depshield.sonatype.org/badges/JohnDeere/work-tracker/depshield.svg)](https://depshield.github.io)
 
 # Work Tracker
 A library to monitor threads and requests. It provides advanced logging capabilities, and protects the application's JVMs from too many requests and from long running requests that would eventually turn into zombies.
