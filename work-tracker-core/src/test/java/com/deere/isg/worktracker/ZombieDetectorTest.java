@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package com.deere.isg.worktracker;
 
 import com.deere.clock.Clock;
@@ -92,7 +91,7 @@ public class ZombieDetectorTest {
     @Test
     public void longRunningWorksAreLogged() {
         System.out.println("Starting longRunningWorksAreLogged");
-        freezeClock(TimeUnit.MILLISECONDS.convert(30, TimeUnit.SECONDS));
+        freezeClock(TimeUnit.MILLISECONDS.convert(30, TimeUnit.SECONDS) + 1);
 
         detector.doWork();
 
