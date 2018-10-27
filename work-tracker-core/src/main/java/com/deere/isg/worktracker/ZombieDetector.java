@@ -117,7 +117,9 @@ public class ZombieDetector implements AutoCloseable {
     }
 
     private boolean isLoggable(Work work) {
-        return work.getElapsedMillis() > SECOND_30;
+        boolean result = work.getElapsedMillis() > SECOND_30;
+        System.out.println(work.getRequestId()+" Elapsed: "+work.getElapsedMillis()+" isLoggable: "+result);
+        return result;
     }
 
     private void logZombie(Work work) {
