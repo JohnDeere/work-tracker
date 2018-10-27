@@ -43,7 +43,6 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class ZombieDetectorTest {
     private static final int SIZE = 10;
-    private static final List<MockWork> WORK_LIST = MockWorkUtils.createMockWorkList(SIZE);
 
     @Mock
     private OutstandingWork<MockWork> outstanding;
@@ -51,14 +50,17 @@ public class ZombieDetectorTest {
     private ZombieLogger logger;
 
     private ZombieDetector detector;
+    private List<MockWork> workList;
 
     @Before
     public void setUp() {
+        Clock.freeze();
+        workList = MockWorkUtils.createMockWorkList(SIZE);
         detector = new ZombieDetector(outstanding);
         detector.start();
         detector.setLogger(logger);
 
-        when(outstanding.stream()).thenAnswer(invocation -> WORK_LIST.stream());
+        when(outstanding.stream()).thenAnswer(invocation -> workList.stream());
     }
 
     @After
@@ -75,7 +77,7 @@ public class ZombieDetectorTest {
                 .filter(Work::isZombie)
                 .count();
 
-        assertThat(count, is(WORK_LIST.size()));
+        assertThat(count, is(workList.size()));
     }
 
     @Test
@@ -89,7 +91,7 @@ public class ZombieDetectorTest {
 
     @Test
     public void longRunningWorksAreLogged() {
-        freezeClock(TimeUnit.MILLISECONDS.convert(30, TimeUnit.SECONDS));
+        freezeClock(TimeUnit.MILLISECONDS.convert(30, TimeUnit.SECONDS) + 1);
 
         detector.doWork();
 
