@@ -76,7 +76,7 @@ public abstract class Work {
     }
 
     public boolean isZombie() {
-        boolean result = getElapsedMillis() > maxTime;
+        boolean result = getElapsedMillis() >= maxTime;
         System.out.println(getRequestId()+" Elapsed: "+getElapsedMillis()+" isZombie: "+result);
         return result;
     }
