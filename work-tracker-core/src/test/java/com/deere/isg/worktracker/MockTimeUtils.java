@@ -34,7 +34,13 @@ public final class MockTimeUtils {
     }
 
     public static void freezeClock(long milliseconds) {
+        printTime();
         Clock.freeze(Clock.milliseconds() + milliseconds);
+        printTime();
+    }
+
+    private static void printTime() {
+        System.out.println(Clock.now());
     }
 
 }
