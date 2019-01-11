@@ -11,7 +11,7 @@ These Spring modules have more Spring specific metadata.
 See [releases](../../../releases/latest) for the latest release
 ```xml
 <dependency>
-    <groupId>com.deere.isg.devops.work-tracker</groupId>
+    <groupId>com.deere.isg.work-tracker</groupId>
     <artifactId>work-tracker-servlet</artifactId>
     <version>${work-tracker.version}</version>
 </dependency>
