@@ -7,7 +7,6 @@ If you are using:
 ## Dependencies
 See [releases](../../../releases/latest) for the latest release
 ```xml
-<dependencies>
   <dependency>
     <!-- add this dependency before work-tracker to avoid Logback dependency conflicts -->
       <groupId>org.logback-extensions</groupId>
@@ -15,10 +14,14 @@ See [releases](../../../releases/latest) for the latest release
       <version>0.1.4</version>
   </dependency>
   <dependency>
-    <groupId>com.deere.isg.devops.work-tracker</groupId>
+    <groupId>com.deere.isg.work-tracker</groupId>
     <artifactId>work-tracker-spring</artifactId>
     <version>${work-tracker.version}</version>
   </dependency>
+```
+
+Some Spring libraries and logging that may be required
+```
   <!-- Spring libraries -->
   <dependency>
       <groupId>org.springframework</groupId>
@@ -63,7 +66,6 @@ See [releases](../../../releases/latest) for the latest release
       <artifactId>groovy-all</artifactId>
       <version>${groovy.version}</version>
   </dependency>
-</dependencies>
 ```
 
 See [example](./../work-tracker-examples/spring-example) for more details
