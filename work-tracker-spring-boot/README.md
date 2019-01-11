@@ -9,7 +9,7 @@ See [releases](../../../releases/latest) for the latest release
 ```xml
 <dependencies>
     <dependency>
-        <groupId>com.deere.isg.devops.work-tracker</groupId>
+        <groupId>com.deere.isg.work-tracker</groupId>
         <artifactId>work-tracker-spring-boot</artifactId>
         <version>${work-tracker.version}</version>
     </dependency>
