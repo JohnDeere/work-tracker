@@ -55,6 +55,10 @@ public abstract class Work {
         return Clock.milliseconds() - startTime;
     }
 
+    protected void setStartTime(long startTime) {
+        this.startTime = startTime;
+    }
+    
     public long getStartTime() {
         return startTime;
     }
