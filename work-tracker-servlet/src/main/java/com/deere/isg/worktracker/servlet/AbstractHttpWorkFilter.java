@@ -54,10 +54,10 @@ public abstract class AbstractHttpWorkFilter<W extends HttpWork>
             throw new ServletException(e);
         } finally {
             try {
+                postProcess(request, response, payload);
                 if (outstanding != null) {
                     logger.logEnd(httpRequest, (HttpServletResponse) response, payload);
                 }
-                postProcess(request, response, payload);
             } finally {
                 MDC.clear();
             }
