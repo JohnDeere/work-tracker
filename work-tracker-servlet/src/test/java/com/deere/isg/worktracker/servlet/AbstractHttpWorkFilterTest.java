@@ -80,7 +80,6 @@ public class AbstractHttpWorkFilterTest {
         verify(logger).logStart(request, TEST_WORK);
         verify(logger).logEnd(request, response, TEST_WORK);
         assertThat(filter.getPostProcessedData(), is("postProcessedData"));
-        assertThat(filter.getPreProcessedData(), is("preProcessedData"));
     }
 
     @Test
@@ -104,7 +103,6 @@ public class AbstractHttpWorkFilterTest {
             verify(logger).logEnd(request, response, TEST_WORK);
             verifyEmptyMDC();
             assertThat(filter.getPostProcessedData(), is("postProcessedData"));
-            assertThat(filter.getPreProcessedData(), is("preProcessedData"));
         }
     }
 
@@ -117,7 +115,6 @@ public class AbstractHttpWorkFilterTest {
 
         verify(logger, never()).logStart(request, TEST_WORK);
         verify(logger, never()).logEnd(request, response, TEST_WORK);
-        assertThat(nullFilter.getPreProcessedData(), is("preProcessedData"));
         assertThat(nullFilter.getPostProcessedData(), is("postProcessedData"));
     }
 
@@ -140,7 +137,6 @@ public class AbstractHttpWorkFilterTest {
     }
 
     private class MockHttpWorkFilter extends AbstractHttpWorkFilter<HttpWork> {
-        private String preProcessedData = "";
         private String postProcessedData = "";
 
         MockHttpWorkFilter() {
@@ -157,11 +153,6 @@ public class AbstractHttpWorkFilterTest {
         }
 
         @Override
-        protected void preProcess(ServletRequest request, ServletResponse response, HttpWork payload) {
-            preProcessedData = "preProcessedData";
-        }
-
-        @Override
         protected void postProcess(ServletRequest request, ServletResponse response, HttpWork payload) {
             postProcessedData = "postProcessedData";
         }
@@ -170,9 +161,6 @@ public class AbstractHttpWorkFilterTest {
             return postProcessedData;
         }
 
-        public String getPreProcessedData() {
-            return preProcessedData;
-        }
     }
 
     private class MockNullHttpWorkFilter extends MockHttpWorkFilter {

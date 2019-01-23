@@ -38,11 +38,10 @@ public abstract class AbstractHttpWorkFilter<W extends HttpWork>
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        W payload = createWork(request);
+        W payload = createWork(request, response);
         HttpServletRequest httpRequest = getHttpRequest(payload, request);
         OutstandingWork<W> outstanding = getOutstanding();
         try {
-            preProcess(request, response, payload);
             if (outstanding != null) {
                 outstanding.<IOException, ServletException>doInTransactionChecked(payload, () -> {
                     doStartLog(payload, httpRequest);
@@ -66,10 +65,6 @@ public abstract class AbstractHttpWorkFilter<W extends HttpWork>
         }
     }
 
-    protected void preProcess(ServletRequest request, ServletResponse response, W payload) {
-
-    }
-
     protected void postProcess(ServletRequest request, ServletResponse response, W payload) {
     }
 
@@ -90,6 +85,10 @@ public abstract class AbstractHttpWorkFilter<W extends HttpWork>
      * @return new instance of {@link HttpWork} or its subclass.
      */
     protected abstract W createWork(ServletRequest request);
+
+    protected W createWork(ServletRequest request, ServletResponse response){
+        return createWork(request);
+    }
 
     protected HttpServletRequest getHttpRequest(W payload, ServletRequest servletRequest) {
         return (HttpServletRequest) servletRequest;
