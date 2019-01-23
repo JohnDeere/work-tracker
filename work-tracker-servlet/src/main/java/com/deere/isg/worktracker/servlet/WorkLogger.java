@@ -43,7 +43,7 @@ public class WorkLogger {
     private Logger logger = LoggerFactory.getLogger(WorkLogger.class);
     private List<String> excludeUrls = new ArrayList<>();
 
-    private WorkLogger() {
+    public WorkLogger() {
     }
 
     public static WorkLogger getLogger() {
