@@ -1,19 +1,18 @@
 /**
  * Copyright 2019 Deere & Company
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 package com.deere.isg.worktracker.servlet;
 
@@ -43,8 +42,8 @@ public abstract class AbstractHttpWorkFilter<W extends HttpWork>
         HttpServletRequest httpRequest = getHttpRequest(payload, request);
         OutstandingWork<W> outstanding = getOutstanding();
         try {
+            preProcess(request, response, payload);
             if (outstanding != null) {
-                preProcess(request, response, payload);
                 outstanding.<IOException, ServletException>doInTransactionChecked(payload, () -> {
                     doStartLog(payload, httpRequest);
                     chain.doFilter(httpRequest, response);
@@ -55,11 +54,15 @@ public abstract class AbstractHttpWorkFilter<W extends HttpWork>
         } catch (ClassCastException e) {
             throw new ServletException(e);
         } finally {
-            if (outstanding != null) {
+            try {
+                if (outstanding != null) {
+                    logger.logEnd(httpRequest, (HttpServletResponse) response, payload);
+                }
                 postProcess(request, response, payload);
-                logger.logEnd(httpRequest, (HttpServletResponse) response, payload);
+            } finally {
+                MDC.clear();
             }
-            MDC.clear();
+
         }
     }
 

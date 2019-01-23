@@ -117,8 +117,8 @@ public class AbstractHttpWorkFilterTest {
 
         verify(logger, never()).logStart(request, TEST_WORK);
         verify(logger, never()).logEnd(request, response, TEST_WORK);
-        assertThat(nullFilter.getPostProcessedData(), is(""));
-        assertThat(nullFilter.getPreProcessedData(), is(""));
+        assertThat(nullFilter.getPreProcessedData(), is("preProcessedData"));
+        assertThat(nullFilter.getPostProcessedData(), is("postProcessedData"));
     }
 
     @Test
