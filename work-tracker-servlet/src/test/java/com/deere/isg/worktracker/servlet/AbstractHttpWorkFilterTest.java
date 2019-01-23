@@ -45,6 +45,7 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class AbstractHttpWorkFilterTest {
     private static final HttpWork TEST_WORK = createWork();
+    private static final String POST_PROCESSED_DATA = "postProcessedData";
     @Mock
     private HttpServletRequest request;
     @Mock
@@ -79,7 +80,7 @@ public class AbstractHttpWorkFilterTest {
 
         verify(logger).logStart(request, TEST_WORK);
         verify(logger).logEnd(request, response, TEST_WORK);
-        assertThat(filter.getPostProcessedData(), is("postProcessedData"));
+        assertThat(filter.getPostProcessedData(), is(POST_PROCESSED_DATA));
     }
 
     @Test
@@ -102,7 +103,7 @@ public class AbstractHttpWorkFilterTest {
             verify(logger).logStart(request, TEST_WORK);
             verify(logger).logEnd(request, response, TEST_WORK);
             verifyEmptyMDC();
-            assertThat(filter.getPostProcessedData(), is("postProcessedData"));
+            assertThat(filter.getPostProcessedData(), is(POST_PROCESSED_DATA));
         }
     }
 
@@ -115,7 +116,7 @@ public class AbstractHttpWorkFilterTest {
 
         verify(logger, never()).logStart(request, TEST_WORK);
         verify(logger, never()).logEnd(request, response, TEST_WORK);
-        assertThat(nullFilter.getPostProcessedData(), is("postProcessedData"));
+        assertThat(nullFilter.getPostProcessedData(), is(POST_PROCESSED_DATA));
     }
 
     @Test
@@ -154,7 +155,7 @@ public class AbstractHttpWorkFilterTest {
 
         @Override
         protected void postProcess(ServletRequest request, ServletResponse response, HttpWork payload) {
-            postProcessedData = "postProcessedData";
+            postProcessedData = POST_PROCESSED_DATA;
         }
 
         public String getPostProcessedData() {
