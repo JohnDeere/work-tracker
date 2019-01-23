@@ -42,9 +42,9 @@ public abstract class AbstractHttpWorkFilter<W extends HttpWork>
         W payload = createWork(request);
         HttpServletRequest httpRequest = getHttpRequest(payload, request);
         OutstandingWork<W> outstanding = getOutstanding();
-
         try {
             if (outstanding != null) {
+                preProcess(request, response, payload);
                 outstanding.<IOException, ServletException>doInTransactionChecked(payload, () -> {
                     doStartLog(payload, httpRequest);
                     chain.doFilter(httpRequest, response);
@@ -56,10 +56,18 @@ public abstract class AbstractHttpWorkFilter<W extends HttpWork>
             throw new ServletException(e);
         } finally {
             if (outstanding != null) {
-                logger.logEnd((HttpServletRequest) request, (HttpServletResponse) response, payload);
+                postProcess(request, response, payload);
+                logger.logEnd(httpRequest, (HttpServletResponse) response, payload);
             }
             MDC.clear();
         }
+    }
+
+    protected void preProcess(ServletRequest request, ServletResponse response, W payload) {
+
+    }
+
+    protected void postProcess(ServletRequest request, ServletResponse response, W payload) {
     }
 
     protected void doStartLog(W payload, HttpServletRequest httpRequest) {
