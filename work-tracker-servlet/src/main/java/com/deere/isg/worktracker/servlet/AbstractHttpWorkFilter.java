@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package com.deere.isg.worktracker.servlet;
 
 import com.deere.isg.worktracker.OutstandingWork;
@@ -39,10 +38,9 @@ public abstract class AbstractHttpWorkFilter<W extends HttpWork>
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        W payload = createWork(request);
+        W payload = createWork(request, response);
         HttpServletRequest httpRequest = getHttpRequest(payload, request);
         OutstandingWork<W> outstanding = getOutstanding();
-
         try {
             if (outstanding != null) {
                 outstanding.<IOException, ServletException>doInTransactionChecked(payload, () -> {
@@ -55,11 +53,19 @@ public abstract class AbstractHttpWorkFilter<W extends HttpWork>
         } catch (ClassCastException e) {
             throw new ServletException(e);
         } finally {
-            if (outstanding != null) {
-                logger.logEnd((HttpServletRequest) request, (HttpServletResponse) response, payload);
+            try {
+                postProcess(request, response, payload);
+            } finally {
+                if (outstanding != null) {
+                    logger.logEnd(httpRequest, (HttpServletResponse) response, payload);
+                }
+                MDC.clear();
             }
-            MDC.clear();
+
         }
+    }
+
+    protected void postProcess(ServletRequest request, ServletResponse response, W payload) {
     }
 
     protected void doStartLog(W payload, HttpServletRequest httpRequest) {
@@ -79,6 +85,10 @@ public abstract class AbstractHttpWorkFilter<W extends HttpWork>
      * @return new instance of {@link HttpWork} or its subclass.
      */
     protected abstract W createWork(ServletRequest request);
+
+    protected W createWork(ServletRequest request, ServletResponse response){
+        return createWork(request);
+    }
 
     protected HttpServletRequest getHttpRequest(W payload, ServletRequest servletRequest) {
         return (HttpServletRequest) servletRequest;

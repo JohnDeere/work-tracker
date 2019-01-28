@@ -31,6 +31,7 @@ import org.slf4j.MDC;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -38,11 +39,13 @@ import java.io.IOException;
 import static com.deere.isg.worktracker.servlet.TestWorkUtils.createWork;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AbstractHttpWorkFilterTest {
     private static final HttpWork TEST_WORK = createWork();
+    private static final String POST_PROCESSED_DATA = "postProcessedData";
     @Mock
     private HttpServletRequest request;
     @Mock
@@ -77,6 +80,7 @@ public class AbstractHttpWorkFilterTest {
 
         verify(logger).logStart(request, TEST_WORK);
         verify(logger).logEnd(request, response, TEST_WORK);
+        assertThat(filter.getPostProcessedData(), is(POST_PROCESSED_DATA));
     }
 
     @Test
@@ -99,6 +103,7 @@ public class AbstractHttpWorkFilterTest {
             verify(logger).logStart(request, TEST_WORK);
             verify(logger).logEnd(request, response, TEST_WORK);
             verifyEmptyMDC();
+            assertThat(filter.getPostProcessedData(), is(POST_PROCESSED_DATA));
         }
     }
 
@@ -111,7 +116,7 @@ public class AbstractHttpWorkFilterTest {
 
         verify(logger, never()).logStart(request, TEST_WORK);
         verify(logger, never()).logEnd(request, response, TEST_WORK);
-
+        assertThat(nullFilter.getPostProcessedData(), is(POST_PROCESSED_DATA));
     }
 
     @Test
@@ -128,11 +133,27 @@ public class AbstractHttpWorkFilterTest {
         verify(mockLogger, never()).info(anyString(), any(Object[].class));
     }
 
+    @Test
+    public void postFilterExceptionsStillLogAndClearMDC() throws IOException, ServletException {
+        filter = new PostProcessExceptionThrowingMockHttpWorkFilter();
+        filter.setLogger(logger);
+        try {
+            filter.doFilter(request, response, chain);
+        } catch (RuntimeException e) {
+            verify(logger).logStart(request, TEST_WORK);
+            verify(logger).logEnd(request, response, TEST_WORK);
+            verifyEmptyMDC();
+            assertThat(filter.getPostProcessedData(), is(""));
+        }
+    }
+
     private void verifyEmptyMDC() {
         assertThat(MDC.getCopyOfContextMap(), nullValue());
     }
 
     private class MockHttpWorkFilter extends AbstractHttpWorkFilter<HttpWork> {
+        private String postProcessedData = "";
+
         MockHttpWorkFilter() {
             setLogger(logger);
         }
@@ -145,16 +166,32 @@ public class AbstractHttpWorkFilterTest {
         protected HttpWork createWork(ServletRequest request) {
             return TEST_WORK;
         }
+
+        @Override
+        protected void postProcess(ServletRequest request, ServletResponse response, HttpWork payload) {
+            postProcessedData = POST_PROCESSED_DATA;
+        }
+
+        public String getPostProcessedData() {
+            return postProcessedData;
+        }
+
     }
 
-    private class MockNullHttpWorkFilter extends AbstractHttpWorkFilter<HttpWork> {
+    private class MockNullHttpWorkFilter extends MockHttpWorkFilter {
         MockNullHttpWorkFilter() {
-            setLogger(logger);
         }
         @Override
-        protected HttpWork createWork(ServletRequest request) {
-            return TEST_WORK;
+        public OutstandingWork<HttpWork> getOutstanding() {
+            return null;
         }
+
     }
 
+    private class PostProcessExceptionThrowingMockHttpWorkFilter extends MockHttpWorkFilter {
+        @Override
+        protected void postProcess(ServletRequest request, ServletResponse response, HttpWork payload) {
+            throw new RuntimeException();
+        }
+    }
 }
