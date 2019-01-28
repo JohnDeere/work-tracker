@@ -133,6 +133,20 @@ public class AbstractHttpWorkFilterTest {
         verify(mockLogger, never()).info(anyString(), any(Object[].class));
     }
 
+    @Test
+    public void postFilterExceptionsStillLogAndClearMDC() throws IOException, ServletException {
+        filter = new PostProcessExceptionThrowingMockHttpWorkFilter();
+        filter.setLogger(logger);
+        try {
+            filter.doFilter(request, response, chain);
+        } catch (RuntimeException e) {
+            verify(logger).logStart(request, TEST_WORK);
+            verify(logger).logEnd(request, response, TEST_WORK);
+            verifyEmptyMDC();
+            assertThat(filter.getPostProcessedData(), is(""));
+        }
+    }
+
     private void verifyEmptyMDC() {
         assertThat(MDC.getCopyOfContextMap(), nullValue());
     }
@@ -174,4 +188,10 @@ public class AbstractHttpWorkFilterTest {
 
     }
 
+    private class PostProcessExceptionThrowingMockHttpWorkFilter extends MockHttpWorkFilter {
+        @Override
+        protected void postProcess(ServletRequest request, ServletResponse response, HttpWork payload) {
+            throw new RuntimeException();
+        }
+    }
 }
