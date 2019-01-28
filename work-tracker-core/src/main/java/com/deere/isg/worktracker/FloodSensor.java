@@ -18,6 +18,7 @@
 package com.deere.isg.worktracker;
 
 import net.logstash.logback.argument.StructuredArgument;
+import net.logstash.logback.argument.StructuredArguments;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +58,7 @@ public abstract class FloodSensor<W extends Work> {
         if (exceeds(limit, predicate) && notCheckedYet) {
             return likeThingsStream(predicate)
                     .findFirst()
-                    .map(oldestSimilar -> getRetryAfter(oldestSimilar, message));
+                    .map(oldestSimilar -> getRetryAfter(oldestSimilar, typeName, message));
         }
         return Optional.empty();
     }
@@ -86,10 +87,13 @@ public abstract class FloodSensor<W extends Work> {
         return likeThingsStream(predicate).limit(limit + 1).count() > limit;
     }
 
-    private int getRetryAfter(W oldestSimilar, String message) {
+    private int getRetryAfter(W oldestSimilar, String typeName, String message) {
+        outstanding.putInContext("limit_type", typeName);
         List<StructuredArgument> metadata = outstanding.getCurrentMetadata();
+        int retryAfterSeconds = (int) Math.ceil(oldestSimilar.getElapsedMillis() / 1000.0);
+        metadata.add(StructuredArguments.keyValue("retry_after_seconds", retryAfterSeconds));
         logger.warn(message, metadata.toArray());
-        return (int) Math.ceil(oldestSimilar.getElapsedMillis() / 1000.0);
+        return retryAfterSeconds;
     }
 
     protected void setLogger(Logger logger) {
