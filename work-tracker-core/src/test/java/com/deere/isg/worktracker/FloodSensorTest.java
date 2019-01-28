@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-
 package com.deere.isg.worktracker;
 
+import net.logstash.logback.argument.StructuredArguments;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
@@ -157,6 +158,26 @@ public class FloodSensorTest {
 
         assertThat(work.checkLimit(USER), is(false));
         assertNoRetry(MESSAGE, retryAfter);
+    }
+
+    @Test
+    public void addsLimitTypeToMetaData() {
+        setSameUserStream();
+
+        floodSensor.shouldRetryLater(new MockWork(TEST_USER), MockWork::getUser, LIMIT_UNDER, USER, MESSAGE);
+
+        verify(outstanding).putInContext("limit_type", USER);
+    }
+
+    @Test
+    public void addsRetryAfterToMetaData() {
+        setSameUserStream();
+
+        floodSensor.shouldRetryLater(new MockWork(TEST_USER), MockWork::getUser, LIMIT_UNDER, USER, MESSAGE);
+
+        ArgumentCaptor<Object[]> captor = ArgumentCaptor.forClass(Object[].class);
+        verify(logger).warn(eq(MESSAGE), captor.capture());
+        assertThat(captor.getValue(), is(StructuredArguments.keyValue("retry_after_seconds", 1)));
     }
 
     private void assertNoRetry(String message, Optional<Integer> retryAfter) {
