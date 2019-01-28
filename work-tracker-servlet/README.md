@@ -84,8 +84,10 @@ In your web.xml, add the following:
 </listener>
 ```
 
-## Connection Limits
-Request Bouncer requires Connection Limits to determine whether to reject a work if the work exceeds a particular limit. By default, `ConnectionLimits` provides limits for `same session`, `same user`, `same service` and `total`. You can also provide your own limits as follows:
+## Connection Limits (Flood Sensor)
+Request Bouncer requires Connection Limits to determine whether to reject a work if the work exceeds a particular limit. 
+By default, `ConnectionLimits` provides limits for `same session`, `same user`, `same service` and `total`. 
+You can also provide your own limits as follows:
 
 ```java
 public class WorkTrackerContextListener extends WorkContextListener {
@@ -111,6 +113,18 @@ public class WorkTrackerContextListener extends WorkContextListener {
 ```
 
 See [example](./../work-tracker-examples/java-example), [web.xml](./../work-tracker-examples/java-example/src/main/webapp/WEB-INF/web.xml)
+
+When a connection limit is tripped, the following happens:
+* The client gets an Http Status code of 429 - TOO MANY REQUESTS.
+* The client gets a Retry-After header with its value in seconds.  The number of seconds that are given to wait is determined by finding the oldest similar request, 
+  and getting the ceiling of the current elapsed time of that request.
+* A log statement will be written with the following metadata:
+  * message: "Request rejected to protect JVM from too many requests".  There will be additional wording after this statement about what kind of limit was reached.
+  * retry_after_seconds: The value given in the Retry-After header to the client.
+  * limit_type: The type name of the limit that was tripped.  Standard limit types are: total, user, session, and service.
+  * All the other metadata kept track of in the Work bean.
+  
+  With this metadata you will be able to create dashboards that show who had 429s and why they tripped in an easily digestible format.
 
 ## Outstanding HttpServlet
 We provide a WorkHttpServlet that displays all the outstanding work that are currently in progress. This can be used for debugging purposes. Below is the configuration in `web.xml`:
