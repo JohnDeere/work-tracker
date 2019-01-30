@@ -17,15 +17,18 @@
 
 package com.deere.isg.worktracker.servlet;
 
+import com.deere.isg.worktracker.OutstandingWork;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.beans.HasPropertyWithValue.hasProperty;
+import static org.mockito.Mockito.*;
 
 public class ConnectionLimitsTest {
     private static final String TOTAL_MESSAGE = "Request rejected to protect JVM from too many requests total";
@@ -129,5 +132,45 @@ public class ConnectionLimitsTest {
     public void helperReturnsLimit() {
         int limit = connectionLimits.getLimit(ConnectionLimits.TOTAL);
         assertThat(limit, is((int) (60 * .9)));
+    }
+
+    @Test
+    public void canUseIncomingWorkToDefineTestFunction() {
+        HttpWork incoming = new HttpWork(null);
+        connectionLimits.addConnectionLimit(2, "test").buildTest(w->(x->(w==incoming)));
+        ConnectionLimits<HttpWork>.Limit limit = connectionLimits.getConnectionLimit("test");
+
+        HttpWork existing = new HttpWork(null);
+        assertThat(limit.getPredicate(incoming).test(existing), is(true));
+        assertThat(limit.getPredicate(null).test(existing), is(false));
+        assertThat(limit.getPredicate(new HttpWork(null)).test(existing), is(false));
+
+    }
+
+    @Test
+    public void canUseSimpleTestPredicate() {
+        HttpWork incoming = new HttpWork(null);
+        Predicate<HttpWork> expected = x -> true;
+        connectionLimits.addConnectionLimit(2, "test").test(expected);
+        ConnectionLimits<HttpWork>.Limit limit = connectionLimits.getConnectionLimit("test");
+
+        assertThat(limit.getPredicate(incoming), is(expected));
+        assertThat(limit.getPredicate(null), is(expected));
+        assertThat(limit.getPredicate(new HttpWork(null)), is(expected));
+    }
+
+    @Test
+    public void floodSensorPassesIncomingWorkToGetLimitTest() {
+
+        HttpWork incoming = new HttpWork(null);
+        ConnectionLimits<HttpWork>.Limit limit = mock(ConnectionLimits.Limit.class);
+        when(limit.getPredicate(any())).thenReturn(x->true);
+
+        OutstandingWork<HttpWork> outstandingWork = new OutstandingWork<>();
+        HttpFloodSensor<HttpWork> sensor = new HttpFloodSensor<>(outstandingWork, connectionLimits);
+
+        sensor.shouldRetryLater(incoming, limit);
+
+        verify(limit).getPredicate(eq(incoming));
     }
 }

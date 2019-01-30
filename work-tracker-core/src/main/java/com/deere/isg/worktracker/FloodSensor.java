@@ -53,8 +53,8 @@ public abstract class FloodSensor<W extends Work> {
         return outstanding;
     }
 
-    protected Optional<Integer> shouldRetryLater(W work, Predicate<W> predicate, int limit, String typeName, String message) {
-        boolean notCheckedYet = !work.checkLimit(typeName);
+    protected Optional<Integer> shouldRetryLater(W incoming, Predicate<W> predicate, int limit, String typeName, String message) {
+        boolean notCheckedYet = !incoming.checkLimit(typeName);
         if (exceeds(limit, predicate) && notCheckedYet) {
             return likeThingsStream(predicate)
                     .findFirst()
@@ -63,11 +63,11 @@ public abstract class FloodSensor<W extends Work> {
         return Optional.empty();
     }
 
-    protected Optional<Integer> shouldRetryLater(W work, Function<W, String> getter, int limit, String typeName, String message) {
-        return Optional.ofNullable(work)
+    protected Optional<Integer> shouldRetryLater(W incoming, Function<W, String> getter, int limit, String typeName, String message) {
+        return Optional.ofNullable(incoming)
                 .map(getter)
                 .flatMap(attribute -> isNotBlank(attribute)
-                        ? shouldRetryLater(work, compose(getter, attribute::equals), limit, typeName, message)
+                        ? shouldRetryLater(incoming, compose(getter, attribute::equals), limit, typeName, message)
                         : Optional.empty());
     }
 

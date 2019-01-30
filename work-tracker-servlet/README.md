@@ -106,6 +106,11 @@ public class WorkTrackerContextListener extends WorkContextListener {
         limits.addConnectionLimit(25, "service").method(SpringWork::getService);
         //limit, typeName and Predicate
         limits.addConnectionLimit(20, "acceptHeader").test(w -> w.getAcceptHeader().contains("xml"));
+        //limit, typeName and a dynamic predicate
+        limits.addConnectionLimit(10, "acceptHeader")
+            .buildTest(incoming -> (incoming.getService().contains("foo") ? 
+                (w->incoming.getService().equals(w.getService())) : 
+                (w->false)));
         return limits;
     }
 
