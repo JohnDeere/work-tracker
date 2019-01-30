@@ -119,21 +119,15 @@ public class ConnectionLimits<W extends HttpWork> {
 
     public class Limit {
         private Function<W, String> function;
-        private Predicate<W> predicate;
+        private Function<W, Predicate<W>> predicateBuilder;
         private int limit;
         private String typeName;
 
-        private Limit(int limit, String typeName, Function<W, String> function) {
+        private Limit(int limit, String typeName, Function<W, String> function, Function<W, Predicate<W>> predicateBuilder) {
             this.limit = limit;
             this.typeName = typeName;
             this.function = function;
-            this.predicate = x -> true;
-        }
-
-        private Limit(int limit, String typeName, Predicate<W> predicate) {
-            this.limit = limit;
-            this.typeName = typeName;
-            this.predicate = predicate;
+            this.predicateBuilder = predicateBuilder;
         }
 
         Function<W, String> getFunction() {
@@ -141,7 +135,7 @@ public class ConnectionLimits<W extends HttpWork> {
         }
 
         Predicate<W> getPredicate(W incoming) {
-            return predicate;
+            return predicateBuilder.apply(incoming);
         }
 
         public int getLimit() {
@@ -197,11 +191,15 @@ public class ConnectionLimits<W extends HttpWork> {
         }
 
         public void method(Function<W, String> function) {
-            addConnectionLimit(new Limit(limit, typeName, function));
+            addConnectionLimit(new Limit(limit, typeName, function, w->x->true));
         }
 
         public void test(Predicate<W> predicate) {
-            addConnectionLimit(new Limit(limit, typeName, predicate));
+            addConnectionLimit(new Limit(limit, typeName, null, w->predicate));
+        }
+
+        public void buildTest(Function<W, Predicate<W>> predicateBuilder) {
+            addConnectionLimit(new Limit(limit, typeName, null, predicateBuilder));
         }
     }
 }
