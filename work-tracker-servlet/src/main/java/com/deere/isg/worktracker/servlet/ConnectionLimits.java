@@ -140,7 +140,7 @@ public class ConnectionLimits<W extends HttpWork> {
             return function;
         }
 
-        Predicate<W> getPredicate() {
+        Predicate<W> getPredicate(W incoming) {
             return predicate;
         }
 
