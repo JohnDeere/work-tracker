@@ -136,11 +136,11 @@ public class ConnectionLimits<W extends HttpWork> {
             this.predicate = predicate;
         }
 
-        public Function<W, String> getFunction() {
+        Function<W, String> getFunction() {
             return function;
         }
 
-        public Predicate<W> getPredicate() {
+        Predicate<W> getPredicate() {
             return predicate;
         }
 
