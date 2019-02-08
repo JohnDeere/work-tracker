@@ -88,12 +88,16 @@ public abstract class FloodSensor<W extends Work> {
     }
 
     private int getRetryAfter(W oldestSimilar, String typeName, String message) {
+        int retryAfterSeconds = (int) Math.ceil(oldestSimilar.getElapsedMillis() / 1000.0);
+        logFloodDetected(typeName, message, retryAfterSeconds);
+        return retryAfterSeconds;
+    }
+
+    private void logFloodDetected(String typeName, String message, int retryAfterSeconds) {
         outstanding.putInContext("limit_type", typeName);
         List<StructuredArgument> metadata = outstanding.getCurrentMetadata();
-        int retryAfterSeconds = (int) Math.ceil(oldestSimilar.getElapsedMillis() / 1000.0);
         metadata.add(StructuredArguments.keyValue("retry_after_seconds", retryAfterSeconds));
         logger.warn(message, metadata.toArray());
-        return retryAfterSeconds;
     }
 
     protected void setLogger(Logger logger) {
