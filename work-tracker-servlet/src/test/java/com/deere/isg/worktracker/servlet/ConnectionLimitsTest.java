@@ -17,23 +17,27 @@
 
 package com.deere.isg.worktracker.servlet;
 
-import com.deere.isg.worktracker.OutstandingWork;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.beans.HasPropertyWithValue.hasProperty;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public class ConnectionLimitsTest {
     private static final String TOTAL_MESSAGE = "Request rejected to protect JVM from too many requests total";
     private static final String USER_MESSAGE = "Request rejected to protect JVM from too many requests from same user";
     private static final String TYPE_NAME = "typeName";
+    public static final String USER_TYPE = "user";
     private ConnectionLimits<HttpWork> connectionLimits;
 
     @Before
@@ -57,7 +61,7 @@ public class ConnectionLimitsTest {
         assertThat(connections, hasSize(4));
         assertThat(connections, contains(
                 hasProperty(TYPE_NAME, is("session")),
-                hasProperty(TYPE_NAME, is("user")),
+                hasProperty(TYPE_NAME, is(USER_TYPE)),
                 hasProperty(TYPE_NAME, is("service")),
                 hasProperty(TYPE_NAME, is("total"))
         ));
@@ -137,40 +141,66 @@ public class ConnectionLimitsTest {
     @Test
     public void canUseIncomingWorkToDefineTestFunction() {
         HttpWork incoming = new HttpWork(null);
-        connectionLimits.addConnectionLimit(2, "test").buildTest(w->(x->(w==incoming)));
-        ConnectionLimits<HttpWork>.Limit limit = connectionLimits.getConnectionLimit("test");
+        Function<HttpWork, Predicate<HttpWork>> builtTest = mock(Function.class);
+        Predicate<HttpWork> expectedTest = w -> true;
+        when(builtTest.apply(incoming)).thenReturn(expectedTest);
+        HttpFloodSensor<HttpWork> sensor = mock(HttpFloodSensor.class);
 
-        HttpWork existing = new HttpWork(null);
-        assertThat(limit.getPredicate(incoming).test(existing), is(true));
-        assertThat(limit.getPredicate(null).test(existing), is(false));
-        assertThat(limit.getPredicate(new HttpWork(null)).test(existing), is(false));
+        connectionLimits.addConnectionLimit(2, USER_TYPE).buildTest(builtTest);
+        ConnectionLimits<HttpWork>.Limit limit = connectionLimits.getConnectionLimit(USER_TYPE);
 
+        Optional<Integer> expectedrResult = Optional.of(1);
+        when(sensor.shouldRetryLater(eq(incoming), eq(expectedTest), eq(2), eq(USER_TYPE), eq(USER_MESSAGE))).thenReturn(expectedrResult);
+
+        Optional<Integer> result = limit.shouldRetryLater(sensor, incoming);
+
+        verify(sensor).shouldRetryLater(eq(incoming), eq(expectedTest), eq(2), eq(USER_TYPE), eq(USER_MESSAGE));
+        assertThat(result, is(expectedrResult));
     }
 
     @Test
     public void canUseSimpleTestPredicate() {
+        HttpFloodSensor<HttpWork> sensor = mock(HttpFloodSensor.class);
         HttpWork incoming = new HttpWork(null);
-        Predicate<HttpWork> expected = x -> true;
-        connectionLimits.addConnectionLimit(2, "test").test(expected);
-        ConnectionLimits<HttpWork>.Limit limit = connectionLimits.getConnectionLimit("test");
+        Predicate<HttpWork> expectedTest = x -> true;
 
-        assertThat(limit.getPredicate(incoming), is(expected));
-        assertThat(limit.getPredicate(null), is(expected));
-        assertThat(limit.getPredicate(new HttpWork(null)), is(expected));
+        connectionLimits.addConnectionLimit(2, USER_TYPE).test(expectedTest);
+        ConnectionLimits<HttpWork>.Limit limit = connectionLimits.getConnectionLimit(USER_TYPE);
+
+        assertRunsPredicate(sensor, incoming, expectedTest, limit);
+        assertRunsPredicate(sensor, null, expectedTest, limit);
+        assertRunsPredicate(sensor, new HttpWork(null), expectedTest, limit);
+    }
+
+    private void assertRunsPredicate(HttpFloodSensor<HttpWork> sensor, HttpWork incoming, Predicate<HttpWork> expectedTest, ConnectionLimits<HttpWork>.Limit limit) {
+        Optional<Integer> expectedrResult = Optional.of(1);
+        when(sensor.shouldRetryLater(eq(incoming), eq(expectedTest), eq(2), eq(USER_TYPE), eq(USER_MESSAGE))).thenReturn(expectedrResult);
+        Optional<Integer> result = limit.shouldRetryLater(sensor, incoming);
+        verify(sensor).shouldRetryLater(eq(incoming), eq(expectedTest), eq(2), eq(USER_TYPE), eq(USER_MESSAGE));
+
+        assertThat(result, is(expectedrResult));
     }
 
     @Test
-    public void floodSensorPassesIncomingWorkToGetLimitTest() {
-
+    public void canUseSimpleTestMethod() {
+        HttpFloodSensor<HttpWork> sensor = mock(HttpFloodSensor.class);
         HttpWork incoming = new HttpWork(null);
-        ConnectionLimits<HttpWork>.Limit limit = mock(ConnectionLimits.Limit.class);
-        when(limit.getPredicate(any())).thenReturn(x->true);
+        Function<HttpWork, String> expectedMethod = HttpWork::getRemoteUser;
 
-        OutstandingWork<HttpWork> outstandingWork = new OutstandingWork<>();
-        HttpFloodSensor<HttpWork> sensor = new HttpFloodSensor<>(outstandingWork, connectionLimits);
+        connectionLimits.addConnectionLimit(2, USER_TYPE).method(expectedMethod);
+        ConnectionLimits<HttpWork>.Limit limit = connectionLimits.getConnectionLimit(USER_TYPE);
 
-        sensor.shouldRetryLater(incoming, limit);
+        assertRunsMethod(sensor, incoming, expectedMethod, limit);
+        assertRunsMethod(sensor, null, expectedMethod, limit);
+        assertRunsMethod(sensor, new HttpWork(null), expectedMethod, limit);
+    }
 
-        verify(limit).getPredicate(eq(incoming));
+    private void assertRunsMethod(HttpFloodSensor<HttpWork> sensor, HttpWork incoming, Function<HttpWork, String> expectedMethod, ConnectionLimits<HttpWork>.Limit limit) {
+        Optional<Integer> expectedrResult = Optional.of(1);
+        when(sensor.shouldRetryLater(eq(incoming), eq(expectedMethod), eq(2), eq(USER_TYPE), eq(USER_MESSAGE))).thenReturn(expectedrResult);
+        Optional<Integer> result = limit.shouldRetryLater(sensor, incoming);
+        verify(sensor).shouldRetryLater(eq(incoming), eq(expectedMethod), eq(2), eq(USER_TYPE), eq(USER_MESSAGE));
+
+        assertThat(result, is(expectedrResult));
     }
 }
