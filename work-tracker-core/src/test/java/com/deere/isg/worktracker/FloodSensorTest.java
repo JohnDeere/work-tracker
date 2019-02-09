@@ -78,7 +78,9 @@ public class FloodSensorTest {
     @Test
     public void shouldRetryLaterReturnIntegerOpIfExceedsLimit() {
         MockWork work = new MockWork(null);
-        floodSensor.shouldRetryLater(work, predicate(true), LIMIT_UNDER, USER, MESSAGE);
+        Optional<Integer> retryAfter = floodSensor.shouldRetryLater(work, predicate(true), LIMIT_UNDER, USER, MESSAGE);
+        assertThat(retryAfter.isPresent(), is(true));
+        assertThat(retryAfter.get(), is(1));
 
         verify(logger).warn(eq(MESSAGE), (Object[]) any());
     }

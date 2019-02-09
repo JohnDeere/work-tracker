@@ -26,6 +26,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -222,6 +223,24 @@ public class ConnectionLimits<W extends HttpWork> {
                             getTypeName(),
                             getMessage()
                     );
+                }
+            });
+        }
+
+        public void advanced(Function<W, Optional<Integer>> decider) {
+            addConnectionLimit(new Limit(limit, typeName) {
+                @Override
+                public Optional<Integer> shouldRetryLater(HttpFloodSensor<W> floodSensor, W incoming) {
+                    return floodSensor.logFloodDetected(this, decider.apply(incoming));
+                }
+            });
+        }
+
+        public void advanced(BiFunction< FloodSensor<W>, W, Optional<Integer>> decider) {
+            addConnectionLimit(new Limit(limit, typeName) {
+                @Override
+                public Optional<Integer> shouldRetryLater(HttpFloodSensor<W> floodSensor, W incoming) {
+                    return floodSensor.logFloodDetected(this, decider.apply(floodSensor, incoming));
                 }
             });
         }

@@ -39,7 +39,7 @@ import static com.deere.isg.worktracker.StringUtils.isNotBlank;
  */
 public abstract class FloodSensor<W extends Work> {
     private final OutstandingWork<W> outstanding;
-    private Logger logger = LoggerFactory.getLogger(FloodSensor.class);
+    private static Logger logger = LoggerFactory.getLogger(FloodSensor.class);
 
     public FloodSensor(OutstandingWork<W> outstanding) {
         this.outstanding = outstanding;
@@ -88,12 +88,17 @@ public abstract class FloodSensor<W extends Work> {
     }
 
     private int getRetryAfter(W oldestSimilar, String typeName, String message) {
-        int retryAfterSeconds = (int) Math.ceil(oldestSimilar.getElapsedMillis() / 1000.0);
+        long timeInMillis = oldestSimilar.getElapsedMillis();
+        int retryAfterSeconds = calculateRetryAfterFromMillis(timeInMillis);
         logFloodDetected(typeName, message, retryAfterSeconds);
         return retryAfterSeconds;
     }
 
-    private void logFloodDetected(String typeName, String message, int retryAfterSeconds) {
+    private int calculateRetryAfterFromMillis(long timeInMillis) {
+        return (int) Math.ceil(timeInMillis / 1000.0);
+    }
+
+    protected void logFloodDetected(String typeName, String message, int retryAfterSeconds) {
         outstanding.putInContext("limit_type", typeName);
         List<StructuredArgument> metadata = outstanding.getCurrentMetadata();
         metadata.add(StructuredArguments.keyValue("retry_after_seconds", retryAfterSeconds));

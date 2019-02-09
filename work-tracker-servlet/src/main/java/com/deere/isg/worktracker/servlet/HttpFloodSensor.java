@@ -92,7 +92,7 @@ public class HttpFloodSensor<W extends HttpWork> extends FloodSensor<W> {
     }
 
     protected Optional<Integer> shouldRetryLater(W incoming, ConnectionLimits<W>.Limit connectionLimit) {
-        return connectionLimit.shouldRetryLater(this,   incoming);
+        return connectionLimit.shouldRetryLater(this, incoming);
     }
 
     protected Optional<Integer> shouldRetryLater(W incoming, Predicate<W> predicate, int limit, String typeName, String message) {
@@ -101,5 +101,10 @@ public class HttpFloodSensor<W extends HttpWork> extends FloodSensor<W> {
 
     protected Optional<Integer> shouldRetryLater(W incoming, Function<W, String> getter, int limit, String typeName, String message) {
         return super.shouldRetryLater(incoming, getter, limit, typeName, message);
+    }
+
+    protected Optional<Integer> logFloodDetected(ConnectionLimits<W>.Limit connectionLimit, Optional<Integer> retryAfter) {
+        retryAfter.ifPresent(retryAfterSeconds->super.logFloodDetected(connectionLimit.getTypeName(), connectionLimit.getMessage(), retryAfterSeconds));
+        return retryAfter;
     }
 }

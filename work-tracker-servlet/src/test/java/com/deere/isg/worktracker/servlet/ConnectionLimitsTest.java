@@ -17,11 +17,13 @@
 
 package com.deere.isg.worktracker.servlet;
 
+import com.deere.isg.worktracker.FloodSensor;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -31,6 +33,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.beans.HasPropertyWithValue.hasProperty;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
 
 public class ConnectionLimitsTest {
@@ -202,5 +205,45 @@ public class ConnectionLimitsTest {
         verify(sensor).shouldRetryLater(eq(incoming), eq(expectedMethod), eq(2), eq(USER_TYPE), eq(USER_MESSAGE));
 
         assertThat(result, is(expectedrResult));
+    }
+
+    @Test
+    public void canSupplyAdvancedFunction() {
+        Function<HttpWork, Optional<Integer>> advancedTest = mock(Function.class);
+        connectionLimits.addConnectionLimit(2, USER_TYPE).advanced(advancedTest);
+        HttpWork incoming = new HttpWork(null);
+        Optional<Integer> expectedResult = Optional.of(1);
+        HttpFloodSensor<HttpWork> sensor = mock(HttpFloodSensor.class);
+        when(advancedTest.apply(eq(incoming))).thenReturn(expectedResult);
+
+        assertAdvanced(sensor, incoming, expectedResult);
+
+        verify(advancedTest).apply(incoming);
+    }
+
+    @Test
+    public void canSupplyAdvancedBiFunction() {
+        BiFunction<FloodSensor<HttpWork>, HttpWork, Optional<Integer>> advancedTest = mock(BiFunction.class);
+        connectionLimits.addConnectionLimit(2, USER_TYPE).advanced(advancedTest);
+
+        HttpWork incoming = new HttpWork(null);
+        Optional<Integer> expectedResult = Optional.of(1);
+        HttpFloodSensor<HttpWork> sensor = mock(HttpFloodSensor.class);
+        when(advancedTest.apply(eq(sensor), eq(incoming))).thenReturn(expectedResult);
+
+        assertAdvanced(sensor, incoming, expectedResult);
+        verify(advancedTest).apply(sensor, incoming);
+    }
+
+
+    private void assertAdvanced(HttpFloodSensor<HttpWork> sensor, HttpWork incoming, Optional<Integer> expectedResult) {
+        when(sensor.logFloodDetected(any(), any())).thenAnswer(a->a.getArgument(1));
+
+        ConnectionLimits<HttpWork>.Limit limit = connectionLimits.getConnectionLimit(USER_TYPE);
+
+        Optional<Integer> result = limit.shouldRetryLater(sensor, incoming);
+
+        assertThat(result, is(expectedResult));
+        verify(sensor).logFloodDetected(eq(limit), eq(result));
     }
 }
