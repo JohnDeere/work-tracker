@@ -23,8 +23,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -117,25 +119,13 @@ public class ConnectionLimits<W extends HttpWork> {
         }
     }
 
-    public class Limit {
-        private Function<W, String> function;
-        private Function<W, Predicate<W>> predicateBuilder;
+    public abstract class Limit {
         private int limit;
         private String typeName;
 
-        private Limit(int limit, String typeName, Function<W, String> function, Function<W, Predicate<W>> predicateBuilder) {
+        private Limit(int limit, String typeName) {
             this.limit = limit;
             this.typeName = typeName;
-            this.function = function;
-            this.predicateBuilder = predicateBuilder;
-        }
-
-        Function<W, String> getFunction() {
-            return function;
-        }
-
-        Predicate<W> getPredicate(W incoming) {
-            return predicateBuilder.apply(incoming);
         }
 
         public int getLimit() {
@@ -178,6 +168,8 @@ public class ConnectionLimits<W extends HttpWork> {
         public String toString() {
             return "Limit{ limit=" + limit + ", typeName=" + typeName + "}";
         }
+
+        public abstract Optional<Integer> shouldRetryLater(HttpFloodSensor<W> floodSensor, W incoming);
     }
 
     public class LimitBuilder {
@@ -191,15 +183,66 @@ public class ConnectionLimits<W extends HttpWork> {
         }
 
         public void method(Function<W, String> function) {
-            addConnectionLimit(new Limit(limit, typeName, function, w->x->true));
+            addConnectionLimit(new Limit(limit, typeName) {
+                @Override
+                public Optional<Integer> shouldRetryLater(HttpFloodSensor<W> floodSensor, W incoming) {
+                    return floodSensor.shouldRetryLater(
+                            incoming,
+                            function,
+                            getLimit(),
+                            getTypeName(),
+                            getMessage()
+                    );
+                }
+            });
         }
 
         public void test(Predicate<W> predicate) {
-            addConnectionLimit(new Limit(limit, typeName, null, w->predicate));
+            addConnectionLimit(new Limit(limit, typeName) {
+                @Override
+                public Optional<Integer> shouldRetryLater(HttpFloodSensor<W> floodSensor, W incoming) {
+                    return floodSensor.shouldRetryLater(
+                            incoming,
+                            predicate,
+                            getLimit(),
+                            getTypeName(),
+                            getMessage()
+                    );
+                }
+            });
         }
 
         public void buildTest(Function<W, Predicate<W>> predicateBuilder) {
-            addConnectionLimit(new Limit(limit, typeName, null, predicateBuilder));
+            addConnectionLimit(new Limit(limit, typeName) {
+                @Override
+                public Optional<Integer> shouldRetryLater(HttpFloodSensor<W> floodSensor, W incoming) {
+                    return floodSensor.shouldRetryLater(
+                            incoming,
+                            predicateBuilder.apply(incoming),
+                            getLimit(),
+                            getTypeName(),
+                            getMessage()
+                    );
+                }
+            });
+        }
+
+        public void advanced(Function<W, Optional<Integer>> decider) {
+            addConnectionLimit(new Limit(limit, typeName) {
+                @Override
+                public Optional<Integer> shouldRetryLater(HttpFloodSensor<W> floodSensor, W incoming) {
+                    return floodSensor.logFloodDetected(this, decider.apply(incoming));
+                }
+            });
+        }
+
+        public void advanced(BiFunction< FloodSensor<W>, W, Optional<Integer>> decider) {
+            addConnectionLimit(new Limit(limit, typeName) {
+                @Override
+                public Optional<Integer> shouldRetryLater(HttpFloodSensor<W> floodSensor, W incoming) {
+                    return floodSensor.logFloodDetected(this, decider.apply(floodSensor, incoming));
+                }
+            });
         }
     }
 }

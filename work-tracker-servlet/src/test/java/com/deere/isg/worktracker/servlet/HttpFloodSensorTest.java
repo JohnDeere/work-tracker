@@ -306,6 +306,15 @@ public class HttpFloodSensorTest {
         verify(response, never()).setHeader(RETRY_AFTER_HEADER, "5");
     }
 
+    @Test
+    public void passesThroughLogRequest() {
+        ConnectionLimits.Limit limit = mock(ConnectionLimits.Limit.class);
+        when(limit.getMessage()).thenReturn("foo");
+        when(limit.getTypeName()).thenReturn("bar");
+        floodSensor.logFloodDetected(limit, Optional.of(1));
+        verify(logger).warn(eq("foo"), (Object[])any());
+    }
+
     private void assertLimitsNotTriggered(HttpWork work, String... limits) {
         setSameWorkStream(limit.getConnectionLimit(ConnectionLimits.USER).getLimit() + 1, work);
         assertLimits(work, true, limits);

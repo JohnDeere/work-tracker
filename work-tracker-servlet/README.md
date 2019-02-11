@@ -111,6 +111,10 @@ public class WorkTrackerContextListener extends WorkContextListener {
             .buildTest(incoming -> (incoming.getService().contains("foo") ? 
                 (w->incoming.getService().equals(w.getService())) : 
                 (w->false)));
+        //limit, typeName and function to execute retry later calculation
+        limits.addConnectionLimit(2, USER_TYPE).advanced(incoming -> Optional.of(incoming.getElapsedMillis()));
+        //limit, typeName, floodSensor and function to execute retry later calculation
+        limits.addConnectionLimit(2, USER_TYPE).advanced((floodSensor, incoming) -> Optional.of(incoming.getElapsedMillis()));
         return limits;
     }
 

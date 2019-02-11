@@ -25,6 +25,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class HttpFloodSensor<W extends HttpWork> extends FloodSensor<W> {
@@ -91,21 +92,19 @@ public class HttpFloodSensor<W extends HttpWork> extends FloodSensor<W> {
     }
 
     protected Optional<Integer> shouldRetryLater(W incoming, ConnectionLimits<W>.Limit connectionLimit) {
-        if (connectionLimit.getFunction() != null) {
-            return shouldRetryLater(
-                    incoming,
-                    connectionLimit.getFunction(),
-                    connectionLimit.getLimit(),
-                    connectionLimit.getTypeName(),
-                    connectionLimit.getMessage()
-            );
-        }
-        return shouldRetryLater(
-                incoming,
-                connectionLimit.getPredicate(incoming),
-                connectionLimit.getLimit(),
-                connectionLimit.getTypeName(),
-                connectionLimit.getMessage()
-        );
+        return connectionLimit.shouldRetryLater(this, incoming);
+    }
+
+    protected Optional<Integer> shouldRetryLater(W incoming, Predicate<W> predicate, int limit, String typeName, String message) {
+        return super.shouldRetryLater(incoming, predicate, limit, typeName, message);
+    }
+
+    protected Optional<Integer> shouldRetryLater(W incoming, Function<W, String> getter, int limit, String typeName, String message) {
+        return super.shouldRetryLater(incoming, getter, limit, typeName, message);
+    }
+
+    protected Optional<Integer> logFloodDetected(ConnectionLimits<W>.Limit connectionLimit, Optional<Integer> retryAfter) {
+        retryAfter.ifPresent(retryAfterSeconds->super.logFloodDetected(connectionLimit.getTypeName(), connectionLimit.getMessage(), retryAfterSeconds));
+        return retryAfter;
     }
 }
