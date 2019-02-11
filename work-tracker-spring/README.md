@@ -21,7 +21,7 @@ See [releases](../../../releases/latest) for the latest release
 ```
 
 Some Spring libraries and logging that may be required
-```
+```xml
   <!-- Spring libraries -->
   <dependency>
       <groupId>org.springframework</groupId>
@@ -295,6 +295,15 @@ public class WorkTrackerContextListener extends WorkContextListener {
         limits.addConnectionLimit(20, "acceptHeader").test(w -> w.getAcceptHeader()
                 .contains(MediaType.APPLICATION_XML_VALUE)
         );
+        //limit, typeName and a dynamic predicate
+        limits.addConnectionLimit(10, "acceptHeader")
+                    .buildTest(incoming -> (incoming.getService().contains("foo") ? 
+                        (w->incoming.getService().equals(w.getService())) : 
+                        (w->false)));
+        //limit, typeName and function to execute retry later calculation
+        limits.addConnectionLimit(2, USER_TYPE).advanced(incoming -> Optional.of(incoming.getElapsedMillis()));
+        //limit, typeName, floodSensor and function to execute retry later calculation
+        limits.addConnectionLimit(2, USER_TYPE).advanced((floodSensor, incoming) -> Optional.of(incoming.getElapsedMillis()));
         return limits;
     }
 }
