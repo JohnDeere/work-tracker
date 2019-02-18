@@ -24,6 +24,7 @@ import org.slf4j.MDC;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -180,5 +181,9 @@ public abstract class Work {
         List<StructuredArgument> intervalInfo = getThreadInfo();
         intervalInfo.add(keyValue(TIME_INTERVAL, interval));
         return intervalInfo;
+    }
+
+    public Map<String, String> getMDC() {
+        return Collections.unmodifiableMap(mdc);
     }
 }

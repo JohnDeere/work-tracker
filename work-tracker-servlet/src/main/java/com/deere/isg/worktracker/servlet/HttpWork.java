@@ -20,7 +20,9 @@ package com.deere.isg.worktracker.servlet;
 import com.deere.isg.worktracker.Work;
 
 import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.Optional;
 
@@ -38,6 +40,7 @@ public class HttpWork extends Work {
     private String remoteUser;
     private String sessionId;
     private String acceptHeader;
+    private Optional<Integer> status = Optional.empty();
 
     public HttpWork(ServletRequest request) {
         if (request != null) {
@@ -94,5 +97,16 @@ public class HttpWork extends Work {
 
     public void setAcceptHeader(String acceptHeader) {
         this.acceptHeader = addToMDC(ACCEPT, acceptHeader);
+    }
+
+    protected void close(ServletResponse response) {
+        if(response instanceof HttpServletResponse) {
+            HttpServletResponse httpResponse = (HttpServletResponse) response;
+            this.status = Optional.of(httpResponse.getStatus());
+        }
+    }
+
+    public Optional<Integer> getStatusCode() {
+        return status;
     }
 }

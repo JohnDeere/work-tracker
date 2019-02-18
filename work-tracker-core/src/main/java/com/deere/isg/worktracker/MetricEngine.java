@@ -1,0 +1,153 @@
+package com.deere.isg.worktracker;
+
+import java.time.Instant;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LongSummaryStatistics;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public interface MetricEngine<W extends Work> extends PostProcessor<W> {
+    interface Metric {
+        String getKey();
+        Object getValue();
+    }
+
+    public class Tag implements Metric {
+        private final String key;
+        private final Object value;
+
+        public Tag(String key, Object value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public String getKey() {
+            return key;
+        }
+        public Object getValue() {
+            return value;
+        }
+    }
+
+    interface MetricCollection {
+        Collection<Metric> getMetrics();
+    }
+
+    interface MetricSet extends MetricCollection {
+        <M extends Metric> M getMetric(String key, Class<M> clazz);
+        MetricSet getMetricSet(String key, Object value);
+    }
+
+    interface NumberMetric extends Metric {
+        Number getValue();
+    }
+
+    interface Bucket extends MetricSet {
+        Instant getStartTime();
+        Instant getEndTime();
+    }
+
+    abstract class BaseMetric implements Metric {
+        private String key;
+
+        BaseMetric(String key) {
+            this.key = key;
+        }
+
+        @Override
+        public String getKey() {
+            return key;
+        }
+    }
+
+    public class CountMetric extends BaseMetric implements NumberMetric {
+        private AtomicInteger count = new AtomicInteger();
+
+        public CountMetric(String key) {
+            super(key);
+        }
+
+        public void increment() {
+            count.incrementAndGet();
+        }
+
+        public Integer getValue() {
+            return count.get();
+        }
+    }
+
+    public class LongMetric extends BaseMetric implements MetricCollection {
+        private AtomicLong sum = new AtomicLong();
+        private CountMetric count = new CountMetric("count");
+
+        LongSummaryStatistics longSummaryStatistics = new LongSummaryStatistics();
+
+        public LongMetric(String key) {
+            super(key);
+        }
+
+        public void add(long value) {
+            longSummaryStatistics.accept(value);
+        }
+
+        public long getSum() {
+            return longSummaryStatistics.getSum();
+        }
+
+        public double getAverage() {
+            return longSummaryStatistics.getAverage();
+        }
+
+        @Override
+        public Object getValue() {
+            return longSummaryStatistics;
+        }
+
+        @Override
+        public Collection<Metric> getMetrics() {
+            return Stream.of(
+                    new NumberMetricReport("sum", getSum()),
+                    new NumberMetricReport("average", getAverage()),
+                    new NumberMetricReport("max", longSummaryStatistics.getMax()),
+                    new NumberMetricReport("min", longSummaryStatistics.getMin())
+            ).collect(Collectors.toList());
+        }
+    }
+
+    static class NumberMetricReport extends BaseMetric implements NumberMetric {
+        private final Number value;
+
+        public NumberMetricReport(String key, Number value) {
+            super(key);
+            this.value = value;
+        }
+
+        @Override
+        public Number getValue() {
+            return value;
+        }
+    }
+
+    public class UniqueMetric extends BaseMetric implements NumberMetric {
+        private HashSet hash = new HashSet();
+
+        public UniqueMetric(String key) {
+            super(key);
+        }
+
+        public void add(Object value) {
+            hash.add(value);
+        }
+
+        public Number getValue() {
+            return hash.size();
+        }
+    }
+
+    interface MetricList extends Metric {
+        Stream<MetricSet> stream();
+    }
+}

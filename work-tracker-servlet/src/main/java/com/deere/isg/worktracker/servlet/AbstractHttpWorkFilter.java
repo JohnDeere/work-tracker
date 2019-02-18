@@ -54,6 +54,9 @@ public abstract class AbstractHttpWorkFilter<W extends HttpWork>
             throw new ServletException(e);
         } finally {
             try {
+                if(payload != null) {
+                    payload.close(response);
+                }
                 postProcess(request, response, payload);
             } finally {
                 if (outstanding != null) {
