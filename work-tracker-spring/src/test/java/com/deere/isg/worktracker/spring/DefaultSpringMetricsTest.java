@@ -18,6 +18,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Random;
 
 public class DefaultSpringMetricsTest {
 
@@ -45,16 +46,16 @@ public class DefaultSpringMetricsTest {
 
     private void runOnce() throws IOException, ServletException {
         MockHttpServletRequest request = MockMvcRequestBuilders
-                .get("/hello")
-                .accept("text/html")
-                .principal(() -> "fred")
+                .get(random("/hello", "/foo", "/bar", "/baz", "/zap"))
+                .accept(random("text/html", "application/json", "application/xml"))
+                .principal(() -> random("fred", "george", "charlie", "ron", "ginny"))
                 .buildRequest(new MockServletContext());
 
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         filter.doFilter(request, response, ((req, res) -> {
-            ((HttpServletResponse) res).setStatus(200);
-            Clock.freeze(Clock.now().plusSeconds(2));
+            ((HttpServletResponse) res).setStatus(random(200, 500, 429, 403, 200, 402, 200));
+            Clock.freeze(Clock.now().plusMillis(RANDOM.nextInt(5000)));
         }));
     }
 
@@ -69,5 +70,11 @@ public class DefaultSpringMetricsTest {
         JsonParser jp = new JsonParser();
         JsonElement je = jp.parse(ugly);
         return gson.toJson(je);
+    }
+
+    private static final Random RANDOM = new Random();
+
+    public static <T> T random(T... values) {
+        return values[RANDOM.nextInt(values.length)];
     }
 }
