@@ -1,6 +1,7 @@
 package com.deere.isg.worktracker;
 
-import java.time.Instant;
+import org.joda.time.Instant;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LongSummaryStatistics;
@@ -47,7 +48,7 @@ public interface MetricEngine<W extends Work> extends PostProcessor<W> {
 
     interface Bucket extends MetricSet {
         Instant getStartTime();
-        Instant getEndTime();
+        org.joda.time.Instant getEndTime();
     }
 
     abstract class BaseMetric implements Metric {

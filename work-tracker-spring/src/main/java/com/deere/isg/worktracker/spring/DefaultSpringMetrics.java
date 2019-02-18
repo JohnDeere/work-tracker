@@ -3,9 +3,9 @@ package com.deere.isg.worktracker.spring;
 import com.deere.isg.worktracker.DefaultMetricEngine;
 import com.deere.isg.worktracker.MetricEngine;
 import com.deere.isg.worktracker.RootCauseTurboFilter;
+import org.joda.time.Duration;
 import org.slf4j.MDC;
 
-import java.time.Duration;
 import java.util.function.Consumer;
 
 import static com.deere.isg.worktracker.MetricEngine.*;
@@ -13,7 +13,7 @@ import static com.deere.isg.worktracker.MetricEngine.*;
 public class DefaultSpringMetrics<W extends SpringWork> {
 
     public MetricEngine<W> build(Consumer<Bucket> output) {
-        return new DefaultMetricEngine.Builder<W>(Duration.ofSeconds(30))
+        return new DefaultMetricEngine.Builder<W>(Duration.standardSeconds(30))
                 .collector((b, work) -> {
 
                     MetricSet endpointSet = b.getMetricSet("endpoint", work.getEndpoint());

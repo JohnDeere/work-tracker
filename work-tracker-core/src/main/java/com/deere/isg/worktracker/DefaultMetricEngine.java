@@ -1,10 +1,11 @@
 package com.deere.isg.worktracker;
 
+import com.deere.clock.Clock;
+import org.joda.time.Duration;
+import org.joda.time.Instant;
+
 import java.lang.reflect.InvocationTargetException;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
@@ -139,11 +140,11 @@ public class DefaultMetricEngine<W extends Work> implements MetricEngine<W> {
             super();
             this.duration = duration;
             // actually the start times should be on minute and half minute boundaries
-            this.startTime = new Date().toInstant();
+            this.startTime = Clock.now().toInstant();
         }
 
         boolean exceedsDuration() {
-            return getEndTime().isAfter(getStartTime());
+            return getEndTime().isBefore(Clock.now().toInstant());
         }
 
         public Instant getEndTime() {
