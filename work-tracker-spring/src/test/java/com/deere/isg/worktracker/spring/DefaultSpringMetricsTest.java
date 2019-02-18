@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -34,6 +35,11 @@ public class DefaultSpringMetricsTest {
                 engine.postProcess(payload);
             }
         };
+    }
+
+    @After
+    public void tearDown() {
+        Clock.clear();
     }
 
     @Test
