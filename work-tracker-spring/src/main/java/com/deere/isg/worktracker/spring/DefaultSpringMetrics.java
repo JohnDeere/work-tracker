@@ -7,8 +7,10 @@ import org.joda.time.Duration;
 import org.slf4j.MDC;
 
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static com.deere.isg.worktracker.MetricEngine.*;
+import static java.util.stream.Collectors.groupingBy;
 
 public class DefaultSpringMetrics<W extends SpringWork> {
 
@@ -25,10 +27,20 @@ public class DefaultSpringMetrics<W extends SpringWork> {
 //                    }
 
                 })
+                .outstanding((b, outstanding)->{
+                    addOutstanding(b, outstanding.stream().count());
+                    outstanding.stream()
+                            .collect(groupingBy(SpringWork::getEndpoint, Collectors.counting()))
+                            .forEach((k, v) -> addOutstanding(b.getMetricSet("endpoint", k), v));
+                }, Duration.standardSeconds(1))
 
                 .output(output)
                 .build();
 
+    }
+
+    private void addOutstanding(MetricSet b, long count) {
+        b.getMetric("outstanding", LongMetric.class).add(count);
     }
 
     private void addAllDetails(MetricSet set, W work) {

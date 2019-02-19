@@ -1,36 +1,51 @@
 package com.deere.isg.worktracker;
 
 import com.deere.clock.Clock;
+import com.deere.isg.outstanding.Outstanding;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class DefaultMetricEngine<W extends Work> implements MetricEngine<W> {
     private Duration duration;
     private final Consumer<Bucket> output;
     private final BiConsumer<MetricSet, W> collector;
+    private List<TriConsumer<ScheduledExecutorService, Supplier<MetricSet>, Outstanding<W>>> outstandings;
 
     private volatile MyBucket bucket;
 
-    private DefaultMetricEngine(Duration duration, Consumer<Bucket> output, BiConsumer<MetricSet, W> collector) {
+    private DefaultMetricEngine(Duration duration, Consumer<Bucket> output,
+            BiConsumer<MetricSet, W> collector,
+            List<TriConsumer<ScheduledExecutorService, Supplier<MetricSet>, Outstanding<W>>> outstandings)
+    {
         this.duration = duration;
-
         this.output = output;
         this.collector = collector;
+        this.outstandings = outstandings;
         bucket = new MyBucket(this.duration);
     }
 
     public static class Builder<W extends Work> {
+        // TODO: outputs, collectors, and such should be in lists
         private Consumer<Bucket> output;
         private BiConsumer<MetricSet, W> collector;
         private Duration duration;
+        private BiConsumer<MetricSet, Outstanding<W>> outstandingConsumer;
+        private List<TriConsumer<ScheduledExecutorService, Supplier<MetricSet>, Outstanding<W>>> outstandings
+                = new ArrayList<>();
 
         public Builder(Duration duration) {
             this.duration = duration;
@@ -46,22 +61,48 @@ public class DefaultMetricEngine<W extends Work> implements MetricEngine<W> {
             return this;
         }
 
+        public Builder<W> outstanding(BiConsumer<MetricSet, Outstanding<W>> sampler, Duration rate) {
+            outstandings.add((executor, b, outstanding)->{
+                executor.scheduleAtFixedRate(()->{
+                    sampler.accept(b.get(), outstanding);
+                }, 0, rate.getMillis(), TimeUnit.MILLISECONDS);
+            });
+
+            return this;
+        }
         public MetricEngine<W> build() {
-            return new DefaultMetricEngine<>(duration, output, collector);
+            return new DefaultMetricEngine<>(duration, output, collector, outstandings);
+        }
+    }
+
+    interface TriConsumer<A,B,C> {
+        void accept(A a, B b, C c);
+    }
+
+    @Override
+    public void init(Outstanding<W> outstanding) {
+        if(!outstandings.isEmpty()) {
+            ScheduledExecutorService service = Executors.newScheduledThreadPool(outstandings.size());
+            outstandings.forEach(c->c.accept(service, this::getBucket, outstanding));
         }
     }
 
     @Override
     public void postProcess(W work) {
+        Bucket bucket = getBucket();
 
+        collector.accept(bucket, work);
+    }
+
+    private Bucket getBucket() {
+        // TODO: It should be a background thread that does bucket replacement
         if(bucket.exceedsDuration()) {
             Bucket toWrite = bucket;
             bucket = new MyBucket(duration);
             output.accept(toWrite);
         }
 
-        collector.accept(bucket, work);
-
+        return this.bucket;
     }
 
     private static class MyMetricSet implements MetricSet {

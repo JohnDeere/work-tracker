@@ -2,6 +2,8 @@ package com.deere.isg.worktracker.spring;
 
 import com.deere.clock.Clock;
 import com.deere.isg.worktracker.MetricEngine;
+import com.deere.isg.worktracker.OutstandingWork;
+import com.deere.isg.worktracker.servlet.WorkContextListener;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -14,6 +16,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -21,12 +25,15 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Random;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 public class DefaultSpringMetricsTest {
 
     private SpringWorkFilter filter;
 
     @Before
-    public void setup() {
+    public void setup() throws ServletException {
         MetricEngine<SpringWork> engine = new DefaultSpringMetrics<>().build(this::writeLog);
 
         filter = new SpringWorkFilter() {
@@ -34,7 +41,21 @@ public class DefaultSpringMetricsTest {
             protected void postProcess(ServletRequest request, ServletResponse response, SpringWork payload) {
                 engine.postProcess(payload);
             }
+
+            @Override
+            public void init(FilterConfig filterConfig) throws ServletException {
+                super.init(filterConfig);
+                engine.init(getOutstanding());
+            }
         };
+
+        OutstandingWork<SpringWork> outstandingWork = new OutstandingWork<>();
+        FilterConfig filterConfig = mock(FilterConfig.class);
+        ServletContext servletContext = mock(ServletContext.class);
+        when(filterConfig.getServletContext()).thenReturn(servletContext);
+        when(servletContext.getAttribute(WorkContextListener.OUTSTANDING_ATTR)).thenReturn(outstandingWork);
+
+        filter.init(filterConfig);
     }
 
     @After
@@ -44,7 +65,7 @@ public class DefaultSpringMetricsTest {
 
     @Test
     public void second() throws IOException, ServletException {
-        Clock.freeze();
+//        Clock.freeze();
         for(int i=0; i<50; i++) {
             runOnce();
         }
@@ -61,7 +82,13 @@ public class DefaultSpringMetricsTest {
 
         filter.doFilter(request, response, ((req, res) -> {
             ((HttpServletResponse) res).setStatus(random(200, 500, 429, 403, 200, 402, 200));
-            Clock.freeze(Clock.now().plusMillis(RANDOM.nextInt(5000)));
+            int elapsed = RANDOM.nextInt(5000);
+            try {
+                Thread.sleep(elapsed);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+//            Clock.freeze(Clock.now().plusMillis(elapsed));
         }));
     }
 

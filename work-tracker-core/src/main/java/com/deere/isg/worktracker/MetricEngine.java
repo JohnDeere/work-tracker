@@ -3,21 +3,21 @@ package com.deere.isg.worktracker;
 import org.joda.time.Instant;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.LongSummaryStatistics;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public interface MetricEngine<W extends Work> extends PostProcessor<W> {
+
     interface Metric {
         String getKey();
         Object getValue();
     }
 
-    public class Tag implements Metric {
+    class Tag implements Metric {
         private final String key;
         private final Object value;
 
@@ -66,7 +66,7 @@ public interface MetricEngine<W extends Work> extends PostProcessor<W> {
         }
     }
 
-    public class CountMetric extends BaseMetric implements NumberMetric {
+    class CountMetric extends BaseMetric implements NumberMetric {
         private AtomicInteger count = new AtomicInteger();
 
         public CountMetric(String key) {
@@ -82,7 +82,7 @@ public interface MetricEngine<W extends Work> extends PostProcessor<W> {
         }
     }
 
-    public class PercentageMetric extends BaseMetric implements NumberMetric {
+    class PercentageMetric extends BaseMetric implements NumberMetric {
         private CountMetric count;
         private CountMetric parentCount;
 
@@ -100,10 +100,7 @@ public interface MetricEngine<W extends Work> extends PostProcessor<W> {
         }
     }
 
-    public class LongMetric extends BaseMetric implements MetricCollection {
-        private AtomicLong sum = new AtomicLong();
-        private CountMetric count = new CountMetric("count");
-
+    class LongMetric extends BaseMetric implements MetricCollection {
         LongExtendedStatistics longSummaryStatistics = new LongExtendedStatistics();
 
         public LongMetric(String key) {
@@ -114,14 +111,6 @@ public interface MetricEngine<W extends Work> extends PostProcessor<W> {
             longSummaryStatistics.accept(value);
         }
 
-        public long getSum() {
-            return longSummaryStatistics.getSum();
-        }
-
-        public double getAverage() {
-            return longSummaryStatistics.getAverage();
-        }
-
         @Override
         public Object getValue() {
             return longSummaryStatistics;
@@ -130,8 +119,8 @@ public interface MetricEngine<W extends Work> extends PostProcessor<W> {
         @Override
         public Collection<Metric> getMetrics() {
             return Stream.of(
-                    new NumberMetricReport("sum", getSum()),
-                    new NumberMetricReport("average", getAverage()),
+                    new NumberMetricReport("sum", longSummaryStatistics.getSum()),
+                    new NumberMetricReport("average", longSummaryStatistics.getAverage()),
                     new NumberMetricReport("max", longSummaryStatistics.getMax()),
                     new NumberMetricReport("min", longSummaryStatistics.getMin()),
                     new NumberMetricReport("stdDev", longSummaryStatistics.getStandardDeviation())
@@ -139,7 +128,7 @@ public interface MetricEngine<W extends Work> extends PostProcessor<W> {
         }
     }
 
-    static class NumberMetricReport extends BaseMetric implements NumberMetric {
+    class NumberMetricReport extends BaseMetric implements NumberMetric {
         private final Number value;
 
         public NumberMetricReport(String key, Number value) {
@@ -153,8 +142,8 @@ public interface MetricEngine<W extends Work> extends PostProcessor<W> {
         }
     }
 
-    public class UniqueMetric extends BaseMetric implements NumberMetric {
-        private HashSet hash = new HashSet();
+    class UniqueMetric extends BaseMetric implements NumberMetric {
+        private Set hash = ConcurrentHashMap.newKeySet();
 
         public UniqueMetric(String key) {
             super(key);
