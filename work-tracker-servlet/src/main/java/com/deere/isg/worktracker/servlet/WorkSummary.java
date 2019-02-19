@@ -20,7 +20,7 @@ package com.deere.isg.worktracker.servlet;
 import java.util.Date;
 import java.util.Objects;
 
-public class WorkSummary {
+public class WorkSummary<W extends HttpWork> {
     private Date startTime;
     private String service;
     private String requestId;
@@ -29,7 +29,10 @@ public class WorkSummary {
     private String elapsedMillis;
     private boolean zombie;
 
-    public WorkSummary(HttpWork work) {
+    public WorkSummary() {
+
+    }
+    public WorkSummary(W work) {
         if (work != null) {
             setStartTime(new Date(work.getStartTime()));
             setElapsedMillis(String.valueOf(work.getElapsedMillis()));
