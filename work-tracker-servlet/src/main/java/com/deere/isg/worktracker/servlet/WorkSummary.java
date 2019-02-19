@@ -29,9 +29,6 @@ public class WorkSummary<W extends HttpWork> {
     private String elapsedMillis;
     private boolean zombie;
 
-    public WorkSummary() {
-
-    }
     public WorkSummary(W work) {
         if (work != null) {
             setStartTime(new Date(work.getStartTime()));

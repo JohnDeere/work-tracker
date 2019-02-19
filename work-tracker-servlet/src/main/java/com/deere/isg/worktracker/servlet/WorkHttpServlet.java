@@ -93,7 +93,7 @@ public class WorkHttpServlet extends HttpServlet {
     }
 
     protected List<WorkSummary<? extends HttpWork>> mapOutstandingToSummaryList() {
-        return getOutstanding().stream().map(w -> new WorkSummary<>(w)).collect(toList());
+        return getOutstanding().stream().map(WorkSummary::new).collect(toList());
     }
 
     protected Outstanding<? extends HttpWork> getOutstanding() {
