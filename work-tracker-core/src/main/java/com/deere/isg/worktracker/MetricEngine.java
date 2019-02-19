@@ -104,7 +104,7 @@ public interface MetricEngine<W extends Work> extends PostProcessor<W> {
         private AtomicLong sum = new AtomicLong();
         private CountMetric count = new CountMetric("count");
 
-        LongSummaryStatistics longSummaryStatistics = new LongSummaryStatistics();
+        LongExtendedStatistics longSummaryStatistics = new LongExtendedStatistics();
 
         public LongMetric(String key) {
             super(key);
@@ -133,7 +133,8 @@ public interface MetricEngine<W extends Work> extends PostProcessor<W> {
                     new NumberMetricReport("sum", getSum()),
                     new NumberMetricReport("average", getAverage()),
                     new NumberMetricReport("max", longSummaryStatistics.getMax()),
-                    new NumberMetricReport("min", longSummaryStatistics.getMin())
+                    new NumberMetricReport("min", longSummaryStatistics.getMin()),
+                    new NumberMetricReport("stdDev", longSummaryStatistics.getStandardDeviation())
             ).collect(Collectors.toList());
         }
     }
