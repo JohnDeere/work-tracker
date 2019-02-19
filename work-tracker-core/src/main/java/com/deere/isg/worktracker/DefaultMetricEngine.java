@@ -82,6 +82,17 @@ public class DefaultMetricEngine<W extends Work> implements MetricEngine<W> {
             return (M)metrics.computeIfAbsent(key, k -> createMetric(key, clazz));
         }
 
+        @Override
+        public <M extends Metric> M getMetric(String key, Class<M> clazz, Consumer<M> setup) {
+            return (M)metrics.computeIfAbsent(key, k -> {
+                M metric = createMetric(key, clazz);
+                if(setup != null) {
+                    setup.accept(metric);
+                }
+                return metric;
+            });
+        }
+
         private <M extends Metric> M createMetric(String key, Class<M> clazz) {
             try {
                 return clazz.getConstructor(String.class).newInstance(key);
@@ -93,8 +104,16 @@ public class DefaultMetricEngine<W extends Work> implements MetricEngine<W> {
         @Override
         public MetricSet getMetricSet(String key, Object value) {
             MetricSet set = ((MyMetricList) metrics.computeIfAbsent(key, MyMetricList::new)).add(value);
-            set.getMetric("count", CountMetric.class).increment();
+            CountMetric countMetric = incrementCount(set);
+            set.getMetric("percent", PercentageMetric.class,
+                    (m)->m.with(countMetric, this.getMetric("count", CountMetric.class)));
             return set;
+        }
+
+        private CountMetric incrementCount(MetricSet set) {
+            CountMetric countMetric = set.getMetric("count", CountMetric.class);
+            countMetric.increment();
+            return countMetric;
         }
 
         @Override

@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.LongSummaryStatistics;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -39,6 +40,7 @@ public interface MetricEngine<W extends Work> extends PostProcessor<W> {
 
     interface MetricSet extends MetricCollection {
         <M extends Metric> M getMetric(String key, Class<M> clazz);
+        <M extends Metric> M getMetric(String key, Class<M> clazz, Consumer<M> setup);
         MetricSet getMetricSet(String key, Object value);
     }
 
@@ -77,6 +79,24 @@ public interface MetricEngine<W extends Work> extends PostProcessor<W> {
 
         public Integer getValue() {
             return count.get();
+        }
+    }
+
+    public class PercentageMetric extends BaseMetric implements NumberMetric {
+        private CountMetric count;
+        private CountMetric parentCount;
+
+        public PercentageMetric(String key) {
+            super(key);
+        }
+
+        public Double getValue() {
+            return (double)count.getValue() / parentCount.getValue() * 100;
+        }
+
+        public void with(CountMetric count, CountMetric parentCount) {
+            this.count = count;
+            this.parentCount = parentCount;
         }
     }
 

@@ -15,7 +15,7 @@ public class DefaultSpringMetrics<W extends SpringWork> {
     public MetricEngine<W> build(Consumer<Bucket> output) {
         return new DefaultMetricEngine.Builder<W>(Duration.standardSeconds(30))
                 .collector((b, work) -> {
-
+                    b.getMetric("count", CountMetric.class).increment();
                     MetricSet endpointSet = b.getMetricSet("endpoint", work.getEndpoint());
                     addAllDetails(endpointSet, work);
                     addAllDetails(b, work);
@@ -25,6 +25,7 @@ public class DefaultSpringMetrics<W extends SpringWork> {
 //                    }
 
                 })
+
                 .output(output)
                 .build();
 
