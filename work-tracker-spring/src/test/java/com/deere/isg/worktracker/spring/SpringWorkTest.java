@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.slf4j.MDC;
 import org.springframework.mock.web.MockHttpServletRequest;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -92,9 +93,23 @@ public class SpringWorkTest {
     }
 
     @Test
+    public void setupsEndpointForServlets() {
+        String uri = "/test/some/url";
+        ServletEndpointRegistry.populate(uri);
+        request.setRequestURI(uri);
+        request.setMethod("GET");
+        work.setRequestURLPattern(request, null);
+
+        assertThat(work.getRequestURLPattern(), is(uri));
+        assertThat(work.getEndpoint(), is("GET " + uri));
+    }
+
+    @Test
     public void getEndpointReturnsHttpMethodAndURIPattern() {
         setupPatternRequest(ORG_USER_URI, getPathMap());
-        work.setHttpMethod(request.getMethod());
+        work.setHttpMethod(this.request.getMethod());
+        assertNullPathAndEndpoint();
+        triggerEndpointWithSpringAttributes(getPathMap());
 
         assertThat(work.getService(), is("GET " + TEST_ORG_VALUE));
     }
@@ -105,7 +120,7 @@ public class SpringWorkTest {
 
         work.setHttpMethod(GET);
         setupPatternRequest(ORG_USER_URI, getPathMap());
-
+        triggerEndpointWithSpringAttributes(getPathMap());
         assertTestPathAndEndpoint();
     }
 
@@ -115,7 +130,7 @@ public class SpringWorkTest {
 
         work.setHttpMethod(GET);
         setupPatternRequest("/org/some org/user/some user;start=0;end=10", getPathMap());
-
+        triggerEndpointWithSpringAttributes(getPathMap());
         assertTestPathAndEndpoint();
     }
 
@@ -125,7 +140,7 @@ public class SpringWorkTest {
 
         work.setHttpMethod(GET);
         setupPatternRequest("/org/some org;id=100/user/some user;start=0;end=10", getPathMap());
-
+        triggerEndpointWithSpringAttributes(getPathMap());
         assertTestPathAndEndpoint();
     }
 
@@ -137,6 +152,7 @@ public class SpringWorkTest {
         setupPatternRequest("/org/some org;id=100;name=John Deere;time=today/user/some user;start=0;end=10",
                 getPathMap()
         );
+        triggerEndpointWithSpringAttributes(getPathMap());
 
         assertTestPathAndEndpoint();
     }
@@ -198,10 +214,10 @@ public class SpringWorkTest {
     public void requestHasUriTemplateAttribute() {
         assertThat(work.getRequestURLPattern(), is("/"));
         assertThat(work.getHttpMethod(), is(""));
-        assertThat(work.getService(), is(" /"));
+        assertThat(work.getService(), is(" "));
 
-        work.setupSpringVsFilterOrderingWorkaround(request, keyCleanser);
         setupPatternRequest(ORG_USER_URI, getPathMap());
+        triggerEndpointWithSpringAttributes(getPathMap());
 
         assertTestPathAndEndpoint();
     }
@@ -233,14 +249,19 @@ public class SpringWorkTest {
         pathMap.put("User", "SomePerson");
         setUriTemplateAttribute("/users/SomePerson", pathMap);
         work.setRequestURLPattern(request, keyCleanser);
-
+        triggerEndpointWithSpringAttributes(pathMap);
         assertThat(MDC.get("user"), is("SomePerson"));
         assertThat(MDC.get(ENDPOINT), is("GET /users/{user}"));
     }
 
+    private void triggerEndpointWithSpringAttributes(Map<String, String> pathMap) {
+        HttpServletRequest springRequest = work.setupSpringVsFilterOrderingWorkaround(request, keyCleanser);
+        springRequest.setAttribute(URI_TEMPLATE_VARIABLES_ATTRIBUTE, pathMap);
+    }
+
     private void assertNullPathAndEndpoint() {
-        assertThat(MDC.get(PATH), is("/"));
-        assertThat(MDC.get(ENDPOINT), is("/"));
+        assertThat(MDC.get(PATH), nullValue());
+        assertThat(MDC.get(ENDPOINT), nullValue());
     }
 
     private void setupPatternRequest(String requestURI, Map<String, String> keyValue) {

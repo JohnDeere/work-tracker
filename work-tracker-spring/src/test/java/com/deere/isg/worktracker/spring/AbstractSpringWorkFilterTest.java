@@ -30,6 +30,7 @@ import org.slf4j.MDC;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
@@ -40,8 +41,11 @@ import java.util.Map;
 
 import static com.deere.isg.worktracker.servlet.HttpWork.PATH;
 import static com.deere.isg.worktracker.spring.SpringWork.ENDPOINT;
+import static com.deere.isg.worktracker.spring.TestServletContext.ENDPOINT_1;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.web.servlet.HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -68,6 +72,16 @@ public class AbstractSpringWorkFilterTest {
     @After
     public void tearDown() {
         Clock.clear();
+        ServletEndpointRegistry.clear();
+    }
+
+    @Test
+    public void hasServletEndpointsInRegistry() throws ServletException {
+        TestServletContext sc = new TestServletContext();
+        FilterConfig config = mock(FilterConfig.class);
+        when(config.getServletContext()).thenReturn(sc);
+        filter.init(config);
+        assertThat(ServletEndpointRegistry.contains(ENDPOINT_1), is(true));
     }
 
     @Test

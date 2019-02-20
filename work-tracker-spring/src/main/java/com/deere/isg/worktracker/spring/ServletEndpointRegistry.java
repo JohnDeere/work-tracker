@@ -16,20 +16,19 @@
 
 package com.deere.isg.worktracker.spring;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletRegistration;
-import javax.servlet.http.HttpServletRequest;
 import java.util.concurrent.ConcurrentHashMap;
 
 class ServletEndpointRegistry {
     private static EndpointTrie trie = new EndpointTrie();
 
-    public static void populate(HttpServletRequest request){
-        if (request == null){
+    public static void populate(ServletContext context) {
+        if (context == null){
             return;
         }
 
-        request.getServletContext()
-                .getServletRegistrations()
+        context.getServletRegistrations()
                 .forEach((servletName, registration) -> addMappings(registration));
     }
 
