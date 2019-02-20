@@ -3,12 +3,15 @@ package com.deere.isg.worktracker.spring;
 import com.deere.isg.worktracker.DefaultMetricEngine;
 import com.deere.isg.worktracker.MetricEngine;
 import com.deere.isg.worktracker.RootCauseTurboFilter;
+import com.sun.tools.internal.xjc.reader.xmlschema.bindinfo.OptionalPropertyMode;
 import org.joda.time.Duration;
 import org.slf4j.MDC;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -35,12 +38,8 @@ public class DefaultSpringMetrics<W extends SpringWork> {
                     }
                     addAllDetails(b, work);
                 })
-                .outstanding((b, outstanding)->{
-                    addOutstanding(b, outstanding.stream().count());
-                    outstanding.stream()
-                            .collect(groupingBy(w->getSubsetByTags(b, w), Collectors.counting()))
-                            .forEach(this::addOutstanding);
-                }, Duration.standardSeconds(1))
+                .outstanding((b, outstanding)-> outstanding.stream()
+                        .collect(groupingBy(w -> getSubsetByTags(b, w), Collectors.counting())), Duration.standardSeconds(1))
 
                 .output(output)
                 .build();
@@ -52,10 +51,6 @@ public class DefaultSpringMetrics<W extends SpringWork> {
                 .map(e -> new Tag(e.getKey(), e.getValue().apply(work)))
                 .collect(Collectors.toList());
         return b.getMetricSet(tags);
-    }
-
-    private void addOutstanding(MetricSet b, long count) {
-        b.getMetric("outstanding", LongMetric.class).add(count);
     }
 
     private void addAllDetails(MetricSet set, W work) {

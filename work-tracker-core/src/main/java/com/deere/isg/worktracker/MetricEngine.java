@@ -4,6 +4,7 @@ import org.joda.time.Instant;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -42,6 +43,8 @@ public interface MetricEngine<W extends Work> extends PostProcessor<W> {
     interface MetricSet extends MetricCollection {
         <M extends Metric> M getMetric(String key, Class<M> clazz);
         <M extends Metric> M getMetric(String key, Class<M> clazz, Consumer<M> setup);
+
+        <M extends Metric> Optional<M> findMetric(String key, Class<M> clazz);
         MetricSet getMetricSet(Tag... tags);
 
         default MetricSet getMetricSet(List<Tag> tags) {
@@ -112,6 +115,12 @@ public interface MetricEngine<W extends Work> extends PostProcessor<W> {
             super(key);
         }
 
+        void init(long missed) {
+            for (long i = 0; i < missed; i++) {
+                add(0);
+            }
+        }
+
         public void add(long value) {
             longSummaryStatistics.accept(value);
         }
@@ -128,8 +137,12 @@ public interface MetricEngine<W extends Work> extends PostProcessor<W> {
                     new NumberMetricReport("average", longSummaryStatistics.getAverage()),
                     new NumberMetricReport("max", longSummaryStatistics.getMax()),
                     new NumberMetricReport("min", longSummaryStatistics.getMin()),
-                    new NumberMetricReport("stdDev", longSummaryStatistics.getStandardDeviation())
+                    new NumberMetricReport("std_dev", longSummaryStatistics.getStandardDeviation())
             ).collect(Collectors.toList());
+        }
+
+        long getHits() {
+            return longSummaryStatistics.getCount();
         }
     }
 

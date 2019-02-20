@@ -30,7 +30,12 @@ import static org.mockito.Mockito.when;
 
 public class DefaultSpringMetricsTest {
 
+    private static final Random RANDOM = new Random();
     private SpringWorkFilter filter;
+
+    public static <T> T random(T... values) {
+        return values[RANDOM.nextInt(values.length)];
+    }
 
     @Before
     public void setup() throws ServletException {
@@ -69,7 +74,7 @@ public class DefaultSpringMetricsTest {
     @Test
     public void second() throws IOException, ServletException {
 //        Clock.freeze();
-        for(int i=0; i<50; i++) {
+        for (int i = 0; i < 50; i++) {
             runOnce();
         }
     }
@@ -106,11 +111,5 @@ public class DefaultSpringMetricsTest {
         JsonParser jp = new JsonParser();
         JsonElement je = jp.parse(ugly);
         return gson.toJson(je);
-    }
-
-    private static final Random RANDOM = new Random();
-
-    public static <T> T random(T... values) {
-        return values[RANDOM.nextInt(values.length)];
     }
 }

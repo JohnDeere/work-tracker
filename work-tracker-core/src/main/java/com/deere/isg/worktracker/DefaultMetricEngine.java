@@ -10,11 +10,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -22,6 +24,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DefaultMetricEngine<W extends Work> implements MetricEngine<W> {
+    public static final String OUTSTANDING_KEY = "outstanding";
+
     private Duration duration;
     private final Consumer<Bucket> output;
     private final BiConsumer<MetricSet, W> collector;
@@ -37,7 +41,7 @@ public class DefaultMetricEngine<W extends Work> implements MetricEngine<W> {
         this.output = output;
         this.collector = collector;
         this.outstandings = outstandings;
-        bucket = new MyBucket(this.duration);
+        this.bucket = new MyBucket(this.duration);
     }
 
     public static class Builder<W extends Work> {
@@ -45,7 +49,6 @@ public class DefaultMetricEngine<W extends Work> implements MetricEngine<W> {
         private Consumer<Bucket> output;
         private BiConsumer<MetricSet, W> collector;
         private Duration duration;
-        private BiConsumer<MetricSet, Outstanding<W>> outstandingConsumer;
         private List<TriConsumer<ScheduledExecutorService, Supplier<MetricSet>, Outstanding<W>>> outstandings
                 = new ArrayList<>();
 
@@ -63,18 +66,34 @@ public class DefaultMetricEngine<W extends Work> implements MetricEngine<W> {
             return this;
         }
 
-        public Builder<W> outstanding(BiConsumer<MetricSet, Outstanding<W>> sampler, Duration rate) {
+        public Builder<W> outstanding(BiFunction<MetricSet, Outstanding<W>, Map<MetricSet, Long>> sampler, Duration rate) {
             outstandings.add((executor, b, outstanding)->{
                 executor.scheduleAtFixedRate(()->{
-                    sampler.accept(b.get(), outstanding);
+                    LongMetric total = b.get().getMetric(OUTSTANDING_KEY, LongMetric.class);
+                    long missed = total.getHits();
+                    total.add(outstanding.stream().count());
+                    Map<MetricSet, Long> currentMap = sampler.apply(b.get(), outstanding);
+                    currentMap.forEach((b1, count) -> b1.getMetric(OUTSTANDING_KEY, LongMetric.class, m->m.init(missed)).add(count));
+                    correctForSparseData(b, currentMap);
                 }, 0, rate.getMillis(), TimeUnit.MILLISECONDS);
             });
 
             return this;
         }
+
         public MetricEngine<W> build() {
             return new DefaultMetricEngine<>(duration, output, collector, outstandings);
         }
+
+        private void correctForSparseData(Supplier<MetricSet> b, Map<MetricSet, Long> currentMap) {
+            b.get().getMetrics().stream()
+                    .filter(m -> !currentMap.containsKey(m))
+                    .filter(m -> m instanceof MetricEngine.MetricSet)
+                    .map(m -> ((MetricSet) m).findMetric(OUTSTANDING_KEY, LongMetric.class))
+                    .filter(Optional::isPresent)
+                    .forEach(m -> m.get().add(0));
+        }
+
     }
 
     interface TriConsumer<A,B,C> {
@@ -123,6 +142,11 @@ public class DefaultMetricEngine<W extends Work> implements MetricEngine<W> {
         @Override
         public <M extends Metric> M getMetric(String key, Class<M> clazz) {
             return (M)metrics.computeIfAbsent(key, k -> createMetric(key, clazz));
+        }
+
+        @Override
+        public <M extends Metric> Optional<M> findMetric(String key, Class<M> clazz) {
+            return Optional.ofNullable((M)metrics.get(key));
         }
 
         @Override
