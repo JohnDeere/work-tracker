@@ -3,6 +3,7 @@ package com.deere.isg.worktracker;
 import org.joda.time.Instant;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -42,6 +43,10 @@ public interface MetricEngine<W extends Work> extends PostProcessor<W> {
         <M extends Metric> M getMetric(String key, Class<M> clazz);
         <M extends Metric> M getMetric(String key, Class<M> clazz, Consumer<M> setup);
         MetricSet getMetricSet(Tag... tags);
+
+        default MetricSet getMetricSet(List<Tag> tags) {
+            return getMetricSet(tags.toArray(new Tag[0]));
+        }
     }
 
     interface NumberMetric extends Metric {

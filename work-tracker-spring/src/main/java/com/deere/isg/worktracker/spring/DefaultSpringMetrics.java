@@ -6,37 +6,52 @@ import com.deere.isg.worktracker.RootCauseTurboFilter;
 import org.joda.time.Duration;
 import org.slf4j.MDC;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.deere.isg.worktracker.MetricEngine.*;
 import static java.util.stream.Collectors.groupingBy;
 
 public class DefaultSpringMetrics<W extends SpringWork> {
+    private Map<String, Function<W, String>> tagDefinitions = new HashMap<>();
+
+    public DefaultSpringMetrics<W> tag(String name, Function<W, String> fn) {
+        tagDefinitions.put(name, fn);
+        return this;
+    }
 
     public MetricEngine<W> build(Consumer<Bucket> output) {
         return new DefaultMetricEngine.Builder<W>(Duration.standardSeconds(30))
                 .collector((b, work) -> {
                     b.getMetric("count", CountMetric.class).increment();
-                    MetricSet endpointSet = b.getMetricSet(new Tag("endpoint", work.getEndpoint()));
-                    addAllDetails(endpointSet, work);
-                    addAllDetails(b, work);
-//                    String clientKey = w.getClientKey();
-//                    if(clientKey != null) {
-//                        addAllDetails(w, endpointSet.getMetricSet("client_key", clientKey));
-//                    }
 
+                    if(!tagDefinitions.isEmpty()) {
+                        MetricSet endpointSet = getSubsetByTags(b, work);
+                        addAllDetails(endpointSet, work);
+                    }
+                    addAllDetails(b, work);
                 })
                 .outstanding((b, outstanding)->{
                     addOutstanding(b, outstanding.stream().count());
                     outstanding.stream()
-                            .collect(groupingBy(SpringWork::getEndpoint, Collectors.counting()))
-                            .forEach((k, v) -> addOutstanding(b.getMetricSet(new Tag("endpoint", k)), v));
+                            .collect(groupingBy(w->getSubsetByTags(b, w), Collectors.counting()))
+                            .forEach(this::addOutstanding);
                 }, Duration.standardSeconds(1))
 
                 .output(output)
                 .build();
 
+    }
+
+    private MetricSet getSubsetByTags(MetricSet b, W work) {
+        List<Tag> tags = tagDefinitions.entrySet().stream()
+                .map(e -> new Tag(e.getKey(), e.getValue().apply(work)))
+                .collect(Collectors.toList());
+        return b.getMetricSet(tags);
     }
 
     private void addOutstanding(MetricSet b, long count) {
