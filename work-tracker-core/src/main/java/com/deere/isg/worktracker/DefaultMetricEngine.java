@@ -16,7 +16,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DefaultMetricEngine<W extends Work> implements MetricEngine<W> {
@@ -143,8 +145,11 @@ public class DefaultMetricEngine<W extends Work> implements MetricEngine<W> {
         }
 
         @Override
-        public MetricSet getMetricSet(String key, Object value) {
-            MetricSet set = ((MyMetricList) metrics.computeIfAbsent(key, MyMetricList::new)).add(value);
+        public MetricSet getMetricSet(Tag... tags) {
+            if(tags == null || tags.length == 0) {
+                return this;
+            }
+            MetricSet set = ((MyMetricList) metrics.computeIfAbsent(makeKey(tags, Tag::getKey), MyMetricList::new)).add(tags);
             CountMetric countMetric = incrementCount(set);
             set.getMetric("percent", PercentageMetric.class,
                     (m)->m.with(countMetric, this.getMetric("count", CountMetric.class)));
@@ -163,16 +168,20 @@ public class DefaultMetricEngine<W extends Work> implements MetricEngine<W> {
         }
     }
 
+    private static <T> String makeKey(T[] items, Function<T, ?> fn) {
+        return Stream.of(items).map(fn).map(String::valueOf).collect(Collectors.joining("|"));
+    }
+
     private static class MyMetricList implements MetricList {
         private String key;
-        private Map<Object, MetricSet> metrics = new ConcurrentHashMap<>();
+        private Map<String, MetricSet> metrics = new ConcurrentHashMap<>();
 
         MyMetricList(String key) {
             this.key = key;
         }
 
-        public MetricSet add(Object value) {
-            return metrics.computeIfAbsent(value, v -> new MyMetricSet(new Tag(key, v)));
+        public MetricSet add(Tag... tags) {
+            return metrics.computeIfAbsent(makeKey(tags, Tag::getValue), v -> new MyMetricSet(tags));
         }
 
         @Override

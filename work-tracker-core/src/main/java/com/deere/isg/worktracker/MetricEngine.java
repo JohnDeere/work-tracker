@@ -41,7 +41,7 @@ public interface MetricEngine<W extends Work> extends PostProcessor<W> {
     interface MetricSet extends MetricCollection {
         <M extends Metric> M getMetric(String key, Class<M> clazz);
         <M extends Metric> M getMetric(String key, Class<M> clazz, Consumer<M> setup);
-        MetricSet getMetricSet(String key, Object value);
+        MetricSet getMetricSet(Tag... tags);
     }
 
     interface NumberMetric extends Metric {

@@ -18,7 +18,7 @@ public class DefaultSpringMetrics<W extends SpringWork> {
         return new DefaultMetricEngine.Builder<W>(Duration.standardSeconds(30))
                 .collector((b, work) -> {
                     b.getMetric("count", CountMetric.class).increment();
-                    MetricSet endpointSet = b.getMetricSet("endpoint", work.getEndpoint());
+                    MetricSet endpointSet = b.getMetricSet(new Tag("endpoint", work.getEndpoint()));
                     addAllDetails(endpointSet, work);
                     addAllDetails(b, work);
 //                    String clientKey = w.getClientKey();
@@ -31,7 +31,7 @@ public class DefaultSpringMetrics<W extends SpringWork> {
                     addOutstanding(b, outstanding.stream().count());
                     outstanding.stream()
                             .collect(groupingBy(SpringWork::getEndpoint, Collectors.counting()))
-                            .forEach((k, v) -> addOutstanding(b.getMetricSet("endpoint", k), v));
+                            .forEach((k, v) -> addOutstanding(b.getMetricSet(new Tag("endpoint", k)), v));
                 }, Duration.standardSeconds(1))
 
                 .output(output)
@@ -47,13 +47,13 @@ public class DefaultSpringMetrics<W extends SpringWork> {
         addDetails(set, work);
 
         work.getStatusCode().ifPresent(status->{
-            addDetails(set.getMetricSet("status", status), work);
+            addDetails(set.getMetricSet(new Tag("status", status)), work);
         });
 
         // unfortunately, the exception name does not get set in the Work's MDC.
         String exceptionName = MDC.get(RootCauseTurboFilter.FIELD_CAUSE_NAME);
         if(exceptionName != null) {
-            addDetails(set.getMetricSet("error", exceptionName), work);
+            addDetails(set.getMetricSet(new Tag("error", exceptionName)), work);
         }
     }
 
