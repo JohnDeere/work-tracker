@@ -36,6 +36,7 @@ public class DefaultSpringMetricsTest {
     public void setup() throws ServletException {
         MetricEngine<SpringWork> engine = new DefaultSpringMetrics<>()
                 .tag("endpoint", SpringWork::getEndpoint)
+                .tag("accept", SpringWork::getAcceptHeader)
                 .build(this::writeLog);
 
         filter = new SpringWorkFilter() {
