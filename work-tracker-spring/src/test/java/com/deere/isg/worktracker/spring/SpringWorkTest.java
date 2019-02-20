@@ -93,7 +93,7 @@ public class SpringWorkTest {
     }
 
     @Test
-    public void setupsEndpointForServlets() {
+    public void setupEndpointForServlets() {
         String uri = "/test/some/url";
         ServletEndpointRegistry.populate(uri);
         request.setRequestURI(uri);
