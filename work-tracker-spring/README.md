@@ -351,7 +351,7 @@ We provide a WorkHttpServlet that outputs all the outstanding work that are curr
 ```xml
 <servlet>
     <servlet-name>workHttpServlet</servlet-name>
-    <servlet-class>com.deere.isg.worktracker.servlet.WorkHttpServlet</servlet-class>
+    <servlet-class>com.deere.isg.worktracker.spring.SpringWorkHttpServlet</servlet-class>
 </servlet>
 <servlet-mapping>
     <servlet-name>workHttpServlet</servlet-name>
