@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 class ServletEndpointRegistry {
     private static EndpointTrie trie = new EndpointTrie();
 
-    public static void populate(ServletContext context) {
+    static void populate(ServletContext context) {
         if (context == null){
             return;
         }
@@ -32,12 +32,12 @@ class ServletEndpointRegistry {
                 .forEach((servletName, registration) -> addMappings(registration));
     }
 
-    public static boolean contains(String value){
-        return trie.isEqual(value);
-    }
-
     static void populate(String value){
         trie.add(value);
+    }
+
+    static boolean contains(String value){
+        return trie.isEqual(value);
     }
 
     static void clear(){
