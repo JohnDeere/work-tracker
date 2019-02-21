@@ -58,6 +58,7 @@ public class SpringWorkPostAuthFilterTest {
 
     @Before
     public void setUp() {
+        MDC.clear();
         Clock.freeze();
         request = new MockHttpServletRequest();
         response = new MockHttpServletResponse();
