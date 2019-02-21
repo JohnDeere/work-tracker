@@ -21,78 +21,48 @@ import javax.servlet.ServletRegistration;
 import java.util.concurrent.ConcurrentHashMap;
 
 class ServletEndpointRegistry {
-    private static EndpointTrie trie = new EndpointTrie();
+    private static ConcurrentHashMap.KeySetView<String, Boolean> map = ConcurrentHashMap.newKeySet();
 
     static void populate(ServletContext context) {
         if (context == null){
             return;
         }
 
-        context.getServletRegistrations()
-                .forEach((servletName, registration) -> addMappings(registration));
+        context.getServletRegistrations().values().forEach(ServletEndpointRegistry::addMappings);
     }
 
     static void populate(String value){
-        trie.add(value);
+        if (isInvalidEndpoint(value)) {
+            return;
+        }
+        map.add(value);
     }
 
     static boolean contains(String value){
-        return trie.isEqual(value);
+        if (value == null) {
+            return false;
+        }
+        return map.contains(value);
     }
 
     static void clear(){
-        trie = new EndpointTrie();
+        map.clear();
+    }
+
+    private static boolean isInvalidEndpoint(String value) {
+        return value == null || isRoot(value) || !isEndpoint(value);
+    }
+
+    private static boolean isRoot(String value) {
+        return value.trim().equals("/");
+    }
+
+    private static boolean isEndpoint(String value) {
+        return value.startsWith("/");
     }
 
     private static void addMappings(ServletRegistration registration) {
         registration.getMappings().forEach(ServletEndpointRegistry::populate);
-    }
-
-    private static class EndpointTrie{
-        private ConcurrentHashMap<Character, EndpointTrie> map = new ConcurrentHashMap<>();
-        private boolean isEnd = false;
-
-        void add(String value){
-            if (isInvalidEndpoint(value)){
-                return;
-            }
-
-            EndpointTrie current = this;
-            for (char ch: value.toCharArray()){
-                if (!current.map.containsKey(ch)) {
-                    current.map.put(ch, new EndpointTrie());
-                }
-                current = current.map.get(ch);
-            }
-            current.isEnd = true;
-        }
-
-        boolean isEqual(String value){
-            if (value == null){
-                return false;
-            }
-            char[] characters = value.toCharArray();
-            EndpointTrie current = this;
-            for (char ch: characters){
-                if (!current.map.containsKey(ch)){
-                    return false;
-                }
-                current = current.map.get(ch);
-            }
-            return current.isEnd;
-        }
-
-        private boolean isInvalidEndpoint(String value) {
-            return value == null || isRoot(value) || !isEndpoint(value);
-        }
-
-        private boolean isRoot(String value) {
-            return value.trim().equals("/");
-        }
-
-        private boolean isEndpoint(String value) {
-            return value.startsWith("/");
-        }
     }
 
 }
