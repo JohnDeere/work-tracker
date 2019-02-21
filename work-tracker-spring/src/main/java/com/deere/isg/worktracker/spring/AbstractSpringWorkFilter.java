@@ -19,6 +19,8 @@ package com.deere.isg.worktracker.spring;
 
 import com.deere.isg.worktracker.servlet.AbstractHttpWorkFilter;
 
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 
@@ -38,6 +40,12 @@ public abstract class AbstractSpringWorkFilter<W extends SpringWork>
 
     public AbstractSpringWorkFilter() {
         initializeKeyCleanser();
+    }
+
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+        super.init(filterConfig);
+        ServletEndpointRegistry.populate(filterConfig.getServletContext());
     }
 
     @Override
@@ -62,5 +70,8 @@ public abstract class AbstractSpringWorkFilter<W extends SpringWork>
     @Override
     protected void doStartLog(W payload, HttpServletRequest httpRequest) {
         // Delaying start log for spring until user and endpoint are available from Spring Interceptors
+        if (ServletEndpointRegistry.contains(httpRequest.getRequestURI())){
+            super.doStartLog(payload, httpRequest);
+        }
     }
 }

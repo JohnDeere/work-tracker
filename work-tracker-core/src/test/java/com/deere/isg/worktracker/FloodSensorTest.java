@@ -16,7 +16,9 @@
 
 package com.deere.isg.worktracker;
 
+import com.deere.clock.Clock;
 import net.logstash.logback.argument.StructuredArguments;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,10 +55,21 @@ public class FloodSensorTest {
 
     @Before
     public void setUp() {
+        Clock.freeze();
         floodSensor = new MockFloodSensor(outstanding);
         floodSensor.setLogger(logger);
 
         setStream(createMockWorkList(LIMIT_EQUAL));
+        moveTimeSoElapsedGreaterThanZero();
+    }
+
+    private void moveTimeSoElapsedGreaterThanZero() {
+        Clock.freeze(Clock.now().plusMillis(1));
+    }
+
+    @After
+    public void tearDown() {
+        Clock.clear();
     }
 
     @Test
@@ -193,6 +206,7 @@ public class FloodSensorTest {
 
     private void setSameUserStream() {
         setStream(createSameUserMockWork(LIMIT_EQUAL, TEST_USER));
+        moveTimeSoElapsedGreaterThanZero();
     }
 
     private Predicate<MockWork> predicate(boolean value) {

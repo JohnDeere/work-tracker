@@ -24,12 +24,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.MDC;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
@@ -40,8 +43,10 @@ import java.util.Map;
 
 import static com.deere.isg.worktracker.servlet.HttpWork.PATH;
 import static com.deere.isg.worktracker.spring.SpringWork.ENDPOINT;
+import static com.deere.isg.worktracker.spring.TestServletContext.ENDPOINT_1;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.*;
 import static org.springframework.web.servlet.HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -52,14 +57,18 @@ public class AbstractSpringWorkFilterTest {
     private OutstandingWork<?> outstanding;
     @Mock
     private WorkLogger workLogger;
+    @Mock
+    private FilterChain chain;
     private MockSpringWorkFilter filter;
     private HttpServletResponse response;
-    private HttpServletRequest request;
+    private MockHttpServletRequest request;
+    private OutstandingWork<SpringWork> outstandingWork;
 
     @Before
     public void setUp() {
         Clock.freeze();
 
+        outstandingWork = new OutstandingWork<>();
         filter = new MockSpringWorkFilter();
         request = new MockHttpServletRequest();
         response = new MockHttpServletResponse();
@@ -68,6 +77,22 @@ public class AbstractSpringWorkFilterTest {
     @After
     public void tearDown() {
         Clock.clear();
+        ServletEndpointRegistry.clear();
+    }
+
+    @Test
+    public void hasServletEndpointsInRegistry() throws Exception {
+        TestServletContext sc = new TestServletContext();
+        FilterConfig config = mock(FilterConfig.class);
+        when(config.getServletContext()).thenReturn(sc);
+        request.setRequestURI(ENDPOINT_1);
+        filter.init(config);
+        filter.setOutstanding(outstandingWork);
+        assertThat(ServletEndpointRegistry.contains(ENDPOINT_1), is(true));
+
+        filter.doFilter(request, response, chain);
+        verify(chain).doFilter(ArgumentMatchers.any(HttpServletRequest.class), eq(response));
+        verify(workLogger).logStart(ArgumentMatchers.any(HttpServletRequest.class), eq(filter.getSpringWork()));
     }
 
     @Test
@@ -80,6 +105,7 @@ public class AbstractSpringWorkFilterTest {
         });
 
         assertThat(MDC.getCopyOfContextMap(), nullValue());
+        verify(workLogger, never()).logStart(ArgumentMatchers.any(HttpServletRequest.class), eq(filter.getSpringWork()));
     }
 
     @Test
@@ -98,6 +124,8 @@ public class AbstractSpringWorkFilterTest {
 
     private class MockSpringWorkFilter extends AbstractSpringWorkFilter<SpringWork> {
 
+        private SpringWork springWork;
+
         public MockSpringWorkFilter() {
             setLogger(workLogger);
             setOutstanding(outstanding);
@@ -105,7 +133,17 @@ public class AbstractSpringWorkFilterTest {
 
         @Override
         protected SpringWork createWork(ServletRequest request) {
-            return new SpringWork(request);
+            springWork = new SpringWork(request);
+            return springWork;
+        }
+
+        public SpringWork getSpringWork() {
+            return springWork;
+        }
+
+        @Override
+        protected void setOutstanding(OutstandingWork<?> outstanding) {
+            super.setOutstanding(outstanding);
         }
     }
 }

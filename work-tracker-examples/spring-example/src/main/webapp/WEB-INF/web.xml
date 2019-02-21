@@ -91,7 +91,7 @@ limitations under the License.
 
     <servlet>
         <servlet-name>workHttpServlet</servlet-name>
-        <servlet-class>com.deere.isg.worktracker.servlet.WorkHttpServlet</servlet-class>
+        <servlet-class>com.deere.isg.worktracker.spring.SpringWorkHttpServlet</servlet-class>
     </servlet>
 
     <!-- servlet mappings -->

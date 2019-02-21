@@ -55,7 +55,7 @@ public class WorkHttpServletTest {
     private static final WorkHttpServlet.HtmlPage PAGE = new WorkHttpServlet.HtmlPage();
 
     private static final List<HttpWork> TEST_WORKS = createWorkList(10);
-    private static final List<WorkSummary> WORK_SUMMARIES = TEST_WORKS.stream()
+    private static final List<WorkSummary<? extends HttpWork>> WORK_SUMMARIES = TEST_WORKS.stream()
             .map(WorkSummary::new)
             .collect(Collectors.toList());
 
@@ -207,9 +207,9 @@ public class WorkHttpServletTest {
 
     @Test
     public void setsRowToRedForZombie() {
-        WorkSummary zombieSummary = new WorkSummary(null);
+        WorkSummary<HttpWork> zombieSummary = new WorkSummary<>(null);
         zombieSummary.setZombie(true);
-        List<WorkSummary> zombieSummaries = Collections.singletonList(zombieSummary);
+        List<WorkSummary<? extends HttpWork>> zombieSummaries = Collections.singletonList(zombieSummary);
 
         String html = PAGE.render(zombieSummaries);
         assertThat(html, containsString("<tr class='red'>"));
@@ -217,8 +217,8 @@ public class WorkHttpServletTest {
 
     @Test
     public void setsRowToNeutralForNonZombie() {
-        WorkSummary zombieSummary = new WorkSummary(null);
-        List<WorkSummary> zombieSummaries = Collections.singletonList(zombieSummary);
+        WorkSummary<HttpWork> zombieSummary = new WorkSummary<>(null);
+        List<WorkSummary<? extends HttpWork>> zombieSummaries = Collections.singletonList(zombieSummary);
 
         String html = PAGE.render(zombieSummaries);
         assertThat(html, containsString("<tr>"));

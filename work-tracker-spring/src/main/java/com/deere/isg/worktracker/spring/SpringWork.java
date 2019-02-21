@@ -77,7 +77,6 @@ public class SpringWork extends HttpWork {
 
     protected void setRequestURLPattern(HttpServletRequest request, KeyCleanser cleanser) {
         setHttpMethod(request.getMethod());
-
         Map<String, String> pathVariables = getPathVariablesOrElseEmpty(request);
         String requestUri = preCleanUri(request);
         final String originalUri = requestUri;
@@ -95,6 +94,8 @@ public class SpringWork extends HttpWork {
                 requestUri = requestUri.replaceAll(valueRegex, "/{" + key + "}/");
             }
             this.requestURLPattern = postCleanUri(requestUri);
+        }
+        if (ServletEndpointRegistry.contains(request.getRequestURI())){
             setEndpoint();
         }
     }
@@ -144,6 +145,7 @@ public class SpringWork extends HttpWork {
                 super.setAttribute(name, o);
                 if (HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE.equals(name)) {
                     setRequestURLPattern(request, keyCleanser);
+                    setEndpoint();
                 }
             }
         };

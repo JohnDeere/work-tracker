@@ -55,7 +55,7 @@ public class WorkHttpServlet extends HttpServlet {
     public static final String TEMPLATE_PATH = "templatePath";
     public static final String WORK_LIST = "work_list";
 
-    private List<WorkSummary> workSummaries;
+    private List<WorkSummary<? extends HttpWork>> workSummaries;
     private String templatePath;
     private Outstanding<? extends HttpWork> outstanding;
     private HtmlPage page;
@@ -80,7 +80,7 @@ public class WorkHttpServlet extends HttpServlet {
         ServletContext context = getServletConfig().getServletContext();
         response.setContentType("text/html;charset=UTF-8");
         if (context != null && outstanding != null) {
-            workSummaries = outstanding.stream().map(WorkSummary::new).collect(toList());
+            workSummaries = mapOutstandingToSummaryList();
             request.setAttribute(WORK_LIST, workSummaries);
             if (templatePath != null) {
                 context.getRequestDispatcher(templatePath).forward(request, response);
@@ -92,6 +92,14 @@ public class WorkHttpServlet extends HttpServlet {
         }
     }
 
+    protected List<WorkSummary<? extends HttpWork>> mapOutstandingToSummaryList() {
+        return getOutstanding().stream().map(WorkSummary::new).collect(toList());
+    }
+
+    protected Outstanding<? extends HttpWork> getOutstanding() {
+        return outstanding;
+    }
+
     public String getTemplatePath() {
         return templatePath;
     }
@@ -100,7 +108,7 @@ public class WorkHttpServlet extends HttpServlet {
         this.templatePath = templatePath;
     }
 
-    public List<WorkSummary> getWorkSummaries() {
+    public List<WorkSummary<? extends HttpWork>> getWorkSummaries() {
         return workSummaries;
     }
 
@@ -140,7 +148,7 @@ public class WorkHttpServlet extends HttpServlet {
         private static final String TABLE_END = "</table>";
         private static final String BODY_END = "</body>" + "</html>";
 
-        String render(List<WorkSummary> workSummaries) {
+        String render(List<WorkSummary<? extends HttpWork>> workSummaries) {
             StringBuilder builder = new StringBuilder();
             builder.append(HEAD)
                     .append(BODY_START)
