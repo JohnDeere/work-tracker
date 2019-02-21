@@ -3,7 +3,7 @@
     <parent>
         <groupId>com.deere.isg.work-tracker.examples</groupId>
         <artifactId>work-tracker-examples</artifactId>
-        <version>1.0.0-rc10-SNAPSHOT</version>
+        <version>1.0.0-rc10</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
