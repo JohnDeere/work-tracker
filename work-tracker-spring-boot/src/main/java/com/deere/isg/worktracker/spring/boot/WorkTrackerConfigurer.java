@@ -25,7 +25,6 @@ import com.deere.isg.worktracker.servlet.HttpFloodSensor;
 import com.deere.isg.worktracker.servlet.RequestBouncerFilter;
 import com.deere.isg.worktracker.servlet.WorkConfig;
 import com.deere.isg.worktracker.servlet.WorkContextListener;
-import com.deere.isg.worktracker.servlet.WorkHttpServlet;
 import com.deere.isg.worktracker.servlet.WorkLogger;
 import com.deere.isg.worktracker.servlet.ZombieFilter;
 import com.deere.isg.worktracker.spring.KeyCleanser;
@@ -33,6 +32,7 @@ import com.deere.isg.worktracker.spring.PathMetadataCleanser;
 import com.deere.isg.worktracker.spring.SpringLoggerHandlerInterceptor;
 import com.deere.isg.worktracker.spring.SpringRequestBouncerHandlerInterceptor;
 import com.deere.isg.worktracker.spring.SpringWork;
+import com.deere.isg.worktracker.spring.SpringWorkHttpServlet;
 import com.deere.isg.worktracker.spring.SpringWorkPostAuthFilter;
 import com.deere.isg.worktracker.spring.ZombieExceptionHandler;
 import org.slf4j.Logger;
@@ -184,9 +184,9 @@ public abstract class WorkTrackerConfigurer<W extends SpringWork> extends WebMvc
     }
 
     @Bean
-    @ConditionalOnMissingBean(WorkHttpServlet.class)
+    @ConditionalOnMissingBean(SpringWorkHttpServlet.class)
     public ServletRegistrationBean workHttpServlet() {
-        return new ServletRegistrationBean(new WorkHttpServlet(), getOutstandingPath());
+        return new ServletRegistrationBean(new SpringWorkHttpServlet(), getOutstandingPath());
     }
 
     @Bean
