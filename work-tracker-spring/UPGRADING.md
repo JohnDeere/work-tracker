@@ -17,4 +17,4 @@ with
    </servlet>
 ```
 
-in your project's web.com file.
+in your project's web.xml file.
