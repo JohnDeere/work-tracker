@@ -33,6 +33,7 @@ import java.util.regex.Pattern;
 
 import static com.deere.isg.worktracker.StringUtils.camelToSnakeCase;
 import static com.deere.isg.worktracker.StringUtils.isNotBlank;
+import static java.util.regex.Pattern.quote;
 
 /**
  * By default, when adding a standardMap to this cleanser,
@@ -196,9 +197,9 @@ public class PathMetadataCleanser implements KeyCleanser {
         return key;
     }
 
-    private String buildContextRegex(final String key, final String valueAppender) {
-        String pathValue = valueAppender.startsWith("/") ? valueAppender : "/" + valueAppender;
-        return "/([^/]+?)(?:s?-?/?" + key + ")?s?" + pathValue;
+    private String buildContextRegex(final String key, final String value) {
+        String pathValue = quote(value.startsWith("/") ? value.substring(1) : value);
+        return "/([^/]+?)(?:s?-?/?" + key + ")?s?/" + pathValue;
     }
 
     private void putIfAbsent(Map<String, String> map, String key, String value) {

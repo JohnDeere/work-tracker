@@ -150,6 +150,13 @@ public class PathMetadataCleanserTest {
     }
 
     @Test
+    public void handlesSpecialCharactersInValue() {
+        String key = metadataCleanser.cleanse(LOWER_ID, "\\.[]{}()<>*+-=?^$|", "/tests/\\.[]{}()<>*+-=?^$|");
+
+        assertThat(key, is(TEST_ID));
+    }
+
+    @Test
     public void upperCaseKey() {
         String key = metadataCleanser.cleanse("ID", "some id", "/tests/some id/");
 
