@@ -272,6 +272,7 @@ public class SpringWorkTest {
         work.setRequestURLPattern(request, keyCleanser);
         triggerEndpointWithSpringAttributes(pathMap);
         assertThat(MDC.get("user"), nullValue());
+        assertThat(MDC.getCopyOfContextMap().keySet().contains("user"), is(false));
         assertThat(MDC.get(ENDPOINT), is("GET /users/(null)"));
     }
 
