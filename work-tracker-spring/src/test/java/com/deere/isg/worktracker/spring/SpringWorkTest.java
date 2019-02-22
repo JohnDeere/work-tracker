@@ -268,11 +268,11 @@ public class SpringWorkTest {
         work.setupSpringVsFilterOrderingWorkaround(request, keyCleanser);
         Map<String, String> pathMap = new HashMap<>();
         pathMap.put("User", null);
-        setUriTemplateAttribute("/users/SomePerson", pathMap);
+        setUriTemplateAttribute("/users/(null)", pathMap);
         work.setRequestURLPattern(request, keyCleanser);
         triggerEndpointWithSpringAttributes(pathMap);
         assertThat(MDC.get("user"), nullValue());
-        assertThat(MDC.get(ENDPOINT), is("GET /users/SomePerson"));
+        assertThat(MDC.get(ENDPOINT), is("GET /users/(null)"));
     }
 
     private void triggerEndpointWithSpringAttributes(Map<String, String> pathMap) {
