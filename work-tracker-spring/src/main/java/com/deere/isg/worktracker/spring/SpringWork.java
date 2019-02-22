@@ -29,6 +29,7 @@ import java.util.Optional;
 
 import static com.deere.isg.worktracker.StringUtils.replaceNullWithEmpty;
 import static com.deere.isg.worktracker.servlet.HttpUtils.decodeUrl;
+import static java.util.regex.Pattern.quote;
 import static org.springframework.web.servlet.HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 
 /**
@@ -113,7 +114,7 @@ public class SpringWork extends HttpWork {
     }
 
     protected String buildValueRegex(String value) {
-        return "/" + WHITE_SPACE_REGEX + value + WHITE_SPACE_REGEX + "/";
+        return "/" + WHITE_SPACE_REGEX + quote(value) + WHITE_SPACE_REGEX + "/";
     }
 
     protected String postCleanUri(String requestUri) {
