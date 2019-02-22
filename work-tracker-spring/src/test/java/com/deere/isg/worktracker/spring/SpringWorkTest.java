@@ -83,6 +83,14 @@ public class SpringWorkTest {
     }
 
     @Test
+    public void setRequestURLPatternHandlesSpecialCharacters() {
+        setupPatternRequest("/org/  {some org}   /user/  {some user} ",
+                getPathMap("{some org}", "{some user}"));
+
+        assertThat(work.getRequestURLPattern(), is(TEST_ORG_VALUE));
+    }
+
+    @Test
     public void stripContextPath() {
         request.setContextPath("/jd");
         request.setRequestURI("/jd/org/some org/user/ some user ");
@@ -283,9 +291,13 @@ public class SpringWorkTest {
     }
 
     private Map<String, String> getPathMap() {
+        return getPathMap(SOME_ORG, SOME_USER);
+    }
+
+    private Map<String, String> getPathMap(String someOrg, String someUser) {
         Map<String, String> keyValue = new HashMap<>();
-        keyValue.put(ORG, SOME_ORG);
-        keyValue.put(USER, SOME_USER);
+        keyValue.put(ORG, someOrg);
+        keyValue.put(USER, someUser);
         return keyValue;
     }
 
