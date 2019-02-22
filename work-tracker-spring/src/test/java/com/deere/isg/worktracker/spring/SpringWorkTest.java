@@ -262,6 +262,19 @@ public class SpringWorkTest {
         assertThat(MDC.get(ENDPOINT), is("GET /users/{user}"));
     }
 
+
+    @Test
+    public void cleansedKeyUsedWithNullValueInEndpoint() {
+        work.setupSpringVsFilterOrderingWorkaround(request, keyCleanser);
+        Map<String, String> pathMap = new HashMap<>();
+        pathMap.put("User", null);
+        setUriTemplateAttribute("/users/SomePerson", pathMap);
+        work.setRequestURLPattern(request, keyCleanser);
+        triggerEndpointWithSpringAttributes(pathMap);
+        assertThat(MDC.get("user"), nullValue());
+        assertThat(MDC.get(ENDPOINT), is("GET /users/SomePerson"));
+    }
+
     private void triggerEndpointWithSpringAttributes(Map<String, String> pathMap) {
         HttpServletRequest springRequest = work.setupSpringVsFilterOrderingWorkaround(request, keyCleanser);
         springRequest.setAttribute(URI_TEMPLATE_VARIABLES_ATTRIBUTE, pathMap);

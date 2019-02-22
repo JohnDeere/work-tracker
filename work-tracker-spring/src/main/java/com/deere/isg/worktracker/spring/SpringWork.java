@@ -114,7 +114,11 @@ public class SpringWork extends HttpWork {
     }
 
     protected String buildValueRegex(String value) {
-        return "/" + WHITE_SPACE_REGEX + quote(value) + WHITE_SPACE_REGEX + "/";
+        return "/" + WHITE_SPACE_REGEX + quotePattern(value) + WHITE_SPACE_REGEX + "/";
+    }
+
+    private String quotePattern(String value) {
+        return value == null ? "" : quote(value);
     }
 
     protected String postCleanUri(String requestUri) {
