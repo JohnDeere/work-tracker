@@ -115,7 +115,7 @@ public abstract class Work {
 
     protected void validateKey(String key) throws IllegalArgumentException {
         if (isNotSnakeCase(key)) {
-            throw new IllegalArgumentException("Key should be in snake_case and cannot be null");
+            throw new IllegalArgumentException("Key "+key+" should be in snake_case and cannot be null");
         }
     }
 
