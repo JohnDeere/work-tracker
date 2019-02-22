@@ -95,9 +95,7 @@ public abstract class Work {
      * @throws IllegalArgumentException if the key is null or not in snake_case.
      */
     public String addToMDC(String key, String value) {
-        if (isNotSnakeCase(key)) {
-            throw new IllegalArgumentException("Key should be in snake_case and cannot be null");
-        }
+        validateKey(key);
 
         if (value != null) {
             String trimKey = key.trim();
@@ -113,6 +111,12 @@ public abstract class Work {
             }
         }
         return value;
+    }
+
+    protected void validateKey(String key) throws IllegalArgumentException {
+        if (isNotSnakeCase(key)) {
+            throw new IllegalArgumentException("Key should be in snake_case and cannot be null");
+        }
     }
 
     /**

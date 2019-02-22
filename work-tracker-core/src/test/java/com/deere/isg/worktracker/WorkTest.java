@@ -176,6 +176,33 @@ public class WorkTest {
         assertThat(MDC.get(SOME_KEY), is(SOME_VALUE));
     }
 
+    @Test
+    public void mayOverrideValidation() {
+        work = new MockWork() {
+            @Override
+            protected void validateKey(String key) {
+                if(!(REQUEST_ID.equals(key) || THREAD_NAME.equals(key))) {
+                    assertThat(key, is("bad.key"));
+                }
+            }
+        };
+
+        work.addToMDC("bad.key", SOME_VALUE);
+        assertThat(MDC.get("bad.key"), is(SOME_VALUE));
+    }
+
+    @Test(expected = TestableIllegalArgumentException.class)
+    public void mayOverrideValidationAndValidateDifferently() {
+        work = new MockWork() {
+            @Override
+            protected void validateKey(String key) {
+                throw new TestableIllegalArgumentException(key);
+            }
+        };
+
+        work.addToMDC("bad.key", SOME_VALUE);
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void throwsErrorForNonSnakeCase() {
         work.addToMDC(NON_SNAKE_CASE_KEY, SOME_VALUE);
@@ -282,6 +309,12 @@ public class WorkTest {
         assertThat(endInfo, hasItem(keyValue(ZOMBIE, false)));
         assertThat(endInfo, hasItem(keyValue(ELAPSED_MS, work.getElapsedMillis())));
         assertThat(endInfo, hasItem(keyValue("time_interval", end)));
+    }
+
+    private static class TestableIllegalArgumentException extends IllegalArgumentException {
+        public TestableIllegalArgumentException(String key) {
+            super(key);
+        }
     }
 
     private class HelperThread extends Thread {
