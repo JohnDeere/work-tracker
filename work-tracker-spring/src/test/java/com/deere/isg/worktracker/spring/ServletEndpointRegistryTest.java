@@ -20,6 +20,7 @@ import org.junit.After;
 import org.junit.Test;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -51,7 +52,8 @@ public class ServletEndpointRegistryTest {
         ServletEndpointRegistry.populate("*.jsp");
         ServletEndpointRegistry.populate("something");
 
-        assertThat(ServletEndpointRegistry.contains(null), is(false));
+        assertThat(ServletEndpointRegistry.contains((HttpServletRequest) null), is(false));
+        assertThat(ServletEndpointRegistry.contains((String) null), is(false));
         assertThat(ServletEndpointRegistry.contains("/"), is(false));
         assertThat(ServletEndpointRegistry.contains("*.jsp"), is(false));
         assertThat(ServletEndpointRegistry.contains("something"), is(false));

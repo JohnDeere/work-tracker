@@ -86,6 +86,7 @@ public class AbstractSpringWorkFilterTest {
         FilterConfig config = mock(FilterConfig.class);
         when(config.getServletContext()).thenReturn(sc);
         request.setRequestURI(ENDPOINT_1);
+        request.setServletPath(ENDPOINT_1);
         filter.init(config);
         filter.setOutstanding(outstandingWork);
         assertThat(ServletEndpointRegistry.contains(ENDPOINT_1), is(true));

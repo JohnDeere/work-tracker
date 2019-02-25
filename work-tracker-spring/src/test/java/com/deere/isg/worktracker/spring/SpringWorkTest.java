@@ -105,6 +105,8 @@ public class SpringWorkTest {
         String uri = "/test/some/url";
         ServletEndpointRegistry.populate(uri);
         request.setRequestURI(uri);
+        request.setContextPath("/someContext");
+        request.setServletPath(uri);
         request.setMethod("GET");
         work.setRequestURLPattern(request, null);
 
