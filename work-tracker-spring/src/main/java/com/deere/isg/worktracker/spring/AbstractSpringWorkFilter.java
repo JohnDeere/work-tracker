@@ -70,7 +70,7 @@ public abstract class AbstractSpringWorkFilter<W extends SpringWork>
     @Override
     protected void doStartLog(W payload, HttpServletRequest httpRequest) {
         // Delaying start log for spring until user and endpoint are available from Spring Interceptors
-        if (ServletEndpointRegistry.contains(httpRequest.getRequestURI())){
+        if (ServletEndpointRegistry.contains(httpRequest)){
             super.doStartLog(payload, httpRequest);
         }
     }

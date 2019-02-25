@@ -18,6 +18,7 @@ package com.deere.isg.worktracker.spring;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRegistration;
+import javax.servlet.http.HttpServletRequest;
 import java.util.concurrent.ConcurrentHashMap;
 
 class ServletEndpointRegistry {
@@ -36,6 +37,13 @@ class ServletEndpointRegistry {
             return;
         }
         map.add(value);
+    }
+
+    static boolean contains(HttpServletRequest request){
+        if (request == null){
+            return false;
+        }
+        return contains(request.getServletPath());
     }
 
     static boolean contains(String value){

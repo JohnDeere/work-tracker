@@ -95,7 +95,7 @@ public class SpringWork extends HttpWork {
             }
             this.requestURLPattern = postCleanUri(requestUri);
         }
-        if (ServletEndpointRegistry.contains(request.getRequestURI())) {
+        if (ServletEndpointRegistry.contains(request)) {
             setEndpoint();
         }
     }
