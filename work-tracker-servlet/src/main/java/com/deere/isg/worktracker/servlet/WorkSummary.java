@@ -107,7 +107,9 @@ public class WorkSummary<W extends HttpWork> {
     }
 
     public void setAcceptHeader(String acceptHeader) {
-        this.acceptHeader = acceptHeader;
+        if (acceptHeader != null){
+            this.acceptHeader = acceptHeader.replaceAll(";\\s*", "; ");
+        }
     }
 
     public String getElapsedMillis() {
