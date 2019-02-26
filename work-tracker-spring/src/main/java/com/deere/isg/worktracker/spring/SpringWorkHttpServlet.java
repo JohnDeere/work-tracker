@@ -39,7 +39,12 @@ public class SpringWorkHttpServlet extends WorkHttpServlet {
     private class SpringWorkSummary extends WorkSummary<SpringWork> {
         public SpringWorkSummary(SpringWork work) {
             super(work);
-            setService(work.getEndpoint());
+            setService(getEndpoint(work));
+        }
+
+        private String getEndpoint(SpringWork work) {
+            String endpoint = work.getEndpoint();
+            return endpoint == null ? "" : endpoint;
         }
     }
 }
