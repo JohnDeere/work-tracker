@@ -36,4 +36,11 @@ public class WorkSummaryTest {
         workSummary.setElapsedMillis("1");
         assertThat(workSummary.getElapsedMillis(), is("1 ms"));
     }
+
+    @Test
+    public void addsSpaceToAcceptHeader() {
+        workSummary.setAcceptHeader("text/html,application/xml;  q=0.9,image/webp,image/apng,*/*;q=0.8");
+
+        assertThat(workSummary.getAcceptHeader(), is("text/html,application/xml; q=0.9,image/webp,image/apng,*/*; q=0.8"));
+    }
 }
