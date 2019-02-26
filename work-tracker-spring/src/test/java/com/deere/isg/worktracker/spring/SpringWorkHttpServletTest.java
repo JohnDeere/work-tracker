@@ -38,4 +38,24 @@ public class SpringWorkHttpServletTest {
         assertThat(workSummaries.get(0).getService(), is(""));
 
     }
+
+    @Test
+    public void nonEmptyEndpoint() throws ServletException {
+        SpringWork work = mock(SpringWork.class);
+        when(work.getEndpoint()).thenReturn("/test/url");
+        OutstandingWork<SpringWork> outstandingWork = mock(OutstandingWork.class);
+        when(outstandingWork.stream()).thenReturn(Stream.of(work));
+        ServletConfig config = mock(ServletConfig.class);
+        ServletContext context = mock(ServletContext.class);
+        when(config.getServletContext()).thenReturn(context);
+        when(context.getAttribute(OUTSTANDING_ATTR)).thenReturn(outstandingWork);
+
+        SpringWorkHttpServlet servlet = new SpringWorkHttpServlet();
+        servlet.init(config);
+
+        List<WorkSummary<? extends HttpWork>> workSummaries = servlet.mapOutstandingToSummaryList();
+        assertThat(workSummaries, hasSize(1));
+        assertThat(workSummaries.get(0).getService(), is("/test/url"));
+
+    }
 }
