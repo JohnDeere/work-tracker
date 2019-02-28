@@ -27,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -94,6 +95,17 @@ public class FloodSensorTest {
         Optional<Integer> retryAfter = floodSensor.shouldRetryLater(work, predicate(true), LIMIT_UNDER, USER, MESSAGE);
         assertThat(retryAfter.isPresent(), is(true));
         assertThat(retryAfter.get(), is(1));
+
+        verify(logger).warn(eq(MESSAGE), (Object[]) any());
+    }
+
+    @Test
+    public void shouldRetryLaterReturnIntegerOpIfExceedsLimitWithMax5Minutes() {
+        MockWork work = new MockWork(null);
+        Clock.freeze(Clock.now().plusMillis((int) Duration.ofMinutes(10).toMillis()));
+        Optional<Integer> retryAfter = floodSensor.shouldRetryLater(work, predicate(true), LIMIT_UNDER, USER, MESSAGE);
+        assertThat(retryAfter.isPresent(), is(true));
+        assertThat(retryAfter.get(), is(300));
 
         verify(logger).warn(eq(MESSAGE), (Object[]) any());
     }
