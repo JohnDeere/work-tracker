@@ -22,7 +22,6 @@ import net.logstash.logback.argument.StructuredArguments;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -39,7 +38,6 @@ import static com.deere.isg.worktracker.StringUtils.isNotBlank;
  * @param <W> The type passed should extend {@link Work}
  */
 public abstract class FloodSensor<W extends Work> {
-    private static final int MAX_RETRY_MILLIS = (int) Duration.ofMinutes(5).getSeconds();
     private final OutstandingWork<W> outstanding;
     private static Logger logger = LoggerFactory.getLogger(FloodSensor.class);
 
@@ -60,7 +58,7 @@ public abstract class FloodSensor<W extends Work> {
         if (exceeds(limit, predicate) && notCheckedYet) {
             return likeThingsStream(predicate)
                     .findFirst()
-                    .map(oldestSimilar -> getRetryAfter(oldestSimilar, typeName, message));
+                    .map(oldestSimilar -> getRetryAfter(oldestSimilar, incoming.getMaxTime(), typeName, message));
         }
         return Optional.empty();
     }
@@ -89,16 +87,16 @@ public abstract class FloodSensor<W extends Work> {
         return likeThingsStream(predicate).limit(limit + 1).count() > limit;
     }
 
-    private int getRetryAfter(W oldestSimilar, String typeName, String message) {
+    private int getRetryAfter(W oldestSimilar, long maxTime, String typeName, String message) {
         long timeInMillis = oldestSimilar.getElapsedMillis();
-        int retry = calculateRetryAfterFromMillis(timeInMillis);
-        int retryAfterSeconds = Math.min(MAX_RETRY_MILLIS, retry);
+        int retryAfterSeconds = calculateRetryAfterFromMillis(maxTime, timeInMillis);
         logFloodDetected(typeName, message, retryAfterSeconds);
         return retryAfterSeconds;
     }
 
-    private int calculateRetryAfterFromMillis(long timeInMillis) {
-        return (int) Math.ceil(timeInMillis / 1000.0);
+    private int calculateRetryAfterFromMillis(long maxTime, long timeInMillis) {
+        long minTime = Math.min(maxTime, timeInMillis);
+        return (int) Math.ceil(minTime / 1000.0);
     }
 
     protected void logFloodDetected(String typeName, String message, int retryAfterSeconds) {
