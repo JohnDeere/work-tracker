@@ -118,7 +118,7 @@ public class WorkHttpServlet extends HttpServlet {
                 "h1 { text-align: center; }" +
                 "table { width: 100%; }" +
                 "table, th, td { border: 1px solid black; border-collapse: collapse; }" +
-                "th, td { padding: 5px; text-align: center; }" +
+                "th, td { padding: 5px; }" +
                 "table.work-table tr:nth-child(even) { background-color: #eee; }" +
                 "table.work-table tr:nth-child(odd) { background-color: #fff; }" +
                 "table.work-table th { color: white; background-color: #222222; }" +
