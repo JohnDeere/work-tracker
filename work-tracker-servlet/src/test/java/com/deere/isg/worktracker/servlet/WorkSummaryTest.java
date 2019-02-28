@@ -41,6 +41,6 @@ public class WorkSummaryTest {
     public void addsSpaceToAcceptHeader() {
         workSummary.setAcceptHeader("text/html,application/xml;  q=0.9,image/webp,image/apng,*/*;q=0.8");
 
-        assertThat(workSummary.getAcceptHeader(), is("text/html,application/xml; q=0.9,image/webp,image/apng,*/*; q=0.8"));
+        assertThat(workSummary.getAcceptHeader(), is("text/html,application/xml;&#8203;q=0.9,image/webp,image/apng,*/*;&#8203;q=0.8"));
     }
 }
