@@ -22,6 +22,7 @@ import net.logstash.logback.argument.StructuredArguments;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -38,6 +39,7 @@ import static com.deere.isg.worktracker.StringUtils.isNotBlank;
  * @param <W> The type passed should extend {@link Work}
  */
 public abstract class FloodSensor<W extends Work> {
+    private static final int MAX_RETRY_MILLIS = (int) Duration.ofMinutes(5).getSeconds();
     private final OutstandingWork<W> outstanding;
     private static Logger logger = LoggerFactory.getLogger(FloodSensor.class);
 
@@ -89,7 +91,8 @@ public abstract class FloodSensor<W extends Work> {
 
     private int getRetryAfter(W oldestSimilar, String typeName, String message) {
         long timeInMillis = oldestSimilar.getElapsedMillis();
-        int retryAfterSeconds = calculateRetryAfterFromMillis(timeInMillis);
+        int retry = calculateRetryAfterFromMillis(timeInMillis);
+        int retryAfterSeconds = Math.min(MAX_RETRY_MILLIS, retry);
         logFloodDetected(typeName, message, retryAfterSeconds);
         return retryAfterSeconds;
     }
