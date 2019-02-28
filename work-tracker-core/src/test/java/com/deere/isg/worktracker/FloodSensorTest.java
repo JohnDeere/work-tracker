@@ -100,12 +100,24 @@ public class FloodSensorTest {
     }
 
     @Test
-    public void shouldRetryLaterReturnIntegerOpIfExceedsLimitWithMax5Minutes() {
+    public void shouldRetryLaterReturnIntegerOpIfExceedsLimitWithDefaultMaxTime() {
         MockWork work = new MockWork(null);
         Clock.freeze(Clock.now().plusMillis((int) Duration.ofMinutes(10).toMillis()));
         Optional<Integer> retryAfter = floodSensor.shouldRetryLater(work, predicate(true), LIMIT_UNDER, USER, MESSAGE);
         assertThat(retryAfter.isPresent(), is(true));
         assertThat(retryAfter.get(), is(300));
+
+        verify(logger).warn(eq(MESSAGE), (Object[]) any());
+    }
+
+    @Test
+    public void shouldRetryLaterReturnIntegerOpIfExceedsLimitWithModifiedMaxTime() {
+        MockWork work = new MockWork(null);
+        work.setMaxTime(Duration.ofMinutes(1).toMillis());
+        Clock.freeze(Clock.now().plusMillis((int) Duration.ofMinutes(10).toMillis()));
+        Optional<Integer> retryAfter = floodSensor.shouldRetryLater(work, predicate(true), LIMIT_UNDER, USER, MESSAGE);
+        assertThat(retryAfter.isPresent(), is(true));
+        assertThat(retryAfter.get(), is(60));
 
         verify(logger).warn(eq(MESSAGE), (Object[]) any());
     }
