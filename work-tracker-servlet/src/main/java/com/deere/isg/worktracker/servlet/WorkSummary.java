@@ -108,7 +108,7 @@ public class WorkSummary<W extends HttpWork> {
 
     public void setAcceptHeader(String acceptHeader) {
         if (acceptHeader != null){
-            this.acceptHeader = acceptHeader.replaceAll(";\\s*", "; ");
+            this.acceptHeader = acceptHeader.replaceAll(";\\s*", ";&#8203;");
         }
     }
 
