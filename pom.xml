@@ -26,7 +26,6 @@
         <module>work-tracker-servlet</module>
         <module>work-tracker-spring</module>
         <module>work-tracker-spring-boot</module>
-        <module>work-tracker-examples</module>
     </modules>
 
     <properties>
