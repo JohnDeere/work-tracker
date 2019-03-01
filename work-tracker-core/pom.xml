@@ -25,11 +25,6 @@ limitations under the License.
     <artifactId>work-tracker-core</artifactId>
     <dependencies>
         <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>${joda.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.deere.isg</groupId>
             <artifactId>clock</artifactId>
             <version>${isg.clock.version}</version>
