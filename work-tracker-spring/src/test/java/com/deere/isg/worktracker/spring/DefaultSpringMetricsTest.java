@@ -31,6 +31,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.servlet.HandlerMapping;
 
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
@@ -39,6 +40,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Random;
 
 import static org.mockito.Mockito.mock;
@@ -108,6 +110,7 @@ public class DefaultSpringMetricsTest {
             ((HttpServletResponse) res).setStatus(random(200, 500, 429, 403, 200, 402, 200));
             int elapsed = RANDOM.nextInt(5000);
             try {
+                req.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, Collections.emptyMap());
                 Thread.sleep(elapsed);
             } catch (InterruptedException e) {
                 // ignore
