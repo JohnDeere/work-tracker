@@ -142,7 +142,7 @@ public interface MetricEngine<W extends Work> extends PostProcessor<W> {
         }
 
         @Override
-        public Object getValue() {
+        public LongExtendedStatistics getValue() {
             return longSummaryStatistics;
         }
 

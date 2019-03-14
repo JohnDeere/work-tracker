@@ -1,12 +1,12 @@
 /**
  * Copyright 2019 Deere & Company
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,12 +18,16 @@ package com.deere.isg.worktracker.spring;
 
 import com.deere.clock.Clock;
 import com.deere.isg.worktracker.MetricEngine;
+import com.deere.isg.worktracker.MetricEngine.CountMetric;
+import com.deere.isg.worktracker.MetricEngine.MetricList;
+import com.deere.isg.worktracker.MetricEngine.PercentageMetric;
 import com.deere.isg.worktracker.OutstandingWork;
 import com.deere.isg.worktracker.servlet.WorkContextListener;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,8 +45,11 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Random;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -123,6 +130,43 @@ public class DefaultSpringMetricsTest {
         String orig = new MetricJSONBuilder().marshall(bucket);
 //        System.out.println(orig);
         System.out.println(getPretty(orig));
+        validate(bucket);
+    }
+
+    private void validate(MetricEngine.Bucket bucket) {
+        bucket.findMetric("count", CountMetric.class)
+                .map(m -> m.getValue())
+                .ifPresent(count ->
+                {
+                    for (MetricEngine.Metric metric : bucket.getMetrics()) {
+                        if (metric instanceof MetricList) {
+                            MetricList list = (MetricList) metric;
+                            validate(list, count);
+                        }
+                    }
+                });
+    }
+
+    private void validate(MetricList list, long parentCount) {
+        int total = list.stream().map(set -> set.findMetric("count", CountMetric.class)
+                .map(CountMetric::getValue).map(count -> {
+                    assertThat(set.toString(), (long) count, Matchers.lessThanOrEqualTo(parentCount));
+                    assertThat(set.toString(), count, Matchers.greaterThanOrEqualTo(1));
+                    validatePercent(parentCount, set, count);
+                    return count;
+                })).filter(Optional::isPresent).map(Optional::get)
+                .mapToInt(Integer::intValue).sum();
+        assertEquals(list.getKey(), parentCount, total);
+    }
+
+    private void validatePercent(double parentCount, MetricEngine.MetricSet set, Integer count) {
+        Optional<Double> percent = set.findMetric("percent", PercentageMetric.class)
+                .map(PercentageMetric::getValue);
+        if(percent.isPresent()) {
+            double prct = percent.get();
+            double expected = 100* ((double)count / parentCount);
+            assertEquals(set.toString(), prct, expected, .001);
+        }
     }
 
     private String getPretty(String ugly) {

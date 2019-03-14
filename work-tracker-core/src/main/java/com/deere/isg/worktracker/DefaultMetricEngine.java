@@ -23,9 +23,11 @@ import org.joda.time.Instant;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -205,6 +207,15 @@ public class DefaultMetricEngine<W extends Work> implements MetricEngine<W> {
         @Override
         public Collection<Metric> getMetrics() {
             return metrics.values();
+        }
+
+        public String toString() {
+            return tags == null? "undefined" : Arrays.stream(tags)
+                    .filter(Objects::nonNull)
+                    .map(Tag::getValue)
+                    .filter(Objects::nonNull)
+                    .map(Object::toString)
+                    .collect(Collectors.joining(","));
         }
     }
 
