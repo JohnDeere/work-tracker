@@ -216,6 +216,22 @@ private MdcExecutor mdcExecutor;
 //...
 mdcExecutor.execute(someRunnable);
 ```
+
+- **Exclude Urls from Logging**
+
+You can exclude specific request urls from logging from url patterns.
+
+```java
+@Configuration
+public class WorkTrackerConfig extends WorkTrackerConfigurer<SpringWork> {
+    public WorkTrackerConfig() {
+      excludePathPatterns("/health"); // ignores /health*
+    }
+    //...
+}
+```
+
+
 ## Testing
 
 Start with this to test-drive adding in the work-tracker to your application.
