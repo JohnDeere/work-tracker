@@ -225,7 +225,7 @@ You can exclude specific request urls from logging from url patterns.
 @Configuration
 public class WorkTrackerConfig extends WorkTrackerConfigurer<SpringWork> {
     public WorkTrackerConfig() {
-      excludePathPatterns("/health"); // ignores /health*
+      excludePathPatterns("/favicon.ico"); // no logs for /favicon.ico requests
     }
     //...
 }
