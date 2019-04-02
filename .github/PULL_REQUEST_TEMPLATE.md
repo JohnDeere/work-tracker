@@ -1,4 +1,4 @@
-- [ ] I have followed the [Contribution Guidelines](../blob/master/.github/CONTTRIBUTING.md).
+- [ ] I have followed the [Contribution Guidelines](../blob/master/.github/CONTRIBUTING.md).
 - [ ] My code follows the code style of this project.
 - [ ] I have added tests to cover my changes.
 - [ ] All new and existing tests passed. (Has passed ```mvn clean verify``` locally.)
