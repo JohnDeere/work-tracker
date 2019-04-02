@@ -219,7 +219,7 @@ mdcExecutor.execute(someRunnable);
 
 - **Exclude Urls from Logging**
 
-You can exclude specific request urls from logging from url patterns.
+You can exclude specific request urls from logging by calling excludePathPatterns with url patterns.
 
 ```java
 @Configuration
