@@ -214,9 +214,10 @@ public class FloodSensorTest {
 
         floodSensor.shouldRetryLater(new MockWork(TEST_USER), MockWork::getUser, LIMIT_UNDER, USER, MESSAGE);
 
-        ArgumentCaptor<Object[]> captor = ArgumentCaptor.forClass(Object[].class);
-        verify(logger).warn(eq(MESSAGE), captor.capture());
-        assertThat(captor.getValue(), is(StructuredArguments.keyValue("retry_after_seconds", 1)));
+        ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
+        verify(logger).warn(eq(MESSAGE), (Object[])captor.capture());
+        Object values = captor.getValue();
+        assertThat(values, is(StructuredArguments.keyValue("retry_after_seconds", 1)));
     }
 
     private void assertNoRetry(String message, Optional<Integer> retryAfter) {
