@@ -29,6 +29,9 @@ Before using the core package, see if one of the options above will work for you
     <version>${work-tracker.version}</version>
 </dependency>
 ```
+### Module support for Java 9 and later
+`requires com.deere.isg.worktracker.core;`
+See [example](./work-tracker-servlet/src/main/java9/module-info.java)
 
 Of course, pin to [the latest released version](./../../releases/latest).
 

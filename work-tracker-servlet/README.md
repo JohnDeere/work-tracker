@@ -27,6 +27,9 @@ See [releases](../../../releases/latest) for the latest release
     <version>2.4.0</version>
 </dependency>
 ```
+### Module support for Java 9 and later
+`requires com.deere.isg.worktracker.servlet;`
+
 **Note:** `Logback` dependencies are already included with this library, so there is no need to explicitly include them in your pom.xml.
 
 **Required:** Create a subclass for `WorkContextListener` to initialize your `WorkConfig` (i.e. outstanding, floodSensor and zombie detector):
