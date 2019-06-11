@@ -20,6 +20,9 @@ See [releases](../../../releases/latest) for the latest release
   </dependency>
 ```
 
+### Module support for Java 9 and later
+`requires com.deere.isg.worktracker.spring;`
+
 Some Spring libraries and logging that may be required
 ```xml
   <!-- Spring libraries -->

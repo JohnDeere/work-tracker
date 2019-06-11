@@ -26,6 +26,8 @@ See [releases](../../../releases/latest) for the latest release
     </dependency>
 </dependencies>
 ```
+### Module support for Java 9 and later
+`requires com.deere.isg.worktracker.spring.boot;`
 
 **Note:** `Logback` dependencies are already included with this library, so there is no need to explicitly include them in your pom.xml.
 
