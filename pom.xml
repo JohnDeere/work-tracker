@@ -30,8 +30,6 @@
 
     <properties>
         <preferred.encoding>UTF-8</preferred.encoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <inceptionYear>2018</inceptionYear>
@@ -177,6 +175,7 @@
                     <archive>
                         <manifestEntries>
                             <Built-By>John Deere</Built-By>
+                            <multi-release>true</multi-release>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -257,12 +256,39 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.0</version>
+                <version>3.8.1</version>
+                <executions>
+                    <execution>
+                        <id>default-compile</id>
+                        <configuration>
+                            <!-- compile everything to ensure module-info contains right entries -->
+                            <compileSourceRoots>
+                                <compileSourceRoot>${project.basedir}/src/main/java9</compileSourceRoot>
+                            </compileSourceRoots>
+                            <outputDirectory>${project.build.outputDirectory}/META-INF/versions/9</outputDirectory>
+                            <release>9</release>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>base-compile</id>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <!-- recompile everything for target VM except the module-info.java -->
+                        <configuration>
+                            <excludes>
+                                <exclude>module-info.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
+                <!-- defaults for compile and testCompile -->
                 <configuration>
-                    <source>${maven.compiler.source}</source>
-                    <target>${maven.compiler.target}</target>
-                    <optimize>true</optimize>
-                    <debug>false</debug>
+                    <!--jdkToolchain required when JAVA_HOME is JDK 9 or above-->
+                    <jdkToolchain>
+                        <version>9</version>
+                    </jdkToolchain>
+                    <release>8</release>
                 </configuration>
             </plugin>
             <plugin>
