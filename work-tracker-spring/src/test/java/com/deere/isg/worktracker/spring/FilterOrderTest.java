@@ -26,9 +26,9 @@ import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
 public class FilterOrderTest {
     @Test
     public void filterHasCorrespondingOrders() {
-        assertThat(FilterOrder.WORK_FILTER.getOrder(), is(HIGHEST_PRECEDENCE));
-        assertThat(FilterOrder.FLOOD_SENSOR_FILTER.getOrder(), is(HIGHEST_PRECEDENCE + 1));
-        assertThat(FilterOrder.ZOMBIE_FILTER.getOrder(), is(HIGHEST_PRECEDENCE + 2));
+        assertThat(FilterOrder.WORK_FILTER.getOrder(), is(HIGHEST_PRECEDENCE + 10));
+        assertThat(FilterOrder.FLOOD_SENSOR_FILTER.getOrder(), is(HIGHEST_PRECEDENCE + 10 + 1));
+        assertThat(FilterOrder.ZOMBIE_FILTER.getOrder(), is(HIGHEST_PRECEDENCE + 10 + 2));
         assertThat(FilterOrder.PRE_AUTH_FILTER.getOrder(), is(1000));
         assertThat(FilterOrder.USER_POST_AUTH_FILTER.getOrder(), is(2390));
         assertThat(FilterOrder.FILTER_SECURITY_INTERCEPTOR.getOrder(), is(2400));

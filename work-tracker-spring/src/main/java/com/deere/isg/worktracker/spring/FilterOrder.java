@@ -58,7 +58,7 @@ public enum FilterOrder {
     }
 
     FilterOrder() {
-        this.order = ordinal() + HIGHEST_PRECEDENCE;
+        this.order = ordinal() + 10 + HIGHEST_PRECEDENCE;
     }
 
     public int getOrder() {
