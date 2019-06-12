@@ -29,16 +29,20 @@ Before using the core package, see if one of the options above will work for you
     <version>${work-tracker.version}</version>
 </dependency>
 ```
-### Module support for Java 9 and later
-`requires com.deere.isg.worktracker.core;`
-See [example](./work-tracker-servlet/src/main/java9/module-info.java)
 
 Of course, pin to [the latest released version](./../../releases/latest).
 
-## Whitelisting Jobs
+### Module support for Java 9 and later
+`requires com.deere.isg.worktracker.core;`
+
+See [example](./work-tracker-servlet/src/main/java9/module-info.java)
+
+
+## Configuration
+### Whitelisting Jobs
 If you expect a job to take longer than 5 minutes (i.e. uploading/downloading a file), you may want to `whitelist` that job. Use `Work#setMaxTime(long)` to update the time for Zombie detection.
 
-## Logback features specific to this library
+### Logback features specific to this library
 - [RootCauseTurboFilter](./work-tracker-core/src/main/java/com/deere/isg/worktracker/RootCauseTurboFilter.java)
 
 This turbo filter adds the class name of the `root cause` and the `cause` to the MDC when an exception occurs. Those class names will exist until the request ends to provide an easy way to trace down a faulty request from the beginning of the exception to the end of that request.

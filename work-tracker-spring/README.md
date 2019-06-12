@@ -20,9 +20,6 @@ See [releases](../../../releases/latest) for the latest release
   </dependency>
 ```
 
-### Module support for Java 9 and later
-`requires com.deere.isg.worktracker.spring;`
-
 Some Spring libraries and logging that may be required
 ```xml
   <!-- Spring libraries -->
@@ -72,6 +69,9 @@ Some Spring libraries and logging that may be required
 ```
 
 See [example](./../work-tracker-examples/spring-example) for more details
+
+### Module support for Java 9 and later
+`requires com.deere.isg.worktracker.spring;`
 
 ## Configuration
 **Create a `ContextListener` for WorkTracker**

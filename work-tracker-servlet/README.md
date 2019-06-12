@@ -27,8 +27,6 @@ See [releases](../../../releases/latest) for the latest release
     <version>2.4.0</version>
 </dependency>
 ```
-### Module support for Java 9 and later
-`requires com.deere.isg.worktracker.servlet;`
 
 **Note:** `Logback` dependencies are already included with this library, so there is no need to explicitly include them in your pom.xml.
 
@@ -86,6 +84,13 @@ In your web.xml, add the following:
     <listener-class>com.example.WorkTrackerContextListener</listener-class>
 </listener>
 ```
+
+### Module support for Java 9 and later
+`requires com.deere.isg.worktracker.servlet;`
+
+This module does not expose javax.servlet because that is exposed to your apps in many ways.  
+It is best for your app to require it directly from whichever package contains it so that we 
+avoid duplication errors.
 
 ## Connection Limits (Flood Sensor)
 Request Bouncer requires Connection Limits to determine whether to reject a work if the work exceeds a particular limit. 
