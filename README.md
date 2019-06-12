@@ -18,27 +18,11 @@ and allows new threads to proceed only if they are within the `Connection Limits
 - **Java Web Projects:** See [Readme](./work-tracker-servlet)
 - **Spring Projects:** See [Readme](./work-tracker-spring)
 - **Spring Boot Projects:** See [Readme](./work-tracker-spring-boot)
+- **Other Projects:** See [Readme](./work-tracker-core)
 
-## Installation
-Before using the core package, see if one of the options above will work for you first.
+## Common Configuration and Usage
+The following instructions apply to all of work-tracker's support modules.
 
-```xml
-<dependency>
-    <groupId>com.deere.isg.work-tracker</groupId>
-    <artifactId>work-tracker-core</artifactId>
-    <version>${work-tracker.version}</version>
-</dependency>
-```
-
-Of course, pin to [the latest released version](./../../releases/latest).
-
-### Module support for Java 9 and later
-`requires com.deere.isg.worktracker.core;`
-
-See [example](./work-tracker-servlet/src/main/java9/module-info.java)
-
-
-## Configuration
 ### Whitelisting Jobs
 If you expect a job to take longer than 5 minutes (i.e. uploading/downloading a file), you may want to `whitelist` that job. Use `Work#setMaxTime(long)` to update the time for Zombie detection.
 
@@ -83,8 +67,8 @@ See [example](./work-tracker-examples/java-example/src/main/resources/logback.gr
 
 ---
 
-## Logging Utilities
-### Using Logger to log information
+### Logging Utilities
+#### Using Logger to log information
 ```java
 private Logger logger = LoggerFactory.getLogger(CurrentClass.class);
 //...
@@ -98,7 +82,7 @@ try {
 }
 ```
 
-### Using `putInContext` to add context to logs
+#### Using `putInContext` to add context to logs
 `putInContext` is a wrapper for the `MDC (Mapped Diagnostic Context)`. It puts the key-value pair in the MDC and in the current work payload, thus, making sure that the `ZombieDetector` will have all the work metadata to log to Elasticsearch in the case where you need to track and debug your application for those Zombies.
 
 If you want some context variables to persist for a given request across multiple logs, use the `putInContext` to add those context variables. For example:
@@ -139,7 +123,7 @@ public SomeClass(@Autowired OutstandingWork<? extends SpringWork> outstandingWor
 
 Now, each of your subsequent logs will have those values in the MDC, unless you clear the MDC (and this library automatically clears the MDC at the end of each request to avoid having stale context).
 
-### Using Structured Arguments for individual log context
+#### Using Structured Arguments for individual log context
 If some context variables are specific to a single log (i.e. the sender id for a certain message, elapsed time, etc.), use `StructuredArguments.keyValue()` to add those context variables. Those variables will not persist across all the logs but they will be available for that log only. For example:
 ```java
 logger.info("{} sent a message", keyValue("sender_id", "some sender value"));
