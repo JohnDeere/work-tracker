@@ -18,7 +18,7 @@
 
 open module com.deere.isg.worktracker.core {
     requires com.deere.isg.clock;
-    requires com.deere.isg.outstanding;
+    requires transitive com.deere.isg.outstanding;
     requires slf4j.api;
     requires logstash.logback.encoder;
     requires com.fasterxml.jackson.databind;

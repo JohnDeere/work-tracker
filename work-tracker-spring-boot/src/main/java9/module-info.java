@@ -17,7 +17,7 @@
 // Unpublished Work (c) 2019 Deere & Company
 
 open module com.deere.isg.worktracker.spring.boot {
-    requires com.deere.isg.worktracker.spring;
+    requires transitive com.deere.isg.worktracker.spring;
     requires spring.boot.starter.web;
     requires com.fasterxml.jackson.databind;
     exports com.deere.isg.worktracker.spring.boot;

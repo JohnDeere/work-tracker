@@ -17,7 +17,7 @@
 // Unpublished Work (c) 2019 Deere & Company
 
 open module com.deere.isg.worktracker.spring {
-    requires com.deere.isg.worktracker.servlet;
+    requires transitive com.deere.isg.worktracker.servlet;
     requires spring.webmvc;
     requires javax.servlet.api;
     exports com.deere.isg.worktracker.spring;
