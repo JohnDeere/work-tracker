@@ -40,7 +40,7 @@
 
         <ch.qos.logback.version>1.2.3</ch.qos.logback.version>
         <logstash.version>5.3</logstash.version>
-        <jackson.databind.version>2.9.9</jackson.databind.version>
+        <jackson.databind.version>2.9.9.3</jackson.databind.version>
         <spring.boot.version>1.5.19.RELEASE</spring.boot.version>
         <spring.version>4.3.17.RELEASE</spring.version>
         <groovy.version>2.4.8</groovy.version>
