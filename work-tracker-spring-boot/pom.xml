@@ -26,7 +26,12 @@ limitations under the License.
     <packaging>jar</packaging>
 
     <dependencies>
-
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>${servlet.version}</version>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>com.deere.isg.work-tracker</groupId>
             <artifactId>work-tracker-spring</artifactId>
@@ -62,6 +67,7 @@ limitations under the License.
             <version>${spring.boot.version}</version>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
 
     <build>

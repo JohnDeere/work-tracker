@@ -19,5 +19,6 @@
 open module com.deere.isg.worktracker.servlet {
     requires transitive com.deere.isg.worktracker.core;
     requires javax.servlet.api;
+    requires slf4j.api;
     exports com.deere.isg.worktracker.servlet;
 }
