@@ -25,5 +25,6 @@ open module com.deere.isg.worktracker.core {
     requires logback.core;
     requires logback.classic;
     requires java.annotation;
+    requires com.fasterxml.jackson.core;
     exports com.deere.isg.worktracker;
 }
