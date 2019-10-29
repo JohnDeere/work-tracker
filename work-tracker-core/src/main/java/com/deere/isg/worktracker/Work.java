@@ -77,7 +77,7 @@ public abstract class Work {
 
     /**
      * Extension point for subclasses to show what kind of work this is.
-     * @return an empty String unless overridden
+     * @return null unless overridden
      */
     public String getService() {
         return null;
@@ -85,10 +85,10 @@ public abstract class Work {
 
     /**
      * Extension point for subclasses to show additional information in /outstanding
-     * @return an empty String unless overridden
+     * @return null unless overridden
      */
     public String getExtraInfo() {
-        return "";
+        return null;
     }
 
     public boolean isZombie() {

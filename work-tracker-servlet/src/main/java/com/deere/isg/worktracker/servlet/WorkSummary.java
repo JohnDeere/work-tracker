@@ -39,7 +39,8 @@ public class WorkSummary<W extends Work> {
             setService(service == null ? "" : service);
             setRequestId(work.getRequestId());
             setThreadName(work.getThreadName());
-            setAcceptHeader(work.getExtraInfo());
+            String extraInfo = work.getExtraInfo();
+            setAcceptHeader(extraInfo == null ? "" : extraInfo);
             setZombie(work.isZombie());
         }
     }

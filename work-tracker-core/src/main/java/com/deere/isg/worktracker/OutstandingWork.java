@@ -45,26 +45,4 @@ public class OutstandingWork<W extends Work> extends Outstanding<W> implements O
             runnable.run();
         }
     }
-
-    /**
-     * Adds metadata to every subsequent log message created on the current thread (i.e. stored in the {@link org.slf4j.MDC}),
-     * and also makes sure that metadata is available to loggers that are running
-     * outside the current thread, such as the {@code ZombieDetector}.
-     * <p>
-     * This method does nothing if there is no current work in progress
-     *
-     * @param key   must be in snake_case because that is most efficiently managed in Elasticsearch.
-     * @param value which must be a String because of historical limitations of SLF4J.
-     *              If the value is {@code null} or empty it will not be stored as metadata.
-     * @return The same value passed in for your coding convenience.
-     * @throws IllegalArgumentException if the key is {@code null} or not in snake_case.
-     */
-    public String putInContext(String key, String value) {
-        current().ifPresent(work -> work.addToMDC(key, value));
-        return value;
-    }
-
-    public List<StructuredArgument> getCurrentMetadata() {
-        return current().map(Work::getMetadata).orElse(new ArrayList<>());
-    }
 }
