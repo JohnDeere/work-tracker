@@ -35,7 +35,8 @@ public class WorkSummary<W extends Work> {
         if (work != null) {
             setStartTime(new Date(work.getStartTime()));
             setElapsedMillis(String.valueOf(work.getElapsedMillis()));
-            setService(work.getService());
+            String service = work.getService();
+            setService(service == null ? "" : service);
             setRequestId(work.getRequestId());
             setThreadName(work.getThreadName());
             setAcceptHeader(work.getExtraInfo());

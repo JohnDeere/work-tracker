@@ -66,8 +66,7 @@ public class HttpWork extends Work {
 
     @Override
     public String getService() {
-        if(path != null) return path;
-        return super.getService();
+        return path;
     }
 
     public void setService(String path) {
