@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class OutstandingWork<W extends Work> extends Outstanding<W> {
+public class OutstandingWork<W extends Work> extends Outstanding<W> implements OutstandingWorkTracker<W> {
     private InheritableThreadLocal<Ticket> currentPayload = new InheritableThreadLocal<>();
 
     @Override
