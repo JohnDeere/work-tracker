@@ -80,7 +80,7 @@ public abstract class Work {
      * @return an empty String unless overridden
      */
     public String getService() {
-        return "";
+        return null;
     };
 
     /**
