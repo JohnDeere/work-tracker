@@ -17,22 +17,35 @@
 
 package com.deere.isg.worktracker.spring;
 
+import com.deere.isg.worktracker.OutstandingWork;
+import com.deere.isg.worktracker.Work;
+import com.deere.isg.worktracker.servlet.WorkSummary;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.MDC;
 import org.springframework.mock.web.MockHttpServletRequest;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static com.deere.isg.worktracker.servlet.HttpWork.PATH;
+import static com.deere.isg.worktracker.servlet.WorkContextListener.OUTSTANDING_ATTR;
 import static com.deere.isg.worktracker.spring.SpringWork.ENDPOINT;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.web.servlet.HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 
 public class SpringWorkTest {
@@ -277,6 +290,45 @@ public class SpringWorkTest {
         assertThat(MDC.getCopyOfContextMap().keySet().contains("user"), is(false));
         assertThat(MDC.get(ENDPOINT), is("GET /users/(null)"));
     }
+
+
+    @Test
+    public void nullTurnsToEmpty() throws ServletException {
+        SpringWork work = new SpringWork(null);
+        OutstandingWork<SpringWork> outstandingWork = mock(OutstandingWork.class);
+        when(outstandingWork.stream()).thenReturn(Stream.of(work));
+        ServletConfig config = mock(ServletConfig.class);
+        ServletContext context = mock(ServletContext.class);
+        when(config.getServletContext()).thenReturn(context);
+        when(context.getAttribute(OUTSTANDING_ATTR)).thenReturn(outstandingWork);
+
+        SpringWorkHttpServlet servlet = new SpringWorkHttpServlet();
+        servlet.init(config);
+
+        List<WorkSummary<? extends Work>> workSummaries = servlet.mapOutstandingToSummaryList();
+        assertThat(workSummaries, hasSize(1));
+        assertThat(workSummaries.get(0).getService(), is(""));
+    }
+
+    @Test
+    public void nonEmptyEndpoint() throws ServletException {
+        SpringWork work =new SpringWork(null);
+        work.setService("/test/url");
+        OutstandingWork<SpringWork> outstandingWork = mock(OutstandingWork.class);
+        when(outstandingWork.stream()).thenReturn(Stream.of(work));
+        ServletConfig config = mock(ServletConfig.class);
+        ServletContext context = mock(ServletContext.class);
+        when(config.getServletContext()).thenReturn(context);
+        when(context.getAttribute(OUTSTANDING_ATTR)).thenReturn(outstandingWork);
+
+        SpringWorkHttpServlet servlet = new SpringWorkHttpServlet();
+        servlet.init(config);
+
+        List<WorkSummary<? extends Work>> workSummaries = servlet.mapOutstandingToSummaryList();
+        assertThat(workSummaries, hasSize(1));
+        assertThat(workSummaries.get(0).getService(), is("/test/url"));
+    }
+
 
     private void triggerEndpointWithSpringAttributes(Map<String, String> pathMap) {
         HttpServletRequest springRequest = work.setupSpringVsFilterOrderingWorkaround(request, keyCleanser);

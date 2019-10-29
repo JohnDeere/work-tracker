@@ -305,6 +305,11 @@ public class WorkTest {
         assertThat(work.removeLimit(USER), is(true));
     }
 
+    @Test
+    public void hasExtensionPoints() {
+        assertThat(work.getService(), is(""));
+        assertThat(work.getExtraInfo(), is(""));
+    }
     private void assertIntervalInfo(List<StructuredArgument> endInfo, String end) {
         assertThat(endInfo, hasItem(keyValue(ZOMBIE, false)));
         assertThat(endInfo, hasItem(keyValue(ELAPSED_MS, work.getElapsedMillis())));
