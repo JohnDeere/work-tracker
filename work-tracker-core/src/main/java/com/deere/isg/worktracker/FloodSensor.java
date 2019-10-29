@@ -38,10 +38,10 @@ import static com.deere.isg.worktracker.StringUtils.isNotBlank;
  * @param <W> The type passed should extend {@link Work}
  */
 public abstract class FloodSensor<W extends Work> {
-    private final OutstandingWork<W> outstanding;
+    private final OutstandingWorkTracker<W> outstanding;
     private static Logger logger = LoggerFactory.getLogger(FloodSensor.class);
 
-    public FloodSensor(OutstandingWork<W> outstanding) {
+    public FloodSensor(OutstandingWorkTracker<W> outstanding) {
         this.outstanding = outstanding;
     }
 
@@ -49,7 +49,7 @@ public abstract class FloodSensor<W extends Work> {
         return b -> test.test(getter.apply(b));
     }
 
-    protected final OutstandingWork<W> getOutstanding() {
+    protected final OutstandingWorkTracker<W> getOutstanding() {
         return outstanding;
     }
 
