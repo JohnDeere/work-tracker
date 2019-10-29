@@ -75,6 +75,22 @@ public abstract class Work {
         this.maxTime = maxTime;
     }
 
+    /**
+     * Extension point for subclasses to show what kind of work this is.
+     * @return an empty String unless overridden
+     */
+    public String getService() {
+        return "";
+    };
+
+    /**
+     * Extension point for subclasses to show additional information in /outstanding
+     * @return an empty String unless overridden
+     */
+    public String getExtraInfo() {
+        return "";
+    }
+
     public boolean isZombie() {
         return getElapsedMillis() > maxTime;
     }

@@ -18,6 +18,7 @@
 package com.deere.isg.worktracker.servlet;
 
 import com.deere.isg.worktracker.OutstandingWork;
+import com.deere.isg.worktracker.Work;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,7 +56,7 @@ public class WorkHttpServletTest {
     private static final WorkHttpServlet.HtmlPage PAGE = new WorkHttpServlet.HtmlPage();
 
     private static final List<HttpWork> TEST_WORKS = createWorkList(10);
-    private static final List<WorkSummary<? extends HttpWork>> WORK_SUMMARIES = TEST_WORKS.stream()
+    private static final List<WorkSummary<? extends Work>> WORK_SUMMARIES = TEST_WORKS.stream()
             .map(WorkSummary::new)
             .collect(Collectors.toList());
 
@@ -209,7 +210,7 @@ public class WorkHttpServletTest {
     public void setsRowToRedForZombie() {
         WorkSummary<HttpWork> zombieSummary = new WorkSummary<>(null);
         zombieSummary.setZombie(true);
-        List<WorkSummary<? extends HttpWork>> zombieSummaries = Collections.singletonList(zombieSummary);
+        List<WorkSummary<? extends Work>> zombieSummaries = Collections.singletonList(zombieSummary);
 
         String html = PAGE.render(zombieSummaries);
         assertThat(html, containsString("<tr class='red'>"));
@@ -218,7 +219,7 @@ public class WorkHttpServletTest {
     @Test
     public void setsRowToNeutralForNonZombie() {
         WorkSummary<HttpWork> zombieSummary = new WorkSummary<>(null);
-        List<WorkSummary<? extends HttpWork>> zombieSummaries = Collections.singletonList(zombieSummary);
+        List<WorkSummary<? extends Work>> zombieSummaries = Collections.singletonList(zombieSummary);
 
         String html = PAGE.render(zombieSummaries);
         assertThat(html, containsString("<tr>"));

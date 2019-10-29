@@ -104,6 +104,15 @@ public class SpringWork extends HttpWork {
         return endpoint;
     }
 
+    @Override
+    public String getService() {
+        String endpoint = getEndpoint();
+        if(endpoint != null) {
+            return endpoint;
+        }
+        return super.getService();
+    }
+
     public String getHttpMethod() {
         return httpMethod;
     }
