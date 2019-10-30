@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// Unpublished Work (c) 2019 Deere & Company
-
 open module com.deere.isg.worktracker.spring {
     requires transitive com.deere.isg.worktracker.servlet;
     requires spring.webmvc;
