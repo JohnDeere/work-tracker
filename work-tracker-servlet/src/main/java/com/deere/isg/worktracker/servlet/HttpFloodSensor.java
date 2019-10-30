@@ -18,7 +18,6 @@
 package com.deere.isg.worktracker.servlet;
 
 import com.deere.isg.worktracker.FloodSensor;
-import com.deere.isg.worktracker.OutstandingWork;
 import com.deere.isg.worktracker.OutstandingWorkTracker;
 import org.slf4j.Logger;
 

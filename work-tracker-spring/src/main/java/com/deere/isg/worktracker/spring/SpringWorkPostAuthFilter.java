@@ -18,6 +18,7 @@
 package com.deere.isg.worktracker.spring;
 
 import com.deere.isg.worktracker.OutstandingWork;
+import com.deere.isg.worktracker.OutstandingWorkTracker;
 import com.deere.isg.worktracker.servlet.BaseTypeFilter;
 
 import javax.servlet.FilterChain;
@@ -36,7 +37,7 @@ public class SpringWorkPostAuthFilter extends BaseTypeFilter {
     @SuppressWarnings("unchecked")
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         if (getOutstanding() != null) {
-            ((OutstandingWork<? extends SpringWork>) getOutstanding()).current()
+            ((OutstandingWorkTracker<? extends SpringWork>) getOutstanding()).current()
                     .ifPresent(work -> addUserInformation((HttpServletRequest) request, work));
         }
         chain.doFilter(request, response);

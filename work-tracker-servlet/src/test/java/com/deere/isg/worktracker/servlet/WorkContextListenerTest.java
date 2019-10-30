@@ -18,10 +18,13 @@
 package com.deere.isg.worktracker.servlet;
 
 import com.deere.isg.worktracker.OutstandingWork;
+import com.deere.isg.worktracker.OutstandingWorkFilter;
+import com.deere.isg.worktracker.Work;
 import com.deere.isg.worktracker.ZombieDetector;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -29,8 +32,9 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
 import static com.deere.isg.worktracker.servlet.WorkContextListener.*;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -65,6 +69,7 @@ public class WorkContextListenerTest {
         verify(context).setAttribute(OUTSTANDING_ATTR, outstanding);
         verify(context).setAttribute(FLOOD_SENSOR_ATTR, httpFloodSensor);
         verify(context).setAttribute(ZOMBIE_ATTR, detector);
+        verify(context).setAttribute(ALL_OUTSTANDING_ATTR, outstanding);
     }
 
     @Test
@@ -81,5 +86,18 @@ public class WorkContextListenerTest {
         } catch (AssertionError e) {
             assertThat(e.getMessage(), is("WorkConfig cannot be null"));
         }
+    }
+
+    @Test
+    public void addsFilteredOutstandingToContext() {
+        OutstandingWork<Work> outstandingWork = new OutstandingWork<>();
+        WorkConfig<HttpWork> config = new WorkConfig.Builder<>(outstandingWork, HttpWork.class)
+                .build();
+
+        workContextListener = new WorkContextListener(config);
+        workContextListener.contextInitialized(contextEvent);
+
+        verify(context).setAttribute(ALL_OUTSTANDING_ATTR, outstandingWork);
+        verify(context).setAttribute(eq(OUTSTANDING_ATTR), ArgumentMatchers.isA(OutstandingWorkFilter.class));
     }
 }

@@ -1,5 +1,22 @@
+/**
+ * Copyright 2019 Deere & Company
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.deere.isg.worktracker;
 
+import com.deere.isg.outstanding.Outstanding;
 import net.logstash.logback.argument.StructuredArgument;
 
 import java.util.ArrayList;
@@ -10,6 +27,7 @@ import java.util.stream.Stream;
 public interface OutstandingWorkTracker<W extends Work> {
     Stream<W> stream();
     Optional<W> current();
+    Outstanding<W>.Ticket create(W payload);
 
     default List<StructuredArgument> getCurrentMetadata() {
         return current().map(Work::getMetadata).orElse(new ArrayList<>());
@@ -31,5 +49,15 @@ public interface OutstandingWorkTracker<W extends Work> {
     default String putInContext(String key, String value) {
         current().ifPresent(work -> work.addToMDC(key, value));
         return value;
+    }
+
+    default <E extends Throwable, E2 extends Throwable> void doInTransactionChecked(W payload, CheckedRunnable<E, E2> runnable) throws E, E2 {
+        try (Outstanding<W>.Ticket ignored = this.create(payload)) {
+            runnable.run();
+        }
+    }
+
+    default <T extends W> OutstandingWorkTracker<T> filterTo(Class<T> clazz) {
+        return new OutstandingWorkFilter<>(this, clazz);
     }
 }

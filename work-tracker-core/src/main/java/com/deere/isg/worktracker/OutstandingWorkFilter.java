@@ -16,6 +16,8 @@
 
 package com.deere.isg.worktracker;
 
+import com.deere.isg.outstanding.Outstanding;
+
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -42,5 +44,11 @@ public class OutstandingWorkFilter<W extends Work> implements OutstandingWorkTra
     @SuppressWarnings("unchecked")
     public Optional<W> current() {
         return (Optional<W>) parent.current().filter(this::isExpectedWork);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Outstanding<W>.Ticket create(W payload) {
+        return (Outstanding<W>.Ticket) parent.create(payload);
     }
 }

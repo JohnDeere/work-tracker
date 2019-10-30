@@ -17,7 +17,7 @@
 
 package com.deere.isg.worktracker.servlet;
 
-import com.deere.isg.worktracker.OutstandingWork;
+import com.deere.isg.worktracker.OutstandingWorkTracker;
 
 /**
  * If your filter accepts generic types, you can extend this class instead
@@ -29,8 +29,8 @@ import com.deere.isg.worktracker.OutstandingWork;
 public abstract class BaseTypeFilter<W extends HttpWork> extends BaseFilter {
     @Override
     @SuppressWarnings("unchecked")
-    public OutstandingWork<W> getOutstanding() {
-        return (OutstandingWork<W>) super.getOutstanding();
+    public OutstandingWorkTracker<W> getOutstanding() {
+        return (OutstandingWorkTracker<W>) super.getOutstanding();
     }
 
     @Override

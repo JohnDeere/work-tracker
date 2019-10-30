@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.deere.isg.worktracker.servlet.TestWorkUtils.createWorkList;
-import static com.deere.isg.worktracker.servlet.WorkContextListener.OUTSTANDING_ATTR;
+import static com.deere.isg.worktracker.servlet.WorkContextListener.ALL_OUTSTANDING_ATTR;
 import static com.deere.isg.worktracker.servlet.WorkHttpServlet.TEMPLATE_PATH;
 import static com.deere.isg.worktracker.servlet.WorkHttpServlet.WORK_LIST;
 import static org.hamcrest.CoreMatchers.*;
@@ -78,7 +78,7 @@ public class WorkHttpServletTest {
     public void setUp() {
         servlet = new WorkHttpServlet();
         when(config.getServletContext()).thenReturn(mock(ServletContext.class));
-        when(config.getServletContext().getAttribute(OUTSTANDING_ATTR)).thenReturn(outstanding);
+        when(config.getServletContext().getAttribute(ALL_OUTSTANDING_ATTR)).thenReturn(outstanding);
     }
 
     @Test
@@ -198,7 +198,7 @@ public class WorkHttpServletTest {
 
     @Test
     public void nullOutstandingHaveNoOutput() throws ServletException, IOException {
-        when(config.getServletContext().getAttribute(OUTSTANDING_ATTR)).thenReturn(null);
+        when(config.getServletContext().getAttribute(ALL_OUTSTANDING_ATTR)).thenReturn(null);
         initPath(TEST_PATH);
 
         servlet.doGet(request, response);

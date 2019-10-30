@@ -37,10 +37,11 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static com.deere.isg.worktracker.servlet.HttpWork.PATH;
-import static com.deere.isg.worktracker.servlet.WorkContextListener.OUTSTANDING_ATTR;
+import static com.deere.isg.worktracker.servlet.WorkContextListener.ALL_OUTSTANDING_ATTR;
 import static com.deere.isg.worktracker.spring.SpringWork.ENDPOINT;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -300,7 +301,7 @@ public class SpringWorkTest {
         ServletConfig config = mock(ServletConfig.class);
         ServletContext context = mock(ServletContext.class);
         when(config.getServletContext()).thenReturn(context);
-        when(context.getAttribute(OUTSTANDING_ATTR)).thenReturn(outstandingWork);
+        when(context.getAttribute(ALL_OUTSTANDING_ATTR)).thenReturn(outstandingWork);
 
         SpringWorkHttpServlet servlet = new SpringWorkHttpServlet();
         servlet.init(config);
@@ -319,7 +320,7 @@ public class SpringWorkTest {
         ServletConfig config = mock(ServletConfig.class);
         ServletContext context = mock(ServletContext.class);
         when(config.getServletContext()).thenReturn(context);
-        when(context.getAttribute(OUTSTANDING_ATTR)).thenReturn(outstandingWork);
+        when(context.getAttribute(ALL_OUTSTANDING_ATTR)).thenReturn(outstandingWork);
 
         SpringWorkHttpServlet servlet = new SpringWorkHttpServlet();
         servlet.init(config);
