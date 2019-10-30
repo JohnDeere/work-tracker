@@ -17,7 +17,7 @@
 
 package com.deere.isg.worktracker.spring;
 
-import com.deere.isg.worktracker.OutstandingWork;
+import com.deere.isg.worktracker.OutstandingWorkTracker;
 import com.deere.isg.worktracker.servlet.WorkLogger;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -32,13 +32,13 @@ import static com.deere.isg.worktracker.servlet.WorkContextListener.OUTSTANDING_
  * This class logs the start of a request
  */
 public class SpringLoggerHandlerInterceptor extends HandlerInterceptorAdapter implements ServletContextAware {
-    private OutstandingWork<?> outstanding;
+    private OutstandingWorkTracker<?> outstanding;
     private WorkLogger logger = WorkLogger.getLogger();
 
     public SpringLoggerHandlerInterceptor() {
     }
 
-    public SpringLoggerHandlerInterceptor(OutstandingWork<? extends SpringWork> outstanding) {
+    public SpringLoggerHandlerInterceptor(OutstandingWorkTracker<? extends SpringWork> outstanding) {
         this.outstanding = outstanding;
     }
 
@@ -57,6 +57,6 @@ public class SpringLoggerHandlerInterceptor extends HandlerInterceptorAdapter im
     @Override
     @SuppressWarnings("unchecked")
     public void setServletContext(ServletContext context) {
-        this.outstanding = (OutstandingWork<? extends SpringWork>) context.getAttribute(OUTSTANDING_ATTR);
+        this.outstanding = (OutstandingWorkTracker<? extends SpringWork>) context.getAttribute(OUTSTANDING_ATTR);
     }
 }

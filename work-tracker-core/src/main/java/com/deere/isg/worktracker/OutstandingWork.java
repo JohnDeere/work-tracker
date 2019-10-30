@@ -18,10 +18,6 @@
 package com.deere.isg.worktracker;
 
 import com.deere.isg.outstanding.Outstanding;
-import net.logstash.logback.argument.StructuredArgument;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 public class OutstandingWork<W extends Work> extends Outstanding<W> implements OutstandingWorkTracker<W> {
@@ -40,9 +36,4 @@ public class OutstandingWork<W extends Work> extends Outstanding<W> implements O
         return Optional.ofNullable(currentPayload.get()).flatMap(Ticket::getPayload);
     }
 
-    public <E extends Throwable, E2 extends Throwable> void doInTransactionChecked(W payload, CheckedRunnable<E, E2> runnable) throws E, E2 {
-        try (Outstanding<W>.Ticket ignored = this.create(payload)) {
-            runnable.run();
-        }
-    }
 }

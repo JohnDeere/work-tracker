@@ -17,8 +17,7 @@
 
 package com.deere.isg.worktracker.servlet;
 
-import com.deere.isg.outstanding.Outstanding;
-import com.deere.isg.worktracker.OutstandingWork;
+import com.deere.isg.worktracker.OutstandingWorkTracker;
 import com.deere.isg.worktracker.Work;
 
 import javax.servlet.ServletConfig;
@@ -32,7 +31,7 @@ import java.io.PrintWriter;
 import java.util.List;
 
 import static com.deere.isg.worktracker.StringUtils.isNotBlank;
-import static com.deere.isg.worktracker.servlet.WorkContextListener.OUTSTANDING_ATTR;
+import static com.deere.isg.worktracker.servlet.WorkContextListener.ALL_OUTSTANDING_ATTR;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -58,7 +57,7 @@ public class WorkHttpServlet extends HttpServlet {
 
     private List<WorkSummary<? extends Work>> workSummaries;
     private String templatePath;
-    private Outstanding<? extends Work> outstanding;
+    private OutstandingWorkTracker<? extends Work> outstanding;
     private HtmlPage page;
 
     @Override
@@ -73,7 +72,7 @@ public class WorkHttpServlet extends HttpServlet {
             page = new HtmlPage();
         }
 
-        outstanding = (OutstandingWork<? extends Work>) getServletContext().getAttribute(OUTSTANDING_ATTR);
+        outstanding = (OutstandingWorkTracker<? extends Work>) getServletContext().getAttribute(ALL_OUTSTANDING_ATTR);
     }
 
     @Override
@@ -97,7 +96,7 @@ public class WorkHttpServlet extends HttpServlet {
         return getOutstanding().stream().map(WorkSummary::new).collect(toList());
     }
 
-    protected Outstanding<? extends Work> getOutstanding() {
+    protected OutstandingWorkTracker<? extends Work> getOutstanding() {
         return outstanding;
     }
 

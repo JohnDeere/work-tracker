@@ -19,6 +19,7 @@ package com.deere.isg.worktracker.spring.boot;
 
 import ch.qos.logback.classic.ViewStatusMessagesServlet;
 import com.deere.isg.worktracker.OutstandingWork;
+import com.deere.isg.worktracker.OutstandingWorkTracker;
 import com.deere.isg.worktracker.ZombieDetector;
 import com.deere.isg.worktracker.servlet.ConnectionLimits;
 import com.deere.isg.worktracker.servlet.HttpFloodSensor;
@@ -146,10 +147,10 @@ public abstract class WorkTrackerConfigurer<W extends SpringWork> extends WebMvc
     }
 
     @Bean
-    @ConditionalOnMissingBean(OutstandingWork.class)
+    @ConditionalOnMissingBean(OutstandingWorkTracker.class)
     @SuppressWarnings("unchecked")
-    public OutstandingWork<W> outstanding() {
-        return (OutstandingWork<W>) context.getAttribute(OUTSTANDING_ATTR);
+    public OutstandingWorkTracker<W> outstanding() {
+        return (OutstandingWorkTracker<W>) context.getAttribute(OUTSTANDING_ATTR);
     }
 
     @Bean

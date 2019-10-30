@@ -19,6 +19,7 @@ package com.deere.isg.worktracker.spring;
 
 import com.deere.clock.Clock;
 import com.deere.isg.worktracker.OutstandingWork;
+import com.deere.isg.worktracker.OutstandingWorkTracker;
 import com.deere.isg.worktracker.servlet.WorkLogger;
 import org.junit.After;
 import org.junit.Before;
@@ -143,7 +144,7 @@ public class AbstractSpringWorkFilterTest {
         }
 
         @Override
-        protected void setOutstanding(OutstandingWork<?> outstanding) {
+        protected void setOutstanding(OutstandingWorkTracker<?> outstanding) {
             super.setOutstanding(outstanding);
         }
     }
