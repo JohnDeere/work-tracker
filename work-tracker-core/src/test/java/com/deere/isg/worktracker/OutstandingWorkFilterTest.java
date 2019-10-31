@@ -20,6 +20,8 @@ import org.junit.Test;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class OutstandingWorkFilterTest {
     private static class SuperWork extends Work {}
@@ -60,5 +62,16 @@ public class OutstandingWorkFilterTest {
     public void create() {
         TestWork payload = new TestWork();
         assertThat(filtered.create(payload).getPayload().orElse(null), is(payload));
+    }
+
+    @Test
+    public void doInTransaction() {
+        TestWork payload = new TestWork();
+        Runnable runnable = mock(Runnable.class);
+        filtered.doInTransaction(payload, runnable);
+        verify(runnable).run();
+        filtered.doInTransaction(payload, ()->{
+            assertThat(filtered.current().orElseGet(null), is(payload));
+        });
     }
 }

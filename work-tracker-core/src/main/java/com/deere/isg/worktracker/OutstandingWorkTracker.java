@@ -28,6 +28,7 @@ public interface OutstandingWorkTracker<W extends Work> {
     Stream<W> stream();
     Optional<W> current();
     Outstanding<W>.Ticket create(W payload);
+    void doInTransaction(W payload, Runnable transaction);
 
     default List<StructuredArgument> getCurrentMetadata() {
         return current().map(Work::getMetadata).orElse(new ArrayList<>());
