@@ -18,7 +18,6 @@
 package com.deere.isg.worktracker.servlet;
 
 import com.deere.isg.worktracker.OutstandingWork;
-import com.deere.isg.worktracker.OutstandingWorkFilter;
 import com.deere.isg.worktracker.OutstandingWorkTracker;
 import com.deere.isg.worktracker.Work;
 import com.deere.isg.worktracker.ZombieDetector;
