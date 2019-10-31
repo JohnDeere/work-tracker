@@ -51,4 +51,9 @@ public class OutstandingWorkFilter<W extends Work> implements OutstandingWorkTra
     public Outstanding<W>.Ticket create(W payload) {
         return (Outstanding<W>.Ticket) parent.create(payload);
     }
+
+    @Override
+    public void doInTransaction(W payload, Runnable transaction) {
+        parent.doInTransaction(payload, transaction);
+    }
 }
