@@ -20,22 +20,38 @@ import EDU.oswego.cs.dl.util.concurrent.Executor;
 import com.deere.isg.worktracker.ContextualOswegoExecutor;
 import com.deere.isg.worktracker.OutstandingTaskDecorator;
 import com.deere.isg.worktracker.OutstandingWorkTracker;
+import com.deere.isg.worktracker.TaskDecorator;
 import com.deere.isg.worktracker.TaskWork;
 import com.deere.isg.worktracker.Work;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiFunction;
 
 public class MdcOswegoExecutor extends ContextualOswegoExecutor {
     public static final String PARENT_ENDPOINT = "parent_endpoint";
     public static final String PARENT_PATH = "parent_path";
 
+    private Logger logger = LoggerFactory.getLogger(MdcExecutor.class);
+
     public MdcOswegoExecutor(Executor executor) {
         super(executor);
+        setLogger(logger);
+    }
+
+    public MdcOswegoExecutor(Executor executor, TaskDecorator taskDecorator) {
+        super(executor, taskDecorator);
+        setLogger(logger);
+    }
+
+    public MdcOswegoExecutor(Executor executor, OutstandingWorkTracker<Work> outstandingWork, BiFunction<Object, Work, TaskWork> workFactory) {
+        this(executor, new OutstandingTaskDecorator<>(outstandingWork, workFactory));
     }
 
     public MdcOswegoExecutor(Executor executor, OutstandingWorkTracker<Work> outstandingWork) {
-        super(executor, new OutstandingTaskDecorator<>(outstandingWork, (t,p)->new TaskWork(t.getClass().getName(), p)));
+        this(executor, outstandingWork, (t,p)->new TaskWork(t.getClass().getName(), p));
     }
 
     @Override

@@ -18,12 +18,18 @@
 package com.deere.isg.worktracker.servlet;
 
 import com.deere.isg.worktracker.ContextualExecutor;
+import com.deere.isg.worktracker.OutstandingTaskDecorator;
+import com.deere.isg.worktracker.OutstandingWorkTracker;
+import com.deere.isg.worktracker.TaskDecorator;
+import com.deere.isg.worktracker.TaskWork;
+import com.deere.isg.worktracker.Work;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.function.BiFunction;
 
 public class MdcExecutor extends ContextualExecutor {
     public static final String PARENT_ENDPOINT = "parent_endpoint";
@@ -34,6 +40,19 @@ public class MdcExecutor extends ContextualExecutor {
     public MdcExecutor(Executor executor) {
         super(executor);
         setLogger(logger);
+    }
+
+    public MdcExecutor(Executor executor, TaskDecorator taskDecorator) {
+        super(executor, taskDecorator);
+        setLogger(logger);
+    }
+
+    public MdcExecutor(Executor executor, OutstandingWorkTracker<Work> outstandingWork, BiFunction<Object, Work, TaskWork> workFactory) {
+        this(executor, new OutstandingTaskDecorator<>(outstandingWork, workFactory));
+    }
+
+    public MdcExecutor(Executor executor, OutstandingWorkTracker<Work> outstandingWork) {
+        this(executor, outstandingWork, (t,p)->new TaskWork(t.getClass().getName(), p));
     }
 
     @Override
