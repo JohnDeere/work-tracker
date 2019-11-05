@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package com.deere.isg.worktracker;
 
 import com.deere.clock.Clock;
@@ -42,14 +41,23 @@ public abstract class Work {
     public static final String TIME_INTERVAL = "time_interval";
     public static final String ZOMBIE = "zombie";
     public static final String REQUEST_URL = "request_url";
+    private static final long DEFAULT_MAX_TIME = TimeUnit.MILLISECONDS.convert(5, TimeUnit.MINUTES);
 
-    private long maxTime = TimeUnit.MILLISECONDS.convert(5, TimeUnit.MINUTES);
+    private long maxTime = DEFAULT_MAX_TIME;
     private long startTime = Clock.milliseconds();
     private Map<String, String> mdc;
-    private String requestId = addToMDC(REQUEST_ID, UUID.randomUUID().toString());
+    private final String requestId;
     private Thread thread = Thread.currentThread();
     private String threadName = addToMDC(THREAD_NAME, thread.getName());
     private Set<String> checkedLimits = new HashSet<>();
+
+    protected Work() {
+        this(null);
+    }
+
+    protected Work(String requestId) {
+        this.requestId = addToMDC(REQUEST_ID, requestId != null ? requestId : generatedRequestId());
+    }
 
     public long getElapsedMillis() {
         return Clock.milliseconds() - startTime;
@@ -190,6 +198,10 @@ public abstract class Work {
                 keyValue(ZOMBIE, isZombie())
         );
         return new ArrayList<>(args);
+    }
+
+    protected String generatedRequestId() {
+        return UUID.randomUUID().toString();
     }
 
     private List<StructuredArgument> getIntervalInfo(String interval) {
