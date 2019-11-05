@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
-import static com.deere.isg.worktracker.ContextualTaskDecorator.TASK_ID;
+import static com.deere.isg.worktracker.TaskDecorator.TASK_ID;
 
 public final class ExecutorTestUtils {
     static final Pattern UUID_PATTERN =

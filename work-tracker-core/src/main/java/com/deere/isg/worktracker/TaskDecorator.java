@@ -16,24 +16,20 @@
 
 package com.deere.isg.worktracker;
 
+import org.slf4j.Logger;
+
 import java.util.Map;
-import java.util.concurrent.Executor;
+import java.util.concurrent.Callable;
 
-public class ContextualExecutor extends ContextualRunner implements Executor {
-    private Executor executor;
+public interface TaskDecorator {
+    String TASK_TIME_INTERVAL = Work.TIME_INTERVAL;
+    String TASK_ELAPSED_MS = Work.ELAPSED_MS;
+    String TASK_ID = "task_id";
+    String TASK_CLASS_NAME = "task_class_name";
 
-    public ContextualExecutor(Executor executor) {
-        this(executor, new ContextualTaskDecorator());
-    }
+    Runnable decorate(Map<String, String> parentMdc, Runnable runnable);
 
-    public ContextualExecutor(Executor executor, TaskDecorator taskDecorator) {
-        super(taskDecorator);
-        this.executor = executor;
-    }
+    <T> Callable<T> decorate(Map<String, String> parentMdc, Callable<T> task);
 
-    @Override
-    public void execute(Runnable runnable) {
-        Map<String, String> parentMdc = cleanseParentMdc();
-        executor.execute(taskDecorator.decorate(parentMdc, runnable));
-    }
+    void setLogger(Logger logger);
 }
