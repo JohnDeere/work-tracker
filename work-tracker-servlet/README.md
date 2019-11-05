@@ -179,7 +179,7 @@ try {
 ```
 ## Enhanced background task tracking
 Starting in version 1.1.0-rc1, you may configure work-tracker to show your background
-tasks in the [Outstanding HttpServlet](t#outstanding-httpservlet).
+tasks in the [Outstanding HttpServlet](#outstanding-httpservlet).
 
 To enable it, change your WorkTrackerContextListener to use the Builder constructor 
 that tells it how to filter work that will be seen by the FloodSensor and ZombieDetector:
