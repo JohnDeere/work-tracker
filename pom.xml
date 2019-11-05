@@ -5,7 +5,7 @@
     <groupId>com.deere.isg.work-tracker</groupId>
     <artifactId>work-tracker</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.1.0-rc1-SNAPSHOT</version>
 
     <name>work-tracker</name>
     <description>A library to monitor threads and requests.
