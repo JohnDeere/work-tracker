@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased](https://github.com/JohnDeere/work-tracker/tree/HEAD)
+
+[Full Changelog](https://github.com/JohnDeere/work-tracker/compare/work-tracker-1.0.1...HEAD)
+
+**Merged pull requests:**
+
+- Show background work in outstanding [\#76](https://github.com/JohnDeere/work-tracker/pull/76) ([AveryRegier](https://github.com/AveryRegier))
+-  Add module structure support for java 9+ [\#62](https://github.com/JohnDeere/work-tracker/pull/62) ([PrabinAdhikari](https://github.com/PrabinAdhikari))
+
 ## [work-tracker-1.0.1](https://github.com/JohnDeere/work-tracker/tree/work-tracker-1.0.1) (2019-11-05)
 
 [Full Changelog](https://github.com/JohnDeere/work-tracker/compare/work-tracker-1.0.0...work-tracker-1.0.1)
@@ -47,7 +56,6 @@
 
 **Merged pull requests:**
 
--  Add module structure support for java 9+ [\#62](https://github.com/JohnDeere/work-tracker/pull/62) ([PrabinAdhikari](https://github.com/PrabinAdhikari))
 - Fix Contribution Guidelines link [\#56](https://github.com/JohnDeere/work-tracker/pull/56) ([evonsdesigns](https://github.com/evonsdesigns))
 - Add documentation for excludePathPatterns [\#55](https://github.com/JohnDeere/work-tracker/pull/55) ([evonsdesigns](https://github.com/evonsdesigns))
 
