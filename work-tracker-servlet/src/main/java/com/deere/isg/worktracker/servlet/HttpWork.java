@@ -64,6 +64,7 @@ public class HttpWork extends Work {
         this.remoteAddress = addToMDC(REMOTE_ADDRESS, remoteAddress);
     }
 
+    @Override
     public String getService() {
         return path;
     }
@@ -94,5 +95,10 @@ public class HttpWork extends Work {
 
     public void setAcceptHeader(String acceptHeader) {
         this.acceptHeader = addToMDC(ACCEPT, acceptHeader);
+    }
+
+    @Override
+    public String getExtraInfo() {
+        return getAcceptHeader();
     }
 }

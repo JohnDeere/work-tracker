@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-
 package com.deere.isg.worktracker.servlet;
 
-import com.deere.isg.worktracker.ContextualExecutor;
+import EDU.oswego.cs.dl.util.concurrent.Executor;
+import com.deere.isg.worktracker.ContextualOswegoExecutor;
 import com.deere.isg.worktracker.OutstandingTaskDecorator;
 import com.deere.isg.worktracker.OutstandingWorkTracker;
 import com.deere.isg.worktracker.TaskDecorator;
@@ -28,30 +28,29 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
 
-public class MdcExecutor extends ContextualExecutor {
+public class MdcOswegoExecutor extends ContextualOswegoExecutor {
     public static final String PARENT_ENDPOINT = "parent_endpoint";
     public static final String PARENT_PATH = "parent_path";
 
     private Logger logger = LoggerFactory.getLogger(MdcExecutor.class);
 
-    public MdcExecutor(Executor executor) {
+    public MdcOswegoExecutor(Executor executor) {
         super(executor);
         setLogger(logger);
     }
 
-    public MdcExecutor(Executor executor, TaskDecorator taskDecorator) {
+    public MdcOswegoExecutor(Executor executor, TaskDecorator taskDecorator) {
         super(executor, taskDecorator);
         setLogger(logger);
     }
 
-    public MdcExecutor(Executor executor, OutstandingWorkTracker<Work> outstandingWork, BiFunction<Object, Work, TaskWork> workFactory) {
+    public MdcOswegoExecutor(Executor executor, OutstandingWorkTracker<Work> outstandingWork, BiFunction<Object, Work, TaskWork> workFactory) {
         this(executor, new OutstandingTaskDecorator<>(outstandingWork, workFactory));
     }
 
-    public MdcExecutor(Executor executor, OutstandingWorkTracker<Work> outstandingWork) {
+    public MdcOswegoExecutor(Executor executor, OutstandingWorkTracker<Work> outstandingWork) {
         this(executor, outstandingWork, (t,p)->new TaskWork(t.getClass().getName(), p));
     }
 

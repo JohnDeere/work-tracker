@@ -16,8 +16,6 @@
 
 package com.deere.isg.worktracker;
 
-import com.deere.isg.worktracker.ExecutorTestUtils.MockCallable;
-import com.deere.isg.worktracker.ExecutorTestUtils.MockRunnable;
 import net.logstash.logback.marker.SingleFieldAppendingMarker;
 import org.hamcrest.CustomMatcher;
 import org.junit.After;
@@ -36,26 +34,29 @@ import static net.logstash.logback.argument.StructuredArguments.kv;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class ContextualTaskDecoratorTest {
+public class OutstandingTaskDecoratorTest {
     private static final String TASK_CLASS_NAME = "task_class_name";
     private static final String TASK_ID = "task_id";
     private static final String TEST_KEY = "testKey";
     private static final String TEST_VALUE = "testValue";
-    private MockRunnable runnable;
+    private ExecutorTestUtils.MockRunnable runnable;
     private TaskDecorator taskDecorator;
-    private MockCallable callable;
+    private ExecutorTestUtils.MockCallable callable;
     private Logger logger;
+    private OutstandingWork<Work> outstandingWork = new OutstandingWork<>();
 
     @Before
     public void setUp() {
         MDC.clear();
-        taskDecorator = new ContextualTaskDecorator();
-        callable = new MockCallable();
-        runnable = new MockRunnable();
+        callable = new ExecutorTestUtils.MockCallable();
+        runnable = new ExecutorTestUtils.MockRunnable();
+        taskDecorator = new OutstandingTaskDecorator<>(outstandingWork,
+                (t,p)->new TaskWork(runnable.getClass().getName()));
         logger = mock(Logger.class);
     }
 
@@ -75,9 +76,13 @@ public class ContextualTaskDecoratorTest {
         taskDecorator.decorate(emptyMap(), runnable).run();
         boolean uuidMatch = UUID_PATTERN.matcher(runnable.getValue(TASK_ID)).matches();
 
-        verify(logger).info("Task started", kv("time_interval", "start"));
+        verify(logger).info(eq("Task started"), anyObject(),
+                eq(kv("zombie", false)), eq(kv("time_interval", "start")));
 
-        verify(logger).info(ArgumentMatchers.startsWith("Task ended after {} ms"), timeCapture.capture(), eq(kv("time_interval", "end")));
+        verify(logger).info(ArgumentMatchers.startsWith("Task ended: {1} {3}"),
+                timeCapture.capture(), eq(kv("zombie", false)),
+                eq(kv("time_interval", "end")));
+
         assertThat(timeCapture.getValue().getFieldName(), is("elapsed_ms"));
         assertThat(timeCapture.getValue().toString(), matches(".*(\\d{4}).*"));
         assertThat(uuidMatch, is(true));
@@ -93,9 +98,12 @@ public class ContextualTaskDecoratorTest {
         taskDecorator.decorate(emptyMap(), runnable).run();
         boolean uuidMatch = UUID_PATTERN.matcher(runnable.getValue(TASK_ID)).matches();
 
-        verify(logger).info("Task started", kv("time_interval", "start"));
+        verify(logger).info(eq("Task started"), anyObject(),
+                eq(kv("zombie", false)), eq(kv("time_interval", "start")));
 
-        verify(logger).info(ArgumentMatchers.startsWith("Task ended after {} ms"), timeCapture.capture(), eq(kv("time_interval", "end")));
+        verify(logger).info(ArgumentMatchers.startsWith("Task ended: {1} {3}"),
+                timeCapture.capture(), eq(kv("zombie", false)),
+                eq(kv("time_interval", "end")));
         assertThat(timeCapture.getValue().getFieldName(), is("elapsed_ms"));
         assertThat(timeCapture.getValue().toString(), matches(".*(\\d{4}).*"));
         assertThat(uuidMatch, is(true));

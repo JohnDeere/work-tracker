@@ -16,24 +16,25 @@
 
 package com.deere.isg.worktracker;
 
-import java.util.Map;
-import java.util.concurrent.Executor;
+import EDU.oswego.cs.dl.util.concurrent.Executor;
 
-public class ContextualExecutor extends ContextualRunner implements Executor {
+import java.util.Map;
+
+public class ContextualOswegoExecutor extends ContextualRunner implements Executor {
     private Executor executor;
 
-    public ContextualExecutor(Executor executor) {
+    public ContextualOswegoExecutor(Executor executor) {
         this(executor, new ContextualTaskDecorator());
     }
 
-    public ContextualExecutor(Executor executor, TaskDecorator taskDecorator) {
+    public ContextualOswegoExecutor(Executor executor, TaskDecorator taskDecorator) {
         super(taskDecorator);
         this.executor = executor;
     }
 
     @Override
-    public void execute(Runnable runnable) {
+    public void execute(Runnable runnable) throws InterruptedException {
         Map<String, String> parentMdc = cleanseParentMdc();
         executor.execute(taskDecorator.decorate(parentMdc, runnable));
     }
-}
+ }

@@ -17,21 +17,29 @@
 
 package com.deere.isg.worktracker.servlet;
 
-import com.deere.isg.worktracker.OutstandingWork;
+import com.deere.isg.worktracker.OutstandingWorkFilter;
+import com.deere.isg.worktracker.OutstandingWorkTracker;
+import com.deere.isg.worktracker.Work;
 import com.deere.isg.worktracker.ZombieDetector;
 
 public class WorkConfig<W extends HttpWork> {
-    private OutstandingWork<W> outstanding;
+    private OutstandingWorkTracker<? extends Work> allOutstanding;
+    private OutstandingWorkTracker<? extends Work> outstanding;
     private HttpFloodSensor<W> floodSensor;
     private ZombieDetector detector;
 
-    private WorkConfig(OutstandingWork<W> outstanding, HttpFloodSensor<W> floodSensor, ZombieDetector detector) {
+    private WorkConfig(
+            OutstandingWorkTracker<? extends Work> outstanding,
+            HttpFloodSensor<W> floodSensor,
+            ZombieDetector detector,
+            OutstandingWorkTracker<? extends Work> allOutstanding) {
         this.outstanding = outstanding;
         this.floodSensor = floodSensor;
         this.detector = detector;
+        this.allOutstanding = allOutstanding;
     }
 
-    public OutstandingWork<W> getOutstanding() {
+    public OutstandingWorkTracker<? extends Work> getOutstanding() {
         return outstanding;
     }
 
@@ -43,33 +51,70 @@ public class WorkConfig<W extends HttpWork> {
         return detector;
     }
 
+    public OutstandingWorkTracker<? extends Work> getAllOutstanding() {
+        return allOutstanding;
+    }
+
     public static class Builder<T extends HttpWork> {
-        private OutstandingWork<T> outstanding;
+        private OutstandingWorkTracker<? extends Work> outstanding;
+        private OutstandingWorkTracker<T> filteredOutstanding;
+        private OutstandingWorkTracker<? extends Work> zombieOutstanding;
         private HttpFloodSensor<T> floodSensor;
         private ZombieDetector detector;
 
-        public Builder(final OutstandingWork<T> outstanding) {
+        /**
+         * Set up Work Tracker with the following behaviors: <ul>
+         *     <li>WorkHttpServlet will only show work of type T</li>
+         *     <li>ZombieDetector will only detect and kill work of type T when using withZombieDetector()</li>
+         *     <li>HttpFloodSensor will only detect and reject work of type T when using withHttpFloodSensor
+         *         and setHttpFloodSensorWithLimit</li>
+         * </ul>
+         *
+         * This keeps backwards compatibility and a safe upgrade path.
+         * @param outstanding
+         */
+        public Builder(final OutstandingWorkTracker<T> outstanding) {
             assert outstanding != null : "Outstanding cannot be null";
             this.outstanding = outstanding;
+            this.filteredOutstanding = outstanding;
+            this.zombieOutstanding = outstanding;
+        }
+
+        /**
+         * Set up Work Tracker with the following behaviors: <ul>
+         *     <li>WorkHttpServlet will only show all work tracked in the outstanding object</li>
+         *     <li>ZombieDetector will only detect and kill work of type T when using withZombieDetector()</li>
+         *     <li>HttpFloodSensor will only detect and reject work of type T when using withHttpFloodSensor
+         *         and setHttpFloodSensorWithLimit</li>
+         * </ul>
+         *
+         * Use this if you want to have visibility to all work including background or async processes along with HTTP.
+         * @param outstanding
+         */
+        public Builder(final OutstandingWorkTracker<Work> outstanding, Class<T> workClazz) {
+            assert outstanding != null : "Outstanding cannot be null";
+            this.outstanding = outstanding;
+            this.filteredOutstanding = new OutstandingWorkFilter<>(outstanding, workClazz);
+            this.zombieOutstanding = filteredOutstanding;
         }
 
         public WorkConfig<T> build() {
-            return new WorkConfig<>(outstanding, floodSensor, detector);
+            return new WorkConfig<T>(filteredOutstanding, floodSensor, detector, outstanding);
         }
 
         public Builder<T> withHttpFloodSensor() {
-            this.floodSensor = new HttpFloodSensor<>(outstanding);
+            this.floodSensor = new HttpFloodSensor<>(filteredOutstanding);
             return this;
         }
 
         public Builder<T> withZombieDetector() {
-            this.detector = new ZombieDetector(outstanding);
+            this.detector = new ZombieDetector(zombieOutstanding);
             return this;
         }
 
         public Builder<T> setHttpFloodSensorWithLimit(final ConnectionLimits<T> connectionLimits) {
             assert connectionLimits != null : "Connection Limit cannot be null";
-            this.floodSensor = new HttpFloodSensor<>(this.outstanding, connectionLimits);
+            this.floodSensor = new HttpFloodSensor<>(this.filteredOutstanding, connectionLimits);
             return this;
         }
 

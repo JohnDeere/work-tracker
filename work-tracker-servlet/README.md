@@ -177,3 +177,31 @@ try {
     logger.error("Could not complete task", e);
 }
 ```
+## Enhanced background task tracking
+Starting in version 1.1.0-rc1, you may configure work-tracker to show your background
+tasks in the [Outstanding HttpServlet](#outstanding-httpservlet).
+
+To enable it, change your WorkTrackerContextListener to use the Builder constructor 
+that tells it how to filter work that will be seen by the FloodSensor and ZombieDetector:
+
+```java
+public class WorkTrackerContextListener extends WorkContextListener {
+    public WorkTrackerContextListener() {
+        super(new WorkConfig.Builder<>(new OutstandingWork<Work>(), HttpWork.class)
+                .withHttpFloodSensor() //Optional, omit if not required
+                .withZombieDetector() //Optional, omit if not required
+                .build()
+        );
+    }
+}
+```
+
+Now the `new OutstandingWork<Work>()` object will be able to track `TaskWork` objects as well.
+To supply those objects to the tracker, initialize the MDCExecutor as follows:
+
+```java
+private OutstandingWork<Work> outstandingWork = ...
+private ExecutorService service = Executors.newFixedThreadPool(3);
+private Executor executor = new MdcExecutor(service, outstandingWork);
+```
+

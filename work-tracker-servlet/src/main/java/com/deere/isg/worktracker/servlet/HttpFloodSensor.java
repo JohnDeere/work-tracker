@@ -18,7 +18,7 @@
 package com.deere.isg.worktracker.servlet;
 
 import com.deere.isg.worktracker.FloodSensor;
-import com.deere.isg.worktracker.OutstandingWork;
+import com.deere.isg.worktracker.OutstandingWorkTracker;
 import org.slf4j.Logger;
 
 import javax.servlet.ServletResponse;
@@ -32,11 +32,11 @@ public class HttpFloodSensor<W extends HttpWork> extends FloodSensor<W> {
     public static final int SC_TOO_MANY_REQUESTS = 429;
     private ConnectionLimits<W> connectionLimits;
 
-    public HttpFloodSensor(OutstandingWork<W> outstanding) {
+    public HttpFloodSensor(OutstandingWorkTracker<W> outstanding) {
         this(outstanding, new ConnectionLimits<>());
     }
 
-    public HttpFloodSensor(OutstandingWork<W> outstanding, ConnectionLimits<W> connectionLimits) {
+    public HttpFloodSensor(OutstandingWorkTracker<W> outstanding, ConnectionLimits<W> connectionLimits) {
         super(outstanding);
         this.connectionLimits = connectionLimits;
     }

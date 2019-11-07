@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// Unpublished Work (c) 2019 Deere & Company
-
 open module com.deere.isg.worktracker.core {
     requires com.deere.isg.clock;
     requires transitive com.deere.isg.outstanding;
@@ -26,5 +24,6 @@ open module com.deere.isg.worktracker.core {
     requires logback.classic;
     requires java.annotation;
     requires com.fasterxml.jackson.core;
+    requires oswego.concurrent;
     exports com.deere.isg.worktracker;
 }

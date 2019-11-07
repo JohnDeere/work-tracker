@@ -18,6 +18,7 @@
 package com.deere.isg.worktracker.servlet;
 
 import com.deere.isg.worktracker.OutstandingWork;
+import com.deere.isg.worktracker.Work;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +41,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.deere.isg.worktracker.servlet.TestWorkUtils.createWorkList;
-import static com.deere.isg.worktracker.servlet.WorkContextListener.OUTSTANDING_ATTR;
+import static com.deere.isg.worktracker.servlet.WorkContextListener.ALL_OUTSTANDING_ATTR;
 import static com.deere.isg.worktracker.servlet.WorkHttpServlet.TEMPLATE_PATH;
 import static com.deere.isg.worktracker.servlet.WorkHttpServlet.WORK_LIST;
 import static org.hamcrest.CoreMatchers.*;
@@ -55,7 +56,7 @@ public class WorkHttpServletTest {
     private static final WorkHttpServlet.HtmlPage PAGE = new WorkHttpServlet.HtmlPage();
 
     private static final List<HttpWork> TEST_WORKS = createWorkList(10);
-    private static final List<WorkSummary<? extends HttpWork>> WORK_SUMMARIES = TEST_WORKS.stream()
+    private static final List<WorkSummary<? extends Work>> WORK_SUMMARIES = TEST_WORKS.stream()
             .map(WorkSummary::new)
             .collect(Collectors.toList());
 
@@ -77,7 +78,7 @@ public class WorkHttpServletTest {
     public void setUp() {
         servlet = new WorkHttpServlet();
         when(config.getServletContext()).thenReturn(mock(ServletContext.class));
-        when(config.getServletContext().getAttribute(OUTSTANDING_ATTR)).thenReturn(outstanding);
+        when(config.getServletContext().getAttribute(ALL_OUTSTANDING_ATTR)).thenReturn(outstanding);
     }
 
     @Test
@@ -197,7 +198,7 @@ public class WorkHttpServletTest {
 
     @Test
     public void nullOutstandingHaveNoOutput() throws ServletException, IOException {
-        when(config.getServletContext().getAttribute(OUTSTANDING_ATTR)).thenReturn(null);
+        when(config.getServletContext().getAttribute(ALL_OUTSTANDING_ATTR)).thenReturn(null);
         initPath(TEST_PATH);
 
         servlet.doGet(request, response);
@@ -209,7 +210,7 @@ public class WorkHttpServletTest {
     public void setsRowToRedForZombie() {
         WorkSummary<HttpWork> zombieSummary = new WorkSummary<>(null);
         zombieSummary.setZombie(true);
-        List<WorkSummary<? extends HttpWork>> zombieSummaries = Collections.singletonList(zombieSummary);
+        List<WorkSummary<? extends Work>> zombieSummaries = Collections.singletonList(zombieSummary);
 
         String html = PAGE.render(zombieSummaries);
         assertThat(html, containsString("<tr class='red'>"));
@@ -218,7 +219,7 @@ public class WorkHttpServletTest {
     @Test
     public void setsRowToNeutralForNonZombie() {
         WorkSummary<HttpWork> zombieSummary = new WorkSummary<>(null);
-        List<WorkSummary<? extends HttpWork>> zombieSummaries = Collections.singletonList(zombieSummary);
+        List<WorkSummary<? extends Work>> zombieSummaries = Collections.singletonList(zombieSummary);
 
         String html = PAGE.render(zombieSummaries);
         assertThat(html, containsString("<tr>"));

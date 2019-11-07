@@ -18,21 +18,28 @@
 package com.deere.isg.worktracker.servlet;
 
 import com.deere.isg.worktracker.OutstandingWork;
+import com.deere.isg.worktracker.OutstandingWorkTracker;
+import com.deere.isg.worktracker.Work;
 import com.deere.isg.worktracker.ZombieDetector;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.servlet.http.HttpServletResponse;
+
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.*;
 
 public class WorkConfigTest {
     private OutstandingWork<HttpWork> outstanding;
+    private OutstandingWork<Work> allOutstanding;
     private ZombieDetector detector;
     private ConnectionLimits<HttpWork> limit;
 
     @Before
     public void setUp() {
         outstanding = new OutstandingWork<>();
+        allOutstanding = new OutstandingWork<>();
         detector = new ZombieDetector(outstanding);
         limit = new ConnectionLimits<>();
     }
@@ -113,7 +120,8 @@ public class WorkConfigTest {
                 .withZombieDetector()
                 .build();
 
-        assertThat(config.getOutstanding(), notNullValue());
+        assertThat(config.getOutstanding(), is(outstanding));
+        assertThat(config.getAllOutstanding(), is(outstanding));
         assertThat(config.getFloodSensor(), notNullValue());
         assertThat(config.getDetector(), notNullValue());
     }
@@ -123,7 +131,8 @@ public class WorkConfigTest {
         WorkConfig<HttpWork> config = new WorkConfig.Builder<>(outstanding)
                 .build();
 
-        assertThat(config.getOutstanding(), notNullValue());
+        assertThat(config.getOutstanding(), is(outstanding));
+        assertThat(config.getAllOutstanding(), is(outstanding));
         assertThat(config.getFloodSensor(), nullValue());
         assertThat(config.getDetector(), nullValue());
     }
@@ -134,7 +143,8 @@ public class WorkConfigTest {
                 .withHttpFloodSensor()
                 .build();
 
-        assertThat(config.getOutstanding(), notNullValue());
+        assertThat(config.getOutstanding(), is(outstanding));
+        assertThat(config.getAllOutstanding(), is(outstanding));
         assertThat(config.getFloodSensor(), notNullValue());
         assertThat(config.getDetector(), nullValue());
     }
@@ -145,7 +155,8 @@ public class WorkConfigTest {
                 .withZombieDetector()
                 .build();
 
-        assertThat(config.getOutstanding(), notNullValue());
+        assertThat(config.getOutstanding(), is(outstanding));
+        assertThat(config.getAllOutstanding(), is(outstanding));
         assertThat(config.getFloodSensor(), nullValue());
         assertThat(config.getDetector(), notNullValue());
     }
@@ -172,5 +183,37 @@ public class WorkConfigTest {
                 .build();
 
         assertThat(config.getFloodSensor().getConnectionLimit(ConnectionLimits.TOTAL).getLimit(), is(newTotalLimit));
+    }
+
+    @Test
+    public void allOutstandingIsFiltered() {
+        WorkConfig<HttpWork> config = new WorkConfig.Builder<>(allOutstanding, HttpWork.class)
+                .withHttpFloodSensor()
+                .withZombieDetector()
+                .build();
+
+        assertThat(config.getOutstanding(), notNullValue(OutstandingWorkTracker.class));
+        assertThat(config.getAllOutstanding(), is(allOutstanding));
+        assertThat(config.getFloodSensor(), notNullValue());
+        assertThat(config.getDetector(), notNullValue());
+
+        Work otherWork = mock(Work.class);
+        when(otherWork.isZombie()).thenReturn(true);
+        allOutstanding.create(otherWork);
+
+        assertThat(config.getOutstanding().current().isPresent(), is(false));
+        assertThat(config.getAllOutstanding().current().orElse(null), is(otherWork));
+
+        config.getDetector().killRunaway(); // no exception should be thrown
+        verify(otherWork, times(0)).isZombie();
+
+        // Flood detector does not see all this other work going on.
+        // Note that in the future we may decide for this to change and FloodDetector to honor background work in the limits.
+        // but when we do, probably the limits themselves will be configured to honor this work.
+        for (int i = 0; i < 100; i++) {
+            allOutstanding.create(otherWork);
+        }
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        assertThat(config.getFloodSensor().mayProceedOrRedirectTooManyRequest(response), is(true));
     }
 }

@@ -29,13 +29,10 @@ import java.util.concurrent.Callable;
 import static java.util.Collections.emptyMap;
 import static net.logstash.logback.argument.StructuredArguments.kv;
 
-public class ContextualTaskDecorator {
-    public static final String TASK_TIME_INTERVAL = Work.TIME_INTERVAL;
-    public static final String TASK_ELAPSED_MS = Work.ELAPSED_MS;
-    public static final String TASK_ID = "task_id";
-    public static final String TASK_CLASS_NAME = "task_class_name";
+public class ContextualTaskDecorator implements TaskDecorator {
     private Logger logger = LoggerFactory.getLogger(ContextualTaskDecorator.class);
 
+    @Override
     public Runnable decorate(Map<String, String> parentMdc, Runnable runnable) {
         return () -> {
             long startTime = nowInMillis();
@@ -48,6 +45,7 @@ public class ContextualTaskDecorator {
         };
     }
 
+    @Override
     public <T> Callable<T> decorate(Map<String, String> parentMdc, Callable<T> task) {
         return () -> {
             long startTime = nowInMillis();
@@ -58,10 +56,9 @@ public class ContextualTaskDecorator {
                 afterExecute(startTime);
             }
         };
-
     }
 
-    protected void setLogger(Logger logger) {
+    public void setLogger(Logger logger) {
         this.logger = logger;
     }
 

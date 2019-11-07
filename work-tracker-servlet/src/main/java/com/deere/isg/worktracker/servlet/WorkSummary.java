@@ -17,10 +17,12 @@
 
 package com.deere.isg.worktracker.servlet;
 
+import com.deere.isg.worktracker.Work;
+
 import java.util.Date;
 import java.util.Objects;
 
-public class WorkSummary<W extends HttpWork> {
+public class WorkSummary<W extends Work> {
     private Date startTime;
     private String service;
     private String requestId;
@@ -33,10 +35,12 @@ public class WorkSummary<W extends HttpWork> {
         if (work != null) {
             setStartTime(new Date(work.getStartTime()));
             setElapsedMillis(String.valueOf(work.getElapsedMillis()));
-            setService(work.getService());
+            String service = work.getService();
+            setService(service == null ? "" : service);
             setRequestId(work.getRequestId());
             setThreadName(work.getThreadName());
-            setAcceptHeader(work.getAcceptHeader());
+            String extraInfo = work.getExtraInfo();
+            setAcceptHeader(extraInfo == null ? "" : extraInfo);
             setZombie(work.isZombie());
         }
     }

@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-// Unpublished Work (c) 2019 Deere & Company
-
 open module com.deere.isg.worktracker.servlet {
     requires transitive com.deere.isg.worktracker.core;
     requires javax.servlet.api;
     requires slf4j.api;
     requires logstash.logback.encoder;
+    requires oswego.concurrent;
     exports com.deere.isg.worktracker.servlet;
 }

@@ -17,7 +17,7 @@
 
 package com.deere.isg.worktracker.servlet;
 
-import com.deere.isg.worktracker.OutstandingWork;
+import com.deere.isg.worktracker.OutstandingWorkTracker;
 import com.deere.isg.worktracker.ZombieDetector;
 
 import javax.servlet.Filter;
@@ -40,7 +40,7 @@ import static com.deere.isg.worktracker.servlet.WorkContextListener.*;
  * you need to call {@code super.init(filterConfig)} to initialize outstanding, floodSensor and detector.
  */
 public abstract class BaseFilter implements Filter {
-    private OutstandingWork<?> outstanding;
+    private OutstandingWorkTracker<?> outstanding;
     private HttpFloodSensor<?> floodSensor;
     private ZombieDetector detector;
 
@@ -56,7 +56,7 @@ public abstract class BaseFilter implements Filter {
     @Override
     @SuppressWarnings("unchecked")
     public void init(FilterConfig filterConfig) throws ServletException {
-        outstanding = (OutstandingWork<?>) filterConfig.getServletContext().getAttribute(OUTSTANDING_ATTR);
+        outstanding = (OutstandingWorkTracker<?>) filterConfig.getServletContext().getAttribute(OUTSTANDING_ATTR);
         floodSensor = (HttpFloodSensor<?>) filterConfig.getServletContext().getAttribute(FLOOD_SENSOR_ATTR);
         detector = (ZombieDetector) filterConfig.getServletContext().getAttribute(ZOMBIE_ATTR);
     }
@@ -66,11 +66,11 @@ public abstract class BaseFilter implements Filter {
 
     }
 
-    protected OutstandingWork<?> getOutstanding() {
+    protected OutstandingWorkTracker<?> getOutstanding() {
         return outstanding;
     }
 
-    protected void setOutstanding(OutstandingWork<?> outstanding) {
+    protected void setOutstanding(OutstandingWorkTracker<?> outstanding) {
         this.outstanding = outstanding;
     }
 

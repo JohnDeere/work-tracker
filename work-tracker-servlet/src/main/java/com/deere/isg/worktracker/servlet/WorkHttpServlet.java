@@ -17,8 +17,8 @@
 
 package com.deere.isg.worktracker.servlet;
 
-import com.deere.isg.outstanding.Outstanding;
-import com.deere.isg.worktracker.OutstandingWork;
+import com.deere.isg.worktracker.OutstandingWorkTracker;
+import com.deere.isg.worktracker.Work;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -31,7 +31,7 @@ import java.io.PrintWriter;
 import java.util.List;
 
 import static com.deere.isg.worktracker.StringUtils.isNotBlank;
-import static com.deere.isg.worktracker.servlet.WorkContextListener.OUTSTANDING_ATTR;
+import static com.deere.isg.worktracker.servlet.WorkContextListener.ALL_OUTSTANDING_ATTR;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -55,9 +55,9 @@ public class WorkHttpServlet extends HttpServlet {
     public static final String TEMPLATE_PATH = "templatePath";
     public static final String WORK_LIST = "work_list";
 
-    private List<WorkSummary<? extends HttpWork>> workSummaries;
+    private List<WorkSummary<? extends Work>> workSummaries;
     private String templatePath;
-    private Outstanding<? extends HttpWork> outstanding;
+    private OutstandingWorkTracker<? extends Work> outstanding;
     private HtmlPage page;
 
     @Override
@@ -72,7 +72,7 @@ public class WorkHttpServlet extends HttpServlet {
             page = new HtmlPage();
         }
 
-        outstanding = (OutstandingWork<? extends HttpWork>) getServletContext().getAttribute(OUTSTANDING_ATTR);
+        outstanding = (OutstandingWorkTracker<? extends Work>) getServletContext().getAttribute(ALL_OUTSTANDING_ATTR);
     }
 
     @Override
@@ -92,11 +92,11 @@ public class WorkHttpServlet extends HttpServlet {
         }
     }
 
-    protected List<WorkSummary<? extends HttpWork>> mapOutstandingToSummaryList() {
+    protected List<WorkSummary<? extends Work>> mapOutstandingToSummaryList() {
         return getOutstanding().stream().map(WorkSummary::new).collect(toList());
     }
 
-    protected Outstanding<? extends HttpWork> getOutstanding() {
+    protected OutstandingWorkTracker<? extends Work> getOutstanding() {
         return outstanding;
     }
 
@@ -108,7 +108,7 @@ public class WorkHttpServlet extends HttpServlet {
         this.templatePath = templatePath;
     }
 
-    public List<WorkSummary<? extends HttpWork>> getWorkSummaries() {
+    public List<WorkSummary<? extends Work>> getWorkSummaries() {
         return workSummaries;
     }
 
@@ -148,7 +148,7 @@ public class WorkHttpServlet extends HttpServlet {
         private static final String TABLE_END = "</table>";
         private static final String BODY_END = "</body>" + "</html>";
 
-        String render(List<WorkSummary<? extends HttpWork>> workSummaries) {
+        String render(List<WorkSummary<? extends Work>> workSummaries) {
             StringBuilder builder = new StringBuilder();
             builder.append(HEAD)
                     .append(BODY_START)

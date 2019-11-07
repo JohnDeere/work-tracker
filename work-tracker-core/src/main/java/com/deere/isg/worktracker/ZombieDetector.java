@@ -31,12 +31,12 @@ public class ZombieDetector implements AutoCloseable {
 
     private static final long SECOND_30 = TimeUnit.MILLISECONDS.convert(30, TimeUnit.SECONDS);
 
-    private final OutstandingWork<?> outstanding;
+    private final OutstandingWorkTracker<?> outstanding;
 
     private ZombieLogger logger = ZombieLogger.getLogger();
     private ScheduledFuture<?> future;
 
-    public ZombieDetector(OutstandingWork<?> outstanding) {
+    public ZombieDetector(OutstandingWorkTracker<?> outstanding) {
         this.outstanding = outstanding;
     }
 

@@ -16,7 +16,7 @@
 
 package com.deere.isg.worktracker.servlet;
 
-import com.deere.isg.worktracker.OutstandingWork;
+import com.deere.isg.worktracker.OutstandingWorkTracker;
 import org.slf4j.MDC;
 
 import javax.servlet.FilterChain;
@@ -40,7 +40,7 @@ public abstract class AbstractHttpWorkFilter<W extends HttpWork>
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         W payload = createWork(request, response);
         HttpServletRequest httpRequest = getHttpRequest(payload, request);
-        OutstandingWork<W> outstanding = getOutstanding();
+        OutstandingWorkTracker<W> outstanding = getOutstanding();
         try {
             if (outstanding != null) {
                 outstanding.<IOException, ServletException>doInTransactionChecked(payload, () -> {

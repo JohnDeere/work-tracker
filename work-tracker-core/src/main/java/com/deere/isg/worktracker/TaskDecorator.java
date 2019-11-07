@@ -14,26 +14,22 @@
  * limitations under the License.
  */
 
-
 package com.deere.isg.worktracker;
 
-import com.deere.isg.outstanding.Outstanding;
-import java.util.Optional;
+import org.slf4j.Logger;
 
-public class OutstandingWork<W extends Work> extends Outstanding<W> implements OutstandingWorkTracker<W> {
-    private InheritableThreadLocal<Ticket> currentPayload = new InheritableThreadLocal<>();
+import java.util.Map;
+import java.util.concurrent.Callable;
 
-    @Override
-    protected Ticket createTicket(W payload) {
-        Ticket ticket = super.createTicket(payload);
-        if (currentPayload != null) {
-            currentPayload.set(ticket);
-        }
-        return ticket;
-    }
+public interface TaskDecorator {
+    String TASK_TIME_INTERVAL = Work.TIME_INTERVAL;
+    String TASK_ELAPSED_MS = Work.ELAPSED_MS;
+    String TASK_ID = "task_id";
+    String TASK_CLASS_NAME = "task_class_name";
 
-    public Optional<W> current() {
-        return Optional.ofNullable(currentPayload.get()).flatMap(Ticket::getPayload);
-    }
+    Runnable decorate(Map<String, String> parentMdc, Runnable runnable);
 
+    <T> Callable<T> decorate(Map<String, String> parentMdc, Callable<T> task);
+
+    void setLogger(Logger logger);
 }

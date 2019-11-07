@@ -34,7 +34,7 @@ public class ContextualExecutorService extends ContextualExecutor implements Exe
         this(executorService, new ContextualTaskDecorator());
     }
 
-    public ContextualExecutorService(ExecutorService executorService, ContextualTaskDecorator decorator) {
+    public ContextualExecutorService(ExecutorService executorService, TaskDecorator decorator) {
         super(executorService, decorator);
         this.executorService = executorService;
     }
@@ -111,6 +111,4 @@ public class ContextualExecutorService extends ContextualExecutor implements Exe
                 .map(t -> taskDecorator.decorate(parentMdc, t))
                 .collect(Collectors.toList());
     }
-
-
 }

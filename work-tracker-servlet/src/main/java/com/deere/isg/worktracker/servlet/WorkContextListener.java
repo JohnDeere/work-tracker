@@ -17,7 +17,8 @@
 
 package com.deere.isg.worktracker.servlet;
 
-import com.deere.isg.worktracker.OutstandingWork;
+import com.deere.isg.worktracker.OutstandingWorkTracker;
+import com.deere.isg.worktracker.Work;
 import com.deere.isg.worktracker.ZombieDetector;
 
 import javax.servlet.ServletContext;
@@ -80,16 +81,19 @@ import javax.servlet.ServletContextListener;
  */
 public class WorkContextListener implements ServletContextListener {
     public static final String OUTSTANDING_ATTR = "outstanding";
+    public static final String ALL_OUTSTANDING_ATTR = "all_"+OUTSTANDING_ATTR;
     public static final String FLOOD_SENSOR_ATTR = "flood_sensor";
     public static final String ZOMBIE_ATTR = "zombie_detector";
 
-    private OutstandingWork<?> outstanding;
+    private OutstandingWorkTracker<?> outstanding;
+    private OutstandingWorkTracker<Work> allOutstanding;
     private HttpFloodSensor<?> floodSensor;
     private ZombieDetector detector;
 
     public WorkContextListener(WorkConfig config) {
         assert config != null : "WorkConfig cannot be null";
         this.outstanding = config.getOutstanding();
+        this.allOutstanding = config.getAllOutstanding();
         this.floodSensor = config.getFloodSensor();
         this.detector = config.getDetector();
     }
@@ -100,6 +104,7 @@ public class WorkContextListener implements ServletContextListener {
         servletContext.setAttribute(OUTSTANDING_ATTR, outstanding);
         servletContext.setAttribute(FLOOD_SENSOR_ATTR, floodSensor);
         servletContext.setAttribute(ZOMBIE_ATTR, detector);
+        servletContext.setAttribute(ALL_OUTSTANDING_ATTR, allOutstanding);
     }
 
     @Override
