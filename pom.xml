@@ -5,7 +5,7 @@
     <groupId>com.deere.isg.work-tracker</groupId>
     <artifactId>work-tracker</artifactId>
     <packaging>pom</packaging>
-    <version>1.1.0-rc1-SNAPSHOT</version>
+    <version>1.1.0-rc1</version>
 
     <name>work-tracker</name>
     <description>A library to monitor threads and requests.
@@ -57,7 +57,7 @@
         <connection>scm:git:https://github.com/JohnDeere/work-tracker.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/JohnDeere/work-tracker.git</developerConnection>
         <url>https://github.com/JohnDeere/work-tracker</url>
-        <tag>HEAD</tag>
+        <tag>work-tracker-1.1.0-rc1</tag>
     </scm>
 
     <developers>
