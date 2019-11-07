@@ -1,8 +1,8 @@
 # Changelog
 
-## [Unreleased](https://github.com/JohnDeere/work-tracker/tree/HEAD)
+## [work-tracker-1.1.0-rc1](https://github.com/JohnDeere/work-tracker/tree/work-tracker-1.1.0-rc1) (2019-11-07)
 
-[Full Changelog](https://github.com/JohnDeere/work-tracker/compare/work-tracker-1.0.1...HEAD)
+[Full Changelog](https://github.com/JohnDeere/work-tracker/compare/work-tracker-1.0.1...work-tracker-1.1.0-rc1)
 
 **Merged pull requests:**
 
