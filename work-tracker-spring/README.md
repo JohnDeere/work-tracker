@@ -164,7 +164,7 @@ public class UserSpringWork extends SpringWork {
     @Override
     public void updateUserInformation(HttpServletRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        setRemoteUser(auth.getName()); FloodSensor
+        setRemoteUser(auth.getName());
     }
 }
 ```
