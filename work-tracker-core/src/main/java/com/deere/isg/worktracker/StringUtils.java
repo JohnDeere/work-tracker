@@ -19,8 +19,6 @@ package com.deere.isg.worktracker;
 
 import java.util.regex.Pattern;
 
-import static java.lang.Character.isUpperCase;
-
 public final class StringUtils {
     private static final Pattern SNAKE_CASE = Pattern.compile("^([a-z][a-z0-9]*)(_[a-z0-9]+)*$");
     private static final Pattern WHITESPACE = Pattern.compile("\\s+");
@@ -88,6 +86,6 @@ public final class StringUtils {
 
     public static boolean isAllUpperCase(String value) {
         return value != null
-                && value.chars().allMatch(i -> isUpperCase((char) i));
+                && value.chars().allMatch(i -> Character.isLetter(i) ? Character.isUpperCase(i) : !Character.isWhitespace(i));
     }
 }

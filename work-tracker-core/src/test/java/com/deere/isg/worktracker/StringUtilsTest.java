@@ -147,6 +147,7 @@ public class StringUtilsTest {
         assertThat(isAllUpperCase("ASSERTION"), is(true));
         assertThat(isAllUpperCase("          "), is(false));
         assertThat(isAllUpperCase(null), is(false));
+        assertThat(isAllUpperCase("UPPER_CASE"), is(true));
     }
 
     @Test
@@ -155,5 +156,6 @@ public class StringUtilsTest {
         assertThat(camelToSnakeCase("GUID"), is("guid"));
         assertThat(camelToSnakeCase(" ASSER TION"), is("assertion"));
         assertThat(camelToSnakeCase("aID"), is("a_id"));
+        assertThat(camelToSnakeCase("UPPER_CASE"), is("upper_case"));
     }
 }
