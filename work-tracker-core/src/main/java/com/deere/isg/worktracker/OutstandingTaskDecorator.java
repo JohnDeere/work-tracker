@@ -76,7 +76,8 @@ public class OutstandingTaskDecorator<W extends TaskWork> implements TaskDecorat
 
     private void doEndLog(W payload) {
         List<StructuredArgument> endInfo = payload != null ? payload.getEndInfo() : new ArrayList<>();
-        logger.info("Task ended: {1} {"+endInfo.size()+"}", endInfo.toArray());
+        String successMessage = (payload != null && payload.isSuccess()) ? "Successful" : "Failure";
+        logger.info("Task ended: {} "+ successMessage, endInfo.toArray());
     }
 
     /**

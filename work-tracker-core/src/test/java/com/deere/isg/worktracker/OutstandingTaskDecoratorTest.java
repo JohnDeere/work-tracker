@@ -79,7 +79,7 @@ public class OutstandingTaskDecoratorTest {
         verify(logger).info(eq("Task started"), anyObject(),
                 eq(kv("zombie", false)), eq(kv("time_interval", "start")));
 
-        verify(logger).info(ArgumentMatchers.startsWith("Task ended: {1} {3}"),
+        verify(logger).info(ArgumentMatchers.startsWith("Task ended: {} Failure"),
                 timeCapture.capture(), eq(kv("zombie", false)),
                 eq(kv("time_interval", "end")));
 
@@ -101,7 +101,7 @@ public class OutstandingTaskDecoratorTest {
         verify(logger).info(eq("Task started"), anyObject(),
                 eq(kv("zombie", false)), eq(kv("time_interval", "start")));
 
-        verify(logger).info(ArgumentMatchers.startsWith("Task ended: {1} {3}"),
+        verify(logger).info(ArgumentMatchers.startsWith("Task ended: {} Failure"),
                 timeCapture.capture(), eq(kv("zombie", false)),
                 eq(kv("time_interval", "end")));
         assertThat(timeCapture.getValue().getFieldName(), is("elapsed_ms"));
