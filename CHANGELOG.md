@@ -1,5 +1,14 @@
 # Changelog
 
+## [work-tracker-1.1.0-rc2](https://github.com/JohnDeere/work-tracker/tree/work-tracker-1.1.0-rc2) (2019-11-14)
+
+[Full Changelog](https://github.com/JohnDeere/work-tracker/compare/work-tracker-1.1.0-rc1...work-tracker-1.1.0-rc2)
+
+**Merged pull requests:**
+
+- Allow \_ in ALL\_UPPERCASE so that it converts to snake case properly. [\#78](https://github.com/JohnDeere/work-tracker/pull/78) ([AveryRegier](https://github.com/AveryRegier))
+- Fix the Task end messages. [\#77](https://github.com/JohnDeere/work-tracker/pull/77) ([AveryRegier](https://github.com/AveryRegier))
+
 ## [work-tracker-1.1.0-rc1](https://github.com/JohnDeere/work-tracker/tree/work-tracker-1.1.0-rc1) (2019-11-07)
 
 [Full Changelog](https://github.com/JohnDeere/work-tracker/compare/work-tracker-1.0.1...work-tracker-1.1.0-rc1)
