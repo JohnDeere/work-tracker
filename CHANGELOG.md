@@ -91,7 +91,6 @@
 **Merged pull requests:**
 
 - rm center align for contents in table [\#50](https://github.com/JohnDeere/work-tracker/pull/50) ([maheshgaya](https://github.com/maheshgaya))
-- added a max retryAfterSeconds for 5 minutes [\#49](https://github.com/JohnDeere/work-tracker/pull/49) ([maheshgaya](https://github.com/maheshgaya))
 - break accept header with spaces [\#48](https://github.com/JohnDeere/work-tracker/pull/48) ([maheshgaya](https://github.com/maheshgaya))
 - make endpoint empty string if null [\#47](https://github.com/JohnDeere/work-tracker/pull/47) ([maheshgaya](https://github.com/maheshgaya))
 
@@ -118,6 +117,7 @@
 
 **Merged pull requests:**
 
+- added a max retryAfterSeconds for 5 minutes [\#49](https://github.com/JohnDeere/work-tracker/pull/49) ([maheshgaya](https://github.com/maheshgaya))
 - Handle special characters in path values \#2 [\#43](https://github.com/JohnDeere/work-tracker/pull/43) ([AveryRegier](https://github.com/AveryRegier))
 - Handle special characters in path values [\#42](https://github.com/JohnDeere/work-tracker/pull/42) ([AveryRegier](https://github.com/AveryRegier))
 
