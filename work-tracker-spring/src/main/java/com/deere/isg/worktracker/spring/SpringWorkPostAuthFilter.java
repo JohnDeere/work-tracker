@@ -18,36 +18,16 @@
 package com.deere.isg.worktracker.spring;
 
 import com.deere.isg.worktracker.OutstandingWork;
-import com.deere.isg.worktracker.OutstandingWorkTracker;
-import com.deere.isg.worktracker.servlet.BaseTypeFilter;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
+import com.deere.isg.worktracker.servlet.HttpWorkPostAuthFilter;
 
 /**
  * This class updates the user information in the payload work
  * (i.e. work tracked by {@link OutstandingWork}).
  */
-public class SpringWorkPostAuthFilter extends BaseTypeFilter {
+public class SpringWorkPostAuthFilter extends HttpWorkPostAuthFilter {
+
     @Override
-    @SuppressWarnings("unchecked")
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        if (getOutstanding() != null) {
-            ((OutstandingWorkTracker<? extends SpringWork>) getOutstanding()).current()
-                    .ifPresent(work -> addUserInformation((HttpServletRequest) request, work));
-        }
-        chain.doFilter(request, response);
-    }
-
-    private void addUserInformation(HttpServletRequest request, SpringWork work) {
-        work.updateUserInformation(request);
-    }
-
-    void setFilterOutstanding(OutstandingWork outstanding) {
-        super.setOutstanding(outstanding);
+    protected void setFilterOutstanding(OutstandingWork outstanding) {
+        super.setFilterOutstanding(outstanding);
     }
 }
