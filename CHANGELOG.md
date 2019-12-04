@@ -1,5 +1,17 @@
 # Changelog
 
+## [work-tracker-1.1.0-rc4](https://github.com/JohnDeere/work-tracker/tree/work-tracker-1.1.0-rc4) (2019-12-04)
+
+[Full Changelog](https://github.com/JohnDeere/work-tracker/compare/work-tracker-1.1.0-rc3...work-tracker-1.1.0-rc4)
+
+**Merged pull requests:**
+
+- Move the post authentication filter down to the servlet package. [\#79](https://github.com/JohnDeere/work-tracker/pull/79) ([AveryRegier](https://github.com/AveryRegier))
+
+## [work-tracker-1.1.0-rc3](https://github.com/JohnDeere/work-tracker/tree/work-tracker-1.1.0-rc3) (2019-11-18)
+
+[Full Changelog](https://github.com/JohnDeere/work-tracker/compare/work-tracker-1.1.0-rc2...work-tracker-1.1.0-rc3)
+
 ## [work-tracker-1.1.0-rc2](https://github.com/JohnDeere/work-tracker/tree/work-tracker-1.1.0-rc2) (2019-11-14)
 
 [Full Changelog](https://github.com/JohnDeere/work-tracker/compare/work-tracker-1.1.0-rc1...work-tracker-1.1.0-rc2)
@@ -82,7 +94,6 @@
 **Merged pull requests:**
 
 - CVE fixes [\#52](https://github.com/JohnDeere/work-tracker/pull/52) ([AveryRegier](https://github.com/AveryRegier))
-- Extract examples and move to their own repository. [\#51](https://github.com/JohnDeere/work-tracker/pull/51) ([AveryRegier](https://github.com/AveryRegier))
 
 ## [work-tracker-1.0.0-rc14](https://github.com/JohnDeere/work-tracker/tree/work-tracker-1.0.0-rc14) (2019-02-28)
 
@@ -90,7 +101,9 @@
 
 **Merged pull requests:**
 
+- Extract examples and move to their own repository. [\#51](https://github.com/JohnDeere/work-tracker/pull/51) ([AveryRegier](https://github.com/AveryRegier))
 - rm center align for contents in table [\#50](https://github.com/JohnDeere/work-tracker/pull/50) ([maheshgaya](https://github.com/maheshgaya))
+- added a max retryAfterSeconds for 5 minutes [\#49](https://github.com/JohnDeere/work-tracker/pull/49) ([maheshgaya](https://github.com/maheshgaya))
 - break accept header with spaces [\#48](https://github.com/JohnDeere/work-tracker/pull/48) ([maheshgaya](https://github.com/maheshgaya))
 - make endpoint empty string if null [\#47](https://github.com/JohnDeere/work-tracker/pull/47) ([maheshgaya](https://github.com/maheshgaya))
 
@@ -117,7 +130,6 @@
 
 **Merged pull requests:**
 
-- added a max retryAfterSeconds for 5 minutes [\#49](https://github.com/JohnDeere/work-tracker/pull/49) ([maheshgaya](https://github.com/maheshgaya))
 - Handle special characters in path values \#2 [\#43](https://github.com/JohnDeere/work-tracker/pull/43) ([AveryRegier](https://github.com/AveryRegier))
 - Handle special characters in path values [\#42](https://github.com/JohnDeere/work-tracker/pull/42) ([AveryRegier](https://github.com/AveryRegier))
 
