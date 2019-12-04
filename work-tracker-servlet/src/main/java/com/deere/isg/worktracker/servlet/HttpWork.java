@@ -101,4 +101,20 @@ public class HttpWork extends Work {
     public String getExtraInfo() {
         return getAcceptHeader();
     }
+
+    /**
+     * If you plan to have user authentication in your web application,
+     * you should extend {@link HttpWork} and override {@link #updateUserInformation(HttpServletRequest)}
+     * to add the user information to the {@link org.slf4j.MDC}.
+     * Make sure to use {@link HttpWork#setRemoteUser(String)} to update
+     * {@link HttpWork#REMOTE_USER} for FloodSensor to be
+     * effective against `too many same user requests`.
+     * <p>
+     * <b>WARNING:</b> Please do not provide any password!
+     *
+     * @param request Can be useful if using JWT or header authentication
+     */
+    public void updateUserInformation(HttpServletRequest request) {
+
+    }
 }

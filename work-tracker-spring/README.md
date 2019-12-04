@@ -216,7 +216,6 @@ public class WorkTrackerContextListener extends WorkContextListener {
             .withHttpFloodSensor() // omit if not needed
             .withZombieDetector() // omit if not needed
             .build());
-        );
     }
 }
 ```

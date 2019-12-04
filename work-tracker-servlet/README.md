@@ -111,7 +111,7 @@ public class WorkTrackerContextListener extends WorkContextListener {
     public static ConnectionLimits<HttpWork> connectionLimits() {
         ConnectionLimits<HttpWork> limits = new ConnectionLimits<>();
         //limit, typeName and function
-        limits.addConnectionLimit(25, "service").method(SpringWork::getService);
+        limits.addConnectionLimit(25, "service").method(HttpWork::getService);
         //limit, typeName and Predicate
         limits.addConnectionLimit(20, "acceptHeader").test(w -> w.getAcceptHeader().contains("xml"));
         //limit, typeName and a dynamic predicate
@@ -205,3 +205,79 @@ private ExecutorService service = Executors.newFixedThreadPool(3);
 private Executor executor = new MdcExecutor(service, outstandingWork);
 ```
 
+## Application with User Authentication
+Starting in version 1.1.0-rc4, you may configure work-tracker to capture the user information if it has 
+been set after the Work object is initially created, for instance, in a later Filter in the FilterChain.
+This feature is adapted from work-tracker-spring.  If you are using spring authentication, use the 
+[work-tracker-spring instructions](../work-tracker-spring#Application with User Authentication).
+
+Provide a `HttpWork` subclass that overrides `HttpWork#updateUserInformation(HttpServletRequest request)` to add the user's
+username to the `remoteUser` using `Work#setRemoteUser(String)`. 
+You can also add other information in the `MDC`, if you intend to use it as context, by using `Work#addToMDC(String)`. 
+Example:
+
+**WARNING:** Please do not add any **password** to the `MDC`.
+
+```java
+public class UserHttpWork extends HttpWork {
+    public UserHttpWork(ServletRequest request) {
+        super(request);
+    }
+
+    @Override
+    public void updateUserInformation(HttpServletRequest request) {
+        setRemoteUser(request.getRemoteUser());
+    }
+}
+```
+
+Because of Java Type Erasure, you should define a custom `WorkFilter` to take the `UserHttpWork` and discard `HttpWorkFilter` in your `web.xml` in favor of `WorkFilter`:
+
+```java
+public class WorkFilter extends AbstractHttpWorkFilter<UserHttpWork> {
+    @Override
+    protected UserHttpWork createWork(ServletRequest request) {
+        return new UserHttpWork(request);
+    }
+}
+```
+
+```xml
+<filter>
+    <filter-name>workFilter</filter-name>
+    <filter-class>com.example.WorkFilter</filter-class>
+</filter>
+<!--... -->
+<filter-mapping>
+   <filter-name>workFilter</filter-name>
+   <url-pattern>/*</url-pattern>
+</filter-mapping>
+```
+
+Then add the `HttpWorkPostAuthFilter` to the filter list in `web.xml` after any login filters in the FilterChain.
+
+```xml
+<filter>
+  <!-- Add this after the spring security filters, after the username is known -->
+   <filter-name>HttpWorkPostAuthFilter</filter-name>
+   <filter-class>com.deere.isg.worktracker.servlet.HttpWorkPostAuthFilter</filter-class>
+</filter>
+<!--... -->
+<filter-mapping>
+   <filter-name>HttpWorkPostAuthFilter</filter-name>
+   <url-pattern>/*</url-pattern>
+</filter-mapping>
+```
+
+Then your configuration will need `UserHttpWork` as the type, example:
+```java
+@Configuration
+public class WorkTrackerContextListener extends WorkContextListener {
+    public WorkTrackerContextListener() {
+        super(new WorkConfig.Builder<UserHttpWork>(new OutstandingWork<>())
+            .withHttpFloodSensor() // omit if not needed
+            .withZombieDetector() // omit if not needed
+            .build());
+    }
+}
+```

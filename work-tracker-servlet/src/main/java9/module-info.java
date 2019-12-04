@@ -20,5 +20,6 @@ open module com.deere.isg.worktracker.servlet {
     requires slf4j.api;
     requires logstash.logback.encoder;
     requires oswego.concurrent;
+    requires com.deere.isg.clock;
     exports com.deere.isg.worktracker.servlet;
 }
