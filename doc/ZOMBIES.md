@@ -26,8 +26,8 @@ The `WorkHttpServlet` servlet can also give you visibility to zombies. Your zomb
 top of the report, and when they exceed the timeout, will turn red.
 
 Enable this servlet in 
-* [a non-Spring Boot application](../work-tracker-servlet/README.md#Outstanding HttpServlet)
-* [Spring Boot](../work-tracker-spring-boot/README.md#Outstanding HttpServlet) where it is automatically 
+* [a non-Spring Boot application](../work-tracker-servlet#outstanding-httpservlet)
+* [Spring Boot](../work-tracker-spring-boot#outstanding-httpservlet) where it is automatically 
 configured.
 
 ### See zombies ongoing in your logs
@@ -69,7 +69,7 @@ does need to be some kind of backup plan.
 There are points in the execution of your program that are good checkpoints to see if this request has been 
 processing for too long.  One of those is when the application is making another request to a micro service 
 dependency.  For Spring Boot, it is pretty easy to configure an 
-[Interceptor for RestTemplates](../work-tracker-spring-boot/README.md#Interceptor for RestTemplates)
+[Interceptor for RestTemplates](../work-tracker-spring-boot#interceptor-for-resttemplates)
 which will check how long the current request has been running and kill it instead of continuing.  If you
 don't have a Spring Boot application or just want to use a different checkpoint, call `ZombieDetector.killRunaway()`.
 
@@ -87,7 +87,7 @@ The way that `ZombieDetector.killRunaway()` does its dirty work is that it throw
 will generally make it through all your catch blocks (unless you have caught Throwable and not rethrown it)
 and will usually kill the work pretty effectively.  You still want an appropriate `status_code` to be logged
 in your meta data, and just in case someone is still listening to that request, you do want to give them 
-some kind of appropriate feedback. This is why we have you configure a `ZombieFilter` in your application.  
+some kind of appropriate feedback. This is why we have you configure a `ZombieFilter` in your application. 
 The `ZombieFilter` converts these errors into a `504 Gateway Timeout` HTTP status code, and logs the result
 appropriately.
 
