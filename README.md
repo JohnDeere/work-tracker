@@ -10,7 +10,7 @@ A library to monitor threads and requests. It provides advanced logging capabili
 2. Checks if the number of threads do not exceed the maximum number of
 resources than the JVM permits (i.e. database connections, memory resources, etc.). `RequestBouncer` handles those checks
 and allows new threads to proceed only if they are within the `Connection Limits`.  
-3. Kills threads that take too long to respond, aka `Zombies`
+3. Kills threads that take too long to respond, aka [`Zombies`](doc/ZOMBIES.md)
 4. Adds exception names to the logs of faulty requests for tracking bugs better, see `RootCauseTurboFilter`
 5. Provides contextual thread metadata for background tasks, see `MdcExecutor`
 

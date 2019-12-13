@@ -176,12 +176,15 @@ public class WorkTrackerConfig extends WorkTrackerConfigurer<SpringWork> {
 }
 ```
 ## Outstanding HttpServlet
-We provide a WorkHttpServlet that outputs all the outstanding work that are currently in progress. This can be used for debugging purposes. By default, the uri is `/health/outstanding` and is provided by the `WorkTrackerConfigurer`;
+We provide a WorkHttpServlet that outputs all the outstanding work that are currently in progress. This can be used for 
+debugging purposes. By default, the uri is `/health/outstanding` and is provided by the `WorkTrackerConfigurer`;
 
 ## Extra Features
-- **Interceptor for RestTemplates**
+### Interceptor for RestTemplates
 
-We provide an `HttpInterceptor` that has Zombie protection for runaway requests (i.e. requests that can take too long and eventually become orphan because either they never return a value or the user has interrupted the request). This interceptor can be used with a `RestTemplate` or a similar database template in  Spring. Add the following into your configuration class:
+We provide an `HttpInterceptor` that has Zombie protection for runaway requests (i.e. requests that can take too long and 
+eventually become orphan because either they never return a value or the user has interrupted the request). This interceptor 
+can be used with a `RestTemplate` or a similar database template in  Spring. Add the following into your configuration class:
 
 ```java
 @Bean
@@ -192,7 +195,7 @@ public RestTemplate restTemplate() {
 }
 ```
 
-- **MdcExecutor**
+### MdcExecutor
 
 Track your background tasks with the `MdcExecutor`. Example:
 
@@ -220,7 +223,7 @@ private MdcExecutor mdcExecutor;
 mdcExecutor.execute(someRunnable);
 ```
 
-- **Exclude Urls from Logging**
+### Exclude Urls from Logging
 
 You can exclude specific request urls from logging by calling excludePathPatterns with url patterns.
 
