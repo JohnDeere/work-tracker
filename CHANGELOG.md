@@ -1,5 +1,21 @@
 # Changelog
 
+## [work-tracker-1.1.0](https://github.com/JohnDeere/work-tracker/tree/work-tracker-1.1.0) (2020-08-22)
+
+[Full Changelog](https://github.com/JohnDeere/work-tracker/compare/work-tracker-1.1.0-rc5...work-tracker-1.1.0)
+
+**Merged pull requests:**
+
+- Bump checkstyle from 8.18 to 8.29 [\#81](https://github.com/JohnDeere/work-tracker/pull/81) ([dependabot[bot]](https://github.com/apps/dependabot))
+
+## [work-tracker-1.1.0-rc5](https://github.com/JohnDeere/work-tracker/tree/work-tracker-1.1.0-rc5) (2020-08-25)
+
+[Full Changelog](https://github.com/JohnDeere/work-tracker/compare/work-tracker-1.1.0-rc4...work-tracker-1.1.0-rc5)
+
+**Merged pull requests:**
+
+- Document the Zombie Detection feature set. [\#80](https://github.com/JohnDeere/work-tracker/pull/80) ([AveryRegier](https://github.com/AveryRegier))
+
 ## [work-tracker-1.1.0-rc4](https://github.com/JohnDeere/work-tracker/tree/work-tracker-1.1.0-rc4) (2019-12-04)
 
 [Full Changelog](https://github.com/JohnDeere/work-tracker/compare/work-tracker-1.1.0-rc3...work-tracker-1.1.0-rc4)
@@ -94,6 +110,7 @@
 **Merged pull requests:**
 
 - CVE fixes [\#52](https://github.com/JohnDeere/work-tracker/pull/52) ([AveryRegier](https://github.com/AveryRegier))
+- Extract examples and move to their own repository. [\#51](https://github.com/JohnDeere/work-tracker/pull/51) ([AveryRegier](https://github.com/AveryRegier))
 
 ## [work-tracker-1.0.0-rc14](https://github.com/JohnDeere/work-tracker/tree/work-tracker-1.0.0-rc14) (2019-02-28)
 
@@ -101,7 +118,6 @@
 
 **Merged pull requests:**
 
-- Extract examples and move to their own repository. [\#51](https://github.com/JohnDeere/work-tracker/pull/51) ([AveryRegier](https://github.com/AveryRegier))
 - rm center align for contents in table [\#50](https://github.com/JohnDeere/work-tracker/pull/50) ([maheshgaya](https://github.com/maheshgaya))
 - added a max retryAfterSeconds for 5 minutes [\#49](https://github.com/JohnDeere/work-tracker/pull/49) ([maheshgaya](https://github.com/maheshgaya))
 - break accept header with spaces [\#48](https://github.com/JohnDeere/work-tracker/pull/48) ([maheshgaya](https://github.com/maheshgaya))

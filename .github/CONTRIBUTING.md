@@ -6,7 +6,7 @@ The following is a set of guidelines for contributing to John Deere and its pack
 
 ***For the short term, we are not accepting pull requests as we work on a process to accept contributions from the community.***
 
-We expect to begin taking contributions before 2019 begins.
+We expect to begin taking contributions in the near future.
 
 In the meantime, here are some ways you should prepare your contributions for when they can be accepted when we are ready.
 * All changes must be test-driven.
