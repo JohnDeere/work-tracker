@@ -18,6 +18,7 @@ package com.deere.isg.worktracker;
 
 import com.deere.isg.outstanding.Outstanding;
 
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -55,5 +56,10 @@ public class OutstandingWorkFilter<W extends Work> implements OutstandingWorkTra
     @Override
     public void doInTransaction(W payload, Runnable transaction) {
         parent.doInTransaction(payload, transaction);
+    }
+
+    @Override
+    public Iterator<W> iterator() {
+        return stream().iterator();
     }
 }

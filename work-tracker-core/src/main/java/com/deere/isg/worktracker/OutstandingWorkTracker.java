@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public interface OutstandingWorkTracker<W extends Work> {
+public interface OutstandingWorkTracker<W extends Work> extends Iterable<W> {
     Stream<W> stream();
     Optional<W> current();
     Outstanding<W>.Ticket create(W payload);

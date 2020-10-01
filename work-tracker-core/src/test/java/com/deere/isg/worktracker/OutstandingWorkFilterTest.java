@@ -18,8 +18,12 @@ package com.deere.isg.worktracker;
 
 import org.junit.Test;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -73,5 +77,34 @@ public class OutstandingWorkFilterTest {
         filtered.doInTransaction(payload, ()->{
             assertThat(filtered.current().orElseGet(null), is(payload));
         });
+    }
+
+    @Test
+    public void iterable() {
+        base.doInTransaction(new SuperWork(), ()->{
+            final Iterator<TestWork> iterator = filtered.iterator();
+            assertThat(iterator.hasNext(), is(false));
+            assertNoSuchElement(iterator);
+        });
+        base.doInTransaction(new AnotherWork(), ()->{
+            final Iterator<TestWork> iterator = filtered.iterator();
+            assertThat(iterator.hasNext(), is(false));
+            assertNoSuchElement(iterator);
+        });
+        TestWork work = new TestWork();
+        base.doInTransaction(work, ()->{
+            final Iterator<TestWork> iterator = filtered.iterator();
+            assertThat(iterator.hasNext(), is(true));
+            assertThat(iterator.next(), is(work));
+        });
+    }
+
+    private void assertNoSuchElement(Iterator<?> iterator) {
+        try {
+            iterator.next();
+            fail("Should have thrown exception");
+        } catch(NoSuchElementException e) {
+            // expected
+        }
     }
 }
