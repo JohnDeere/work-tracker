@@ -1,6 +1,14 @@
 # Changelog
 
-## [work-tracker-1.1.0](https://github.com/JohnDeere/work-tracker/tree/work-tracker-1.1.0) (2020-08-22)
+## [work-tracker-1.1.1](https://github.com/JohnDeere/work-tracker/tree/work-tracker-1.1.1) (2020-10-01)
+
+[Full Changelog](https://github.com/JohnDeere/work-tracker/compare/work-tracker-1.1.0...work-tracker-1.1.1)
+
+**Merged pull requests:**
+
+- Fix backwards compatibility. OutstandingWorkTracker should be Iterable [\#82](https://github.com/JohnDeere/work-tracker/pull/82) ([AveryRegier](https://github.com/AveryRegier))
+
+## [work-tracker-1.1.0](https://github.com/JohnDeere/work-tracker/tree/work-tracker-1.1.0) (2020-08-25)
 
 [Full Changelog](https://github.com/JohnDeere/work-tracker/compare/work-tracker-1.1.0-rc5...work-tracker-1.1.0)
 
