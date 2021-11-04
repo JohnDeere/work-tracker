@@ -21,19 +21,51 @@ import com.deere.isg.outstanding.Outstanding;
 import java.util.Optional;
 
 public class OutstandingWork<W extends Work> extends Outstanding<W> implements OutstandingWorkTracker<W> {
-    private InheritableThreadLocal<Ticket> currentPayload = new InheritableThreadLocal<>();
+    private InheritableThreadLocal<PayloadHolder<W>> currentPayload = new InheritableThreadLocal<>();
 
     @Override
     protected Ticket createTicket(W payload) {
-        Ticket ticket = super.createTicket(payload);
+        ThreadTrackedTicket ticket = new ThreadTrackedTicket(payload);
         if (currentPayload != null) {
-            currentPayload.set(ticket);
+            currentPayload.set(ticket.holder);
         }
         return ticket;
     }
 
     public Optional<W> current() {
-        return Optional.ofNullable(currentPayload.get()).flatMap(Ticket::getPayload);
+        return Optional.ofNullable(currentPayload.get()).map(PayloadHolder::getPayload);
     }
 
+    private static class PayloadHolder<P> {
+        private volatile P payload;
+        PayloadHolder(P payload) {
+            this.payload = payload;
+        }
+        void clearPayload() {
+            this.payload = null;
+        }
+        P getPayload() {
+            return payload;
+        }
+    }
+
+    private class ThreadTrackedTicket extends Outstanding<W>.Ticket {
+        private final PayloadHolder<W> holder;
+
+        ThreadTrackedTicket(W payload) {
+            this.holder = new PayloadHolder<>(payload);
+        }
+
+        public Optional<W> getPayload() {
+            return Optional.ofNullable(holder.getPayload());
+        }
+
+        public boolean isClosed() {
+            return this.holder.getPayload() == null;
+        }
+
+        public void clearPayload() {
+            holder.clearPayload();
+        }
+    }
 }

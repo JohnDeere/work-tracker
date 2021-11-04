@@ -80,6 +80,16 @@ public class OutstandingWorkTest {
                 () -> assertCurrentThread(outstanding, work));
     }
 
+    @Test
+    public void currentIsSetWhileInTransactionAndClearedWhenDone() {
+        MockWork work = new MockWork();
+
+        outstanding.doInTransactionChecked(work,
+                () -> assertThat(outstanding.current().orElseThrow(AssertionError::new), is(work)));
+
+        assertThat(outstanding.current().isPresent(), is(false));
+    }
+
     @Test(expected = IOException.class)
     public void doInTransactionCheckThrowsException() throws IOException {
         outstanding.doInTransactionChecked(null, () -> {
