@@ -17,14 +17,22 @@
 package com.deere.isg.worktracker;
 
 import com.deere.clock.Clock;
+import com.deere.isg.outstanding.Outstanding;
 import net.logstash.logback.argument.StructuredArgument;
+import org.hamcrest.CoreMatchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.MDC;
 
 import java.io.IOException;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static net.logstash.logback.argument.StructuredArguments.keyValue;
 import static org.hamcrest.CoreMatchers.*;
@@ -78,6 +86,54 @@ public class OutstandingWorkTest {
 
         outstanding.doInTransactionChecked(work,
                 () -> assertCurrentThread(outstanding, work));
+    }
+
+    @Test
+    public void currentIsSetWhileInTransactionAndClearedWhenDone() {
+        MockWork work = new MockWork();
+
+        outstanding.doInTransactionChecked(work,
+                () -> assertThat(outstanding.current().orElseThrow(AssertionError::new), is(work)));
+
+        assertThat(outstanding.current().isPresent(), is(false));
+    }
+
+    @Test
+    public void ticketsAreNotLeakedByThreadLocal() throws InterruptedException, ExecutionException {
+        final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+
+        try {
+            final ReferenceQueue<Object> queue = new ReferenceQueue<>();
+            // First, we need a ticket created on some thread that will reference tickets made later
+            outstanding.create(new MockWork()).close();
+            // Now get a ticket on another thread
+            final WeakReference<Outstanding<?>.Ticket> ref = executorService.submit(() -> {
+                System.out.println("I'm creating the weak reference");
+                outstanding.createTicket(new MockWork()).close();
+                final WeakReference<Outstanding<?>.Ticket> ticketToReferTo = new WeakReference<>(
+                        outstanding.create(new MockWork()), queue);
+                // we need some other ticket created that may be referenced as current on that other thread
+                // to remove the ticket we want to test from being referenced there.
+                outstanding.createTicket(new MockWork()).close();
+                return ticketToReferTo;
+            }).get();
+            // Now close the ticket so that it isn't referenced from the head of OutstandingWork.
+            ref.get().close();
+            // Iterating through the list cleans out any stray references to the ticket we want to make sure is gc'ed
+            outstanding.stream().forEach(System.out::println);
+
+            // now let's create a bunch of garbage so the gc will actually run
+            executorService.scheduleAtFixedRate(() -> {
+                System.out.println("I'm running the garbage");
+                outstanding.doInTransaction(new MockWork(), ()->outstanding.stream().forEach(System.out::println));
+                Runtime.getRuntime().gc();
+            }, 0, 100, TimeUnit.MILLISECONDS);
+
+            assertThat(outstanding.current().isPresent(), is(false));
+            assertThat(queue.remove(20000), CoreMatchers.is(ref));
+        } finally {
+            executorService.shutdown();
+        }
     }
 
     @Test(expected = IOException.class)
