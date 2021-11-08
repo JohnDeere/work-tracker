@@ -1,5 +1,14 @@
 # Changelog
 
+## [work-tracker-1.1.2](https://github.com/JohnDeere/work-tracker/tree/work-tracker-1.1.2) (2020-10-01)
+
+[Full Changelog](https://github.com/JohnDeere/work-tracker/compare/work-tracker-1.1.1...work-tracker-1.1.2)
+
+**Merged pull requests:**
+
+- fix: Tickets can no longer get leaked if threads never get new work. [\#84](https://github.com/JohnDeere/work-tracker/pull/84) ([AveryRegier](https://github.com/AveryRegier))
+- Bump junit from 4.12 to 4.13.1 [\#83](https://github.com/JohnDeere/work-tracker/pull/83) ([AveryRegier](https://github.com/AveryRegier))
+
 ## [work-tracker-1.1.1](https://github.com/JohnDeere/work-tracker/tree/work-tracker-1.1.1) (2020-10-01)
 
 [Full Changelog](https://github.com/JohnDeere/work-tracker/compare/work-tracker-1.1.0...work-tracker-1.1.1)
