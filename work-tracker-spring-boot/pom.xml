@@ -79,7 +79,7 @@ limitations under the License.
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>1.5.9.RELEASE</version>
+                <version>1.5.22.RELEASE</version>
                 <configuration>
                     <classifier>exec</classifier>
                 </configuration>
