@@ -50,7 +50,7 @@
         <jetty.version>9.4.3.v20170317</jetty.version>
         <tomcat.version>9.0.20</tomcat.version>
 
-        <maven-license-plugin-version>1.8.0</maven-license-plugin-version>
+        <maven-license-plugin-version>1.9.0</maven-license-plugin-version>
     </properties>
 
     <scm>
