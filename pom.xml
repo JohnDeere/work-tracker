@@ -44,7 +44,7 @@
         <spring.boot.version>1.5.19.RELEASE</spring.boot.version>
         <spring.version>4.3.17.RELEASE</spring.version>
         <groovy.version>2.4.8</groovy.version>
-        <slf4j.version>1.7.25</slf4j.version>
+        <slf4j.version>1.7.36</slf4j.version>
         <isg.clock.version>3.1.0</isg.clock.version>
         <servlet.version>3.1.0</servlet.version>
         <jetty.version>9.4.3.v20170317</jetty.version>
