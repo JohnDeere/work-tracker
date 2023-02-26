@@ -39,7 +39,7 @@
         <sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
 
         <ch.qos.logback.version>1.2.3</ch.qos.logback.version>
-        <logstash.version>5.3</logstash.version>
+        <logstash.version>7.3</logstash.version>
         <jackson.databind.version>2.14.2</jackson.databind.version>
         <spring.boot.version>1.5.22.RELEASE</spring.boot.version>
         <spring.version>4.3.30.RELEASE</spring.version>
