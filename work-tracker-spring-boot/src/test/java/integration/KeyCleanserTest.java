@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 package integration;
 
@@ -34,9 +33,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import javax.servlet.Filter;
 
 import static integration.helpers.MockTestUtilities.returnResponse;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
+
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = MockKeyCleanserConfiguration.class )
@@ -67,18 +66,18 @@ public class KeyCleanserTest {
         MockHttpServletResponse response = returnResponse(mockMvc, "/aId/some ant/a bear/another cat/any dog");
 
         String contentAsString = response.getContentAsString();
-        assertThat(contentAsString, containsString("\"ant_id\":\"some ant\""));
-        assertThat(contentAsString, containsString("\"bear_id\":\"a bear\""));
-        assertThat(contentAsString, containsString("\"cat_id\":\"another cat\""));
-        assertThat(contentAsString, containsString("\"dog_id\":\"any dog\""));
+        assertThat(contentAsString).contains("\"ant_id\":\"some ant\"");
+        assertThat(contentAsString).contains("\"bear_id\":\"a bear\"");
+        assertThat(contentAsString).contains("\"cat_id\":\"another cat\"");
+        assertThat(contentAsString).contains("\"dog_id\":\"any dog\"");
     }
 
     @Test
     public void bannedKeysGetsConverted() throws Exception {
         MockHttpServletResponse response = returnResponse(mockMvc, "/transform/bean");
 
-        assertThat(response.getContentAsString(), not(containsString("\"transform\":\"bean\"")));
-        assertThat(response.getContentAsString(), containsString("\"unknown_transform\":\"bean\""));
+        assertThat(response.getContentAsString()).doesNotContain("\"transform\":\"bean\"");
+        assertThat(response.getContentAsString()).contains("\"unknown_transform\":\"bean\"");
     }
 
     @Test
@@ -86,7 +85,7 @@ public class KeyCleanserTest {
         MockHttpServletResponse response = returnResponse(mockMvc, "/test/12345");
 
         String contentAsString = response.getContentAsString();
-        assertThat(contentAsString, not(containsString("\"test_id\":\"12345\"")));
-        assertThat(contentAsString, containsString("\"mock_id\":\"12345\""));
+        assertThat(contentAsString).doesNotContain("\"test_id\":\"12345\"");
+        assertThat(contentAsString).contains("\"mock_id\":\"12345\"");
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-
 package com.deere.isg.worktracker.spring;
 
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
 
 public class FilterOrderTest {
     @Test
     public void filterHasCorrespondingOrders() {
-        assertThat(FilterOrder.WORK_FILTER.getOrder(), is(HIGHEST_PRECEDENCE + 10));
-        assertThat(FilterOrder.FLOOD_SENSOR_FILTER.getOrder(), is(HIGHEST_PRECEDENCE + 10 + 1));
-        assertThat(FilterOrder.ZOMBIE_FILTER.getOrder(), is(HIGHEST_PRECEDENCE + 10 + 2));
-        assertThat(FilterOrder.PRE_AUTH_FILTER.getOrder(), is(1000));
-        assertThat(FilterOrder.USER_POST_AUTH_FILTER.getOrder(), is(2390));
-        assertThat(FilterOrder.FILTER_SECURITY_INTERCEPTOR.getOrder(), is(2400));
+        assertThat(FilterOrder.WORK_FILTER.getOrder()).isEqualTo(HIGHEST_PRECEDENCE + 10);
+        assertThat(FilterOrder.FLOOD_SENSOR_FILTER.getOrder()).isEqualTo(HIGHEST_PRECEDENCE + 10 + 1);
+        assertThat(FilterOrder.ZOMBIE_FILTER.getOrder()).isEqualTo(HIGHEST_PRECEDENCE + 10 + 2);
+        assertThat(FilterOrder.PRE_AUTH_FILTER.getOrder()).isEqualTo(1000);
+        assertThat(FilterOrder.USER_POST_AUTH_FILTER.getOrder()).isEqualTo(2390);
+        assertThat(FilterOrder.FILTER_SECURITY_INTERCEPTOR.getOrder()).isEqualTo(2400);
     }
 }

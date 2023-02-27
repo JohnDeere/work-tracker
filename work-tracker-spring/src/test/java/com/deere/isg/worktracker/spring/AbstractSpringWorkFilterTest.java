@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 package com.deere.isg.worktracker.spring;
 
@@ -45,8 +44,7 @@ import java.util.Map;
 import static com.deere.isg.worktracker.servlet.HttpWork.PATH;
 import static com.deere.isg.worktracker.spring.SpringWork.ENDPOINT;
 import static com.deere.isg.worktracker.spring.TestServletContext.ENDPOINT_1;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.springframework.web.servlet.HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 
@@ -90,7 +88,7 @@ public class AbstractSpringWorkFilterTest {
         request.setServletPath(ENDPOINT_1);
         filter.init(config);
         filter.setOutstanding(outstandingWork);
-        assertThat(ServletEndpointRegistry.contains(ENDPOINT_1), is(true));
+        assertThat(ServletEndpointRegistry.contains(ENDPOINT_1)).isTrue();
 
         filter.doFilter(request, response, chain);
         verify(chain).doFilter(ArgumentMatchers.any(HttpServletRequest.class), eq(response));
@@ -102,11 +100,11 @@ public class AbstractSpringWorkFilterTest {
 
         request.setAttribute(URI_TEMPLATE_VARIABLES_ATTRIBUTE, getAttributesMap());
         filter.doFilter(request, response, (request, response) -> {
-            assertThat(MDC.get(PATH), is("GET /"));
-            assertThat(MDC.get(ENDPOINT), is("GET /"));
+            assertThat(MDC.get(PATH)).isEqualTo("GET /");
+            assertThat(MDC.get(ENDPOINT)).isEqualTo("GET /");
         });
 
-        assertThat(MDC.getCopyOfContextMap(), nullValue());
+        assertThat(MDC.getCopyOfContextMap()).isNull();
         verify(workLogger, never()).logStart(ArgumentMatchers.any(HttpServletRequest.class), eq(filter.getSpringWork()));
     }
 
@@ -114,8 +112,7 @@ public class AbstractSpringWorkFilterTest {
     public void backwardCompatibilityNoSpringConfigurationProvidesDefaultKeyCleanser() {
         KeyCleanser keyCleanser = filter.getKeyCleanser();
 
-        assertThat(keyCleanser, notNullValue());
-        assertThat(keyCleanser, instanceOf(PathMetadataCleanser.class));
+        assertThat(keyCleanser).isInstanceOf(PathMetadataCleanser.class);
     }
 
     private Map<String, String> getAttributesMap() {

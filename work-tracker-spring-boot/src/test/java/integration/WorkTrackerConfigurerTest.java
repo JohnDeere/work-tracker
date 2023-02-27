@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 package integration;
 
@@ -39,11 +38,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.Filter;
-import java.util.Arrays;
-import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = MockWorkConfiguration.class)
@@ -76,38 +72,36 @@ public class WorkTrackerConfigurerTest {
 
     @Test
     public void contextLoads() {
-        assertThat(context, notNullValue());
-        assertThat(configuration.connectionLimits(), nullValue());
-        assertThat(outstanding, notNullValue());
-        assertThat(detector, notNullValue());
-        assertThat(floodSensor, notNullValue());
-        assertThat(handler, notNullValue());
-        assertThat(springWorkFilter, notNullValue());
-        assertThat(requestBouncerFilter, notNullValue());
-        assertThat(zombieFilter, notNullValue());
-        assertThat(authFilter, notNullValue());
-        assertThat(zombieRestTemplate, notNullValue());
-        assertThat(keyCleanser, notNullValue());
+        assertThat(context).isNotNull();
+        assertThat(configuration.connectionLimits()).isNull();
+        assertThat(outstanding).isNotNull();
+        assertThat(detector).isNotNull();
+        assertThat(floodSensor).isNotNull();
+        assertThat(handler).isNotNull();
+        assertThat(springWorkFilter).isNotNull();
+        assertThat(requestBouncerFilter).isNotNull();
+        assertThat(zombieFilter).isNotNull();
+        assertThat(authFilter).isNotNull();
+        assertThat(zombieRestTemplate).isNotNull();
+        assertThat(keyCleanser).isNotNull();
     }
 
     @Test
     public void beansExist() {
-        List<String> beansName = Arrays.asList(context.getBeanDefinitionNames());
-
-        assertThat(beansName, hasItems("authFilter", "zombieRestTemplate",
+        assertThat(context.getBeanDefinitionNames()).contains("authFilter", "zombieRestTemplate",
                 "workFactory", "workContextListener", "workConfig",
                 "outstanding", "zombieDetector", "floodSensor", "zombieExceptionHandler",
                 "workHttpServlet", "springWorkFilter", "requestBouncerFilter", "zombieFilter",
-                "authFilter", "logbackStatusServlet", "keyCleanser")
+                "authFilter", "logbackStatusServlet", "keyCleanser"
         );
     }
 
     @Test
     public void assertInstances() {
-        assertThat(springWorkFilter, instanceOf(SpringBootWorkFilter.class));
-        assertThat(requestBouncerFilter, instanceOf(RequestBouncerFilter.class));
-        assertThat(zombieFilter, instanceOf(ZombieFilter.class));
-        assertThat(authFilter, instanceOf(SpringWorkPostAuthFilter.class));
-        assertThat(keyCleanser, instanceOf(PathMetadataCleanser.class));
+        assertThat(springWorkFilter).isInstanceOf(SpringBootWorkFilter.class);
+        assertThat(requestBouncerFilter).isInstanceOf(RequestBouncerFilter.class);
+        assertThat(zombieFilter).isInstanceOf(ZombieFilter.class);
+        assertThat(authFilter).isInstanceOf(SpringWorkPostAuthFilter.class);
+        assertThat(keyCleanser).isInstanceOf(PathMetadataCleanser.class);
     }
 }

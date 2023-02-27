@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 package integration;
 
@@ -42,9 +41,9 @@ import javax.servlet.ServletResponse;
 import java.io.IOException;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @RunWith(SpringRunner.class)
@@ -75,22 +74,22 @@ public class MDCVariableTest {
         mockMvc.perform(get("/user/10/role/20").with(getRequestPostProcessor())).andReturn();
         Map<String, String> mdcMap = mdcFilter.getMdcMap();
 
-        assertThat(mdcMap.keySet(), containsInAnyOrder(
+        assertThat(mdcMap.keySet()).containsExactlyInAnyOrder(
                 "path", "thread_name", "session_id",
                 "remote_address", "request_id", "accept",
                 "remote_user", "role", "path_user_name", "endpoint"
-        ));
+        );
 
         String actual = "GET /user/{path_user_name}/role/{role}";
-        assertThat(mdcMap.get("path"), is(actual));
-        assertThat(mdcMap.get("endpoint"), is(actual));
-        assertThat(mdcMap.get("path_user_name"), is("10"));
-        assertThat(mdcMap.get("role"), is("20"));
-        assertThat(mdcMap.get("remote_user"), is("test_user"));
-        assertThat(mdcMap.get("session_id"), is(session.getId()));
-        assertThat(mdcMap.get("accept"), is(MediaType.APPLICATION_JSON_UTF8_VALUE));
-        assertThat(mdcMap.get("thread_name"), is("main"));
-        assertThat(mdcMap.get("remote_address"), is("1.2.3.4"));
+        assertThat(mdcMap.get("path")).isEqualTo(actual);
+        assertThat(mdcMap.get("endpoint")).isEqualTo(actual);
+        assertThat(mdcMap.get("path_user_name")).isEqualTo("10");
+        assertThat(mdcMap.get("role")).isEqualTo("20");
+        assertThat(mdcMap.get("remote_user")).isEqualTo("test_user");
+        assertThat(mdcMap.get("session_id")).isEqualTo(session.getId());
+        assertThat(mdcMap.get("accept")).isEqualTo(MediaType.APPLICATION_JSON_UTF8_VALUE);
+        assertThat(mdcMap.get("thread_name")).isEqualTo("main");
+        assertThat(mdcMap.get("remote_address")).isEqualTo("1.2.3.4");
     }
 
     private RequestPostProcessor getRequestPostProcessor() {

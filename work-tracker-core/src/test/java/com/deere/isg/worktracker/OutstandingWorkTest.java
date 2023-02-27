@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.deere.isg.worktracker;
 
 import com.deere.clock.Clock;
 import com.deere.isg.outstanding.Outstanding;
 import net.logstash.logback.argument.StructuredArgument;
-import org.hamcrest.CoreMatchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,8 +33,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import static net.logstash.logback.argument.StructuredArguments.keyValue;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class OutstandingWorkTest {
     private static final String SOME_KEY = "some_key";
@@ -63,21 +60,21 @@ public class OutstandingWorkTest {
         outstanding.createTicket(payload);
         MockWork work = outstanding.current().get();
 
-        assertThat(work.getMetadata(), is(payload.getMetadata()));
+        assertThat(work.getMetadata()).isEqualTo(payload.getMetadata());
     }
 
     @Test
     public void nullDoesNotCreateTicket() {
         outstanding.createTicket(null);
 
-        assertThat(outstanding.current(), is(Optional.empty()));
+        assertThat(outstanding.current()).isEqualTo(Optional.empty());
     }
 
     @Test
     public void getCurrentMetadataReturnsCurrentTicketsMetadata() {
         outstanding.createTicket(payload);
 
-        assertThat(outstanding.getCurrentMetadata(), is(payload.getMetadata()));
+        assertThat(outstanding.getCurrentMetadata()).isEqualTo(payload.getMetadata());
     }
 
     @Test
@@ -93,9 +90,9 @@ public class OutstandingWorkTest {
         MockWork work = new MockWork();
 
         outstanding.doInTransactionChecked(work,
-                () -> assertThat(outstanding.current().orElseThrow(AssertionError::new), is(work)));
+                () -> assertThat(outstanding.current().orElseThrow(AssertionError::new)).isEqualTo(work));
 
-        assertThat(outstanding.current().isPresent(), is(false));
+        assertThat(outstanding.current().isPresent()).isEqualTo(false);
     }
 
     @Test
@@ -129,8 +126,8 @@ public class OutstandingWorkTest {
                 Runtime.getRuntime().gc();
             }, 0, 100, TimeUnit.MILLISECONDS);
 
-            assertThat(outstanding.current().isPresent(), is(false));
-            assertThat(queue.remove(20000), CoreMatchers.is(ref));
+            assertThat(outstanding.current().isPresent()).isEqualTo(false);
+            assertThat(queue.remove(20000)).isEqualTo(ref);
         } finally {
             executorService.shutdown();
         }
@@ -148,15 +145,15 @@ public class OutstandingWorkTest {
         outstanding.createTicket(payload);
         StructuredArgument argument = keyValue(SOME_KEY, SOME_VALUE);
 
-        assertThat(outstanding.getCurrentMetadata(), not(hasItem(argument)));
+        assertThat(outstanding.getCurrentMetadata()).doesNotContain(argument);
 
         String result = outstanding.putInContext(SOME_KEY, SOME_VALUE);
-        assertThat(outstanding.getCurrentMetadata(), hasItem(argument));
-        assertThat(result, is(SOME_VALUE));
+        assertThat(outstanding.getCurrentMetadata()).contains(argument);
+        assertThat(result).isEqualTo(SOME_VALUE);
     }
 
     private void assertCurrentThread(OutstandingWork<MockWork> outstanding, MockWork work) {
-        assertThat(outstanding.getCurrentMetadata(), is(work.getMetadata()));
+        assertThat(outstanding.getCurrentMetadata()).isEqualTo(work.getMetadata());
     }
 
     private class MockWork extends Work {

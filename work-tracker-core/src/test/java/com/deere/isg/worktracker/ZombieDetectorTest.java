@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 package com.deere.isg.worktracker;
 
@@ -33,8 +32,7 @@ import static com.deere.isg.worktracker.MockTimeUtils.freezeClock;
 import static com.deere.isg.worktracker.MockTimeUtils.freezeClockOffset;
 import static com.deere.isg.worktracker.ZombieDetector.LONG_RUNNING;
 import static com.deere.isg.worktracker.ZombieDetector.ZOMBIE;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -77,7 +75,7 @@ public class ZombieDetectorTest {
                 .filter(Work::isZombie)
                 .count();
 
-        assertThat(count, is(workList.size()));
+        assertThat(count).isEqualTo(workList.size());
     }
 
     @Test
@@ -117,7 +115,7 @@ public class ZombieDetectorTest {
                 .filter(Work::isZombie)
                 .count();
 
-        assertThat(count, is(SIZE));
+        assertThat(count).isEqualTo(SIZE);
         verify(logger, times(SIZE)).logZombie(eq(ZOMBIE), any());
         verify(logger, times(SIZE)).logKill(startsWith(ZOMBIE + " killed at "), any());
         verify(logger, times(0)).warnFailure(eq(ZOMBIE + " failed to die"), any());
@@ -130,11 +128,11 @@ public class ZombieDetectorTest {
 
     @Test
     public void closeCancelsFutureThreads() {
-        assertThat(detector.isCancelled(), is(false));
+        assertThat(detector.isCancelled()).isEqualTo(false);
 
         detector.close();
 
-        assertThat(detector.isCancelled(), is(true));
+        assertThat(detector.isCancelled()).isTrue();
     }
 
     @Test(expected = ZombieError.class)

@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 package com.deere.isg.worktracker.spring;
 
@@ -40,11 +39,7 @@ import static com.deere.isg.worktracker.servlet.HttpWork.PATH;
 import static com.deere.isg.worktracker.servlet.WorkContextListener.ALL_OUTSTANDING_ATTR;
 import static com.deere.isg.worktracker.spring.SpringWork.ENDPOINT;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.web.servlet.HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
@@ -78,7 +73,7 @@ public class SpringWorkTest {
     public void nullRequestDoesNotSetRequestURLPattern() {
         SpringWork springWork = new SpringWork(null);
 
-        assertThat(springWork.getRequestURLPattern(), nullValue());
+        assertThat(springWork.getRequestURLPattern()).isNull();
 
     }
 
@@ -86,14 +81,14 @@ public class SpringWorkTest {
     public void setRequestURLPatternReplacesValuesWithKeyName() {
         setupPatternRequest(ORG_USER_URI, getPathMap());
 
-        assertThat(work.getRequestURLPattern(), is(TEST_ORG_VALUE));
+        assertThat(work.getRequestURLPattern()).isEqualTo(TEST_ORG_VALUE);
     }
 
     @Test
     public void setRequestURLPatternReplacesEmptySpacesWithKeyName() {
         setupPatternRequest("/org/  some org /user/  some user  ", getPathMap());
 
-        assertThat(work.getRequestURLPattern(), is(TEST_ORG_VALUE));
+        assertThat(work.getRequestURLPattern()).isEqualTo(TEST_ORG_VALUE);
     }
 
     @Test
@@ -101,7 +96,7 @@ public class SpringWorkTest {
         setupPatternRequest("/org/  {some org}   /user/  {some user} ",
                 getPathMap("{some org}", "{some user}"));
 
-        assertThat(work.getRequestURLPattern(), is(TEST_ORG_VALUE));
+        assertThat(work.getRequestURLPattern()).isEqualTo(TEST_ORG_VALUE);
     }
 
     @Test
@@ -111,7 +106,7 @@ public class SpringWorkTest {
         request.setAttribute(URI_TEMPLATE_VARIABLES_ATTRIBUTE, getPathMap());
         work.setRequestURLPattern(request, null);
 
-        assertThat(work.getRequestURLPattern(), is(TEST_ORG_VALUE));
+        assertThat(work.getRequestURLPattern()).isEqualTo(TEST_ORG_VALUE);
     }
 
     @Test
@@ -124,8 +119,8 @@ public class SpringWorkTest {
         request.setMethod("GET");
         work.setRequestURLPattern(request, null);
 
-        assertThat(work.getRequestURLPattern(), is(uri));
-        assertThat(work.getEndpoint(), is("GET " + uri));
+        assertThat(work.getRequestURLPattern()).isEqualTo(uri);
+        assertThat(work.getEndpoint()).isEqualTo("GET " + uri);
     }
 
     @Test
@@ -135,7 +130,7 @@ public class SpringWorkTest {
         assertNullPathAndEndpoint();
         triggerEndpointWithSpringAttributes(getPathMap());
 
-        assertThat(work.getService(), is("GET " + TEST_ORG_VALUE));
+        assertThat(work.getService()).isEqualTo("GET " + TEST_ORG_VALUE);
     }
 
     @Test
@@ -185,17 +180,17 @@ public class SpringWorkTest {
     public void preCleanUriAddsEndingSlash() {
         request.setRequestURI("/org");
 
-        assertThat(work.preCleanUri(request), is("/org/"));
+        assertThat(work.preCleanUri(request)).isEqualTo("/org/");
     }
 
     @Test
     public void preCleanUriDecodesEncodedUri() throws UnsupportedEncodingException {
         String encodedUri = URLEncoder.encode("/org", UTF_8.name());
-        assertThat(encodedUri, not("/org"));
+        assertThat(encodedUri).isNotEqualTo("/org");
 
         request.setRequestURI(encodedUri);
 
-        assertThat(work.preCleanUri(request), is("/org/"));
+        assertThat(work.preCleanUri(request)).isEqualTo("/org/");
     }
 
     @Test
@@ -203,27 +198,27 @@ public class SpringWorkTest {
         request.setRequestURI("/jd/org");
         request.setContextPath("/jd");
 
-        assertThat(work.preCleanUri(request), is("/org/"));
+        assertThat(work.preCleanUri(request)).isEqualTo("/org/");
     }
 
     @Test
     public void postCleanUriRemovesEndingSlash() {
-        assertThat(work.postCleanUri("/org/"), is("/org"));
+        assertThat(work.postCleanUri("/org/")).isEqualTo("/org");
     }
 
     @Test
     public void postCleanUriWithoutEndingSlash() {
-        assertThat(work.postCleanUri("/org"), is("/org"));
+        assertThat(work.postCleanUri("/org")).isEqualTo("/org");
     }
 
     @Test
     public void httpMethodIsSetupForRequestUrlPattern() {
-        assertThat(work.getHttpMethod(), is(""));
+        assertThat(work.getHttpMethod()).isEqualTo("");
         setupPatternRequest(ORG_USER_URI, getPathMap());
 
         work.setRequestURLPattern(request, null);
 
-        assertThat(work.getHttpMethod(), is(GET));
+        assertThat(work.getHttpMethod()).isEqualTo(GET);
     }
 
     @Test
@@ -231,14 +226,14 @@ public class SpringWorkTest {
         work.setupSpringVsFilterOrderingWorkaround(request, keyCleanser);
         request.setAttribute(SOME_ATTRIBUTE, SOME_VALUE);
 
-        assertThat(request.getAttribute(SOME_ATTRIBUTE), is(SOME_VALUE));
+        assertThat(request.getAttribute(SOME_ATTRIBUTE)).isEqualTo(SOME_VALUE);
     }
 
     @Test
     public void requestHasUriTemplateAttribute() {
-        assertThat(work.getRequestURLPattern(), is("/"));
-        assertThat(work.getHttpMethod(), is(""));
-        assertThat(work.getService(), is(" "));
+        assertThat(work.getRequestURLPattern()).isEqualTo("/");
+        assertThat(work.getHttpMethod()).isEqualTo("");
+        assertThat(work.getService()).isEqualTo(" ");
 
         setupPatternRequest(ORG_USER_URI, getPathMap());
         triggerEndpointWithSpringAttributes(getPathMap());
@@ -252,8 +247,8 @@ public class SpringWorkTest {
         setUriTemplateAttribute(TEST_URI, getPathMap());
         work.setRequestURLPattern(request, null);
 
-        assertThat(MDC.get(ORG), nullValue());
-        assertThat(MDC.get(USER), nullValue());
+        assertThat(MDC.get(ORG)).isNull();
+        assertThat(MDC.get(USER)).isNull();
     }
 
     @Test
@@ -262,8 +257,8 @@ public class SpringWorkTest {
         setUriTemplateAttribute(TEST_URI, getPathMap());
         work.setRequestURLPattern(request, keyCleanser);
 
-        assertThat(MDC.get(ORG), is(SOME_ORG));
-        assertThat(MDC.get(USER), is(SOME_USER));
+        assertThat(MDC.get(ORG)).isEqualTo(SOME_ORG);
+        assertThat(MDC.get(USER)).isEqualTo(SOME_USER);
     }
 
     @Test
@@ -274,8 +269,8 @@ public class SpringWorkTest {
         setUriTemplateAttribute("/users/SomePerson", pathMap);
         work.setRequestURLPattern(request, keyCleanser);
         triggerEndpointWithSpringAttributes(pathMap);
-        assertThat(MDC.get("user"), is("SomePerson"));
-        assertThat(MDC.get(ENDPOINT), is("GET /users/{user}"));
+        assertThat(MDC.get("user")).isEqualTo("SomePerson");
+        assertThat(MDC.get(ENDPOINT)).isEqualTo("GET /users/{user}");
     }
 
 
@@ -287,9 +282,9 @@ public class SpringWorkTest {
         setUriTemplateAttribute("/users/(null)", pathMap);
         work.setRequestURLPattern(request, keyCleanser);
         triggerEndpointWithSpringAttributes(pathMap);
-        assertThat(MDC.get("user"), nullValue());
-        assertThat(MDC.getCopyOfContextMap().keySet().contains("user"), is(false));
-        assertThat(MDC.get(ENDPOINT), is("GET /users/(null)"));
+        assertThat(MDC.get("user")).isNull();
+        assertThat(MDC.getCopyOfContextMap().keySet().contains("user")).isFalse();
+        assertThat(MDC.get(ENDPOINT)).isEqualTo("GET /users/(null)");
     }
 
 
@@ -307,8 +302,8 @@ public class SpringWorkTest {
         servlet.init(config);
 
         List<WorkSummary<? extends Work>> workSummaries = servlet.mapOutstandingToSummaryList();
-        assertThat(workSummaries, hasSize(1));
-        assertThat(workSummaries.get(0).getService(), is(""));
+        assertThat(workSummaries).hasSize(1);
+        assertThat(workSummaries.get(0).getService()).isEqualTo("");
     }
 
     @Test
@@ -326,8 +321,8 @@ public class SpringWorkTest {
         servlet.init(config);
 
         List<WorkSummary<? extends Work>> workSummaries = servlet.mapOutstandingToSummaryList();
-        assertThat(workSummaries, hasSize(1));
-        assertThat(workSummaries.get(0).getService(), is("/test/url"));
+        assertThat(workSummaries).hasSize(1);
+        assertThat(workSummaries.get(0).getService()).isEqualTo("/test/url");
     }
 
 
@@ -337,8 +332,8 @@ public class SpringWorkTest {
     }
 
     private void assertNullPathAndEndpoint() {
-        assertThat(MDC.get(PATH), nullValue());
-        assertThat(MDC.get(ENDPOINT), nullValue());
+        assertThat(MDC.get(PATH)).isNull();
+        assertThat(MDC.get(ENDPOINT)).isNull();
     }
 
     private void setupPatternRequest(String requestURI, Map<String, String> keyValue) {
@@ -348,9 +343,9 @@ public class SpringWorkTest {
 
     private void assertTestPathAndEndpoint() {
         String actual = "GET " + TEST_ORG_VALUE;
-        assertThat(MDC.get(PATH), is(actual));
-        assertThat(MDC.get(ENDPOINT), is(actual));
-        assertThat(work.getEndpoint(), is(work.getService()));
+        assertThat(MDC.get(PATH)).isEqualTo(actual);
+        assertThat(MDC.get(ENDPOINT)).isEqualTo(actual);
+        assertThat(work.getEndpoint()).isEqualTo(work.getService());
     }
 
     private void setUriTemplateAttribute(String requestURI, Map<String, String> keyValue) {
