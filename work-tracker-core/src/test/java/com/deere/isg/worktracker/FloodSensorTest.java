@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.deere.isg.worktracker;
 
 import com.deere.clock.Clock;
@@ -36,8 +35,7 @@ import java.util.stream.Stream;
 
 import static com.deere.isg.worktracker.MockWorkUtils.createMockWorkList;
 import static com.deere.isg.worktracker.MockWorkUtils.createSameUserMockWork;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -93,8 +91,8 @@ public class FloodSensorTest {
     public void shouldRetryLaterReturnIntegerOpIfExceedsLimit() {
         MockWork work = new MockWork(null);
         Optional<Integer> retryAfter = floodSensor.shouldRetryLater(work, predicate(true), LIMIT_UNDER, USER, MESSAGE);
-        assertThat(retryAfter.isPresent(), is(true));
-        assertThat(retryAfter.get(), is(1));
+        assertThat(retryAfter.isPresent()).isTrue();
+        assertThat(retryAfter.get()).isEqualTo(1);
 
         verify(logger).warn(eq(MESSAGE), (Object[]) any());
     }
@@ -104,8 +102,8 @@ public class FloodSensorTest {
         MockWork work = new MockWork(null);
         Clock.freeze(Clock.now().plusMillis((int) Duration.ofMinutes(10).toMillis()));
         Optional<Integer> retryAfter = floodSensor.shouldRetryLater(work, predicate(true), LIMIT_UNDER, USER, MESSAGE);
-        assertThat(retryAfter.isPresent(), is(true));
-        assertThat(retryAfter.get(), is(300));
+        assertThat(retryAfter.isPresent()).isTrue();
+        assertThat(retryAfter.get()).isEqualTo(300);
 
         verify(logger).warn(eq(MESSAGE), (Object[]) any());
     }
@@ -116,8 +114,8 @@ public class FloodSensorTest {
         work.setMaxTime(Duration.ofMinutes(1).toMillis());
         Clock.freeze(Clock.now().plusMillis((int) Duration.ofMinutes(10).toMillis()));
         Optional<Integer> retryAfter = floodSensor.shouldRetryLater(work, predicate(true), LIMIT_UNDER, USER, MESSAGE);
-        assertThat(retryAfter.isPresent(), is(true));
-        assertThat(retryAfter.get(), is(60));
+        assertThat(retryAfter.isPresent()).isTrue();
+        assertThat(retryAfter.get()).isEqualTo(60);
 
         verify(logger).warn(eq(MESSAGE), (Object[]) any());
     }
@@ -165,13 +163,13 @@ public class FloodSensorTest {
 
         MockWork work = new MockWork(TEST_USER);
         boolean addToSetIfNotFound = work.checkLimit(USER);
-        assertThat(addToSetIfNotFound, is(false));
+        assertThat(addToSetIfNotFound).isEqualTo(false);
 
         Optional<Integer> retryAfter = floodSensor
                 .shouldRetryLater(work, MockWork::getUser, LIMIT_UNDER, USER, MESSAGE);
 
         boolean isInSet = work.checkLimit(USER);
-        assertThat(isInSet, is(true));
+        assertThat(isInSet).isTrue();
         assertNoRetry(MESSAGE, retryAfter);
     }
 
@@ -183,7 +181,7 @@ public class FloodSensorTest {
         Optional<Integer> retryAfter = floodSensor
                 .shouldRetryLater(work, MockWork::getUser, LIMIT_UNDER, USER, MESSAGE);
 
-        assertThat(work.checkLimit(USER), is(false));
+        assertThat(work.checkLimit(USER)).isEqualTo(false);
         assertNoRetry(MESSAGE, retryAfter);
     }
 
@@ -195,7 +193,7 @@ public class FloodSensorTest {
         Optional<Integer> retryAfter = floodSensor
                 .shouldRetryLater(work, MockWork::getUser, LIMIT_UNDER, USER, MESSAGE);
 
-        assertThat(work.checkLimit(USER), is(false));
+        assertThat(work.checkLimit(USER)).isEqualTo(false);
         assertNoRetry(MESSAGE, retryAfter);
     }
 
@@ -217,11 +215,11 @@ public class FloodSensorTest {
         ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
         verify(logger).warn(eq(MESSAGE), (Object[])captor.capture());
         Object values = captor.getValue();
-        assertThat(values, is(StructuredArguments.keyValue("retry_after_seconds", 1)));
+        assertThat(values).isEqualTo(StructuredArguments.keyValue("retry_after_seconds", 1));
     }
 
     private void assertNoRetry(String message, Optional<Integer> retryAfter) {
-        assertThat(retryAfter, is(Optional.empty()));
+        assertThat(retryAfter).isEqualTo(Optional.empty());
         verify(logger, never()).warn(eq(message), (Object[]) any());
     }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package com.deere.isg.worktracker.servlet;
 
 import org.junit.Before;
@@ -25,8 +24,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -50,7 +49,7 @@ public class HttpWorkFilterTest {
 
         HttpWork work = filter.createWork(request);
 
-        assertThat(work.getService(), is("GET " + TEST_URL));
+        assertThat(work.getService()).isEqualTo("GET " + TEST_URL);
 
     }
 }

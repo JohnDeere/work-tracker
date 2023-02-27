@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 package com.deere.isg.worktracker.servlet;
 
@@ -35,9 +34,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -74,26 +73,26 @@ public class HttpWorkPostAuthFilterTest {
 
     @Test
     public void userIsUpdateInMDC() throws IOException, ServletException {
-        assertThat(MDC.get(USER), nullValue());
+        assertThat(MDC.get(USER)).isNull();
 
         TestUserHttpWork work = new TestUserHttpWork(request);
         when(outstanding.current()).thenReturn(Optional.of(work));
 
         filter.doFilter(request, response, chain);
 
-        assertThat(MDC.get(USER), is(AUTHENTICATED));
+        assertThat(MDC.get(USER)).isEqualTo(AUTHENTICATED);
     }
 
     @Test
     public void nullOutstandingDoesNotUpdateUser() throws IOException, ServletException {
-        assertThat(MDC.get(USER), nullValue());
+        assertThat(MDC.get(USER)).isNull();
 
         HttpWorkPostAuthFilter nullFilter = new HttpWorkPostAuthFilter();
         nullFilter.setFilterOutstanding(null);
 
         nullFilter.doFilter(request, response, chain);
 
-        assertThat(MDC.get(USER), nullValue());
+        assertThat(MDC.get(USER)).isNull();
 
     }
 

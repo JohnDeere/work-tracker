@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 package com.deere.isg.worktracker.servlet;
 
@@ -37,9 +36,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import static com.deere.isg.worktracker.servlet.TestWorkUtils.createWork;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -80,7 +77,7 @@ public class AbstractHttpWorkFilterTest {
 
         verify(logger).logStart(request, TEST_WORK);
         verify(logger).logEnd(request, response, TEST_WORK);
-        assertThat(filter.getPostProcessedData(), is(POST_PROCESSED_DATA));
+        assertThat(filter.getPostProcessedData()).isEqualTo(POST_PROCESSED_DATA);
     }
 
     @Test
@@ -103,7 +100,7 @@ public class AbstractHttpWorkFilterTest {
             verify(logger).logStart(request, TEST_WORK);
             verify(logger).logEnd(request, response, TEST_WORK);
             verifyEmptyMDC();
-            assertThat(filter.getPostProcessedData(), is(POST_PROCESSED_DATA));
+            assertThat(filter.getPostProcessedData()).isEqualTo(POST_PROCESSED_DATA);
         }
     }
 
@@ -116,7 +113,7 @@ public class AbstractHttpWorkFilterTest {
 
         verify(logger, never()).logStart(request, TEST_WORK);
         verify(logger, never()).logEnd(request, response, TEST_WORK);
-        assertThat(nullFilter.getPostProcessedData(), is(POST_PROCESSED_DATA));
+        assertThat(nullFilter.getPostProcessedData()).isEqualTo(POST_PROCESSED_DATA);
     }
 
     @Test
@@ -143,12 +140,12 @@ public class AbstractHttpWorkFilterTest {
             verify(logger).logStart(request, TEST_WORK);
             verify(logger).logEnd(request, response, TEST_WORK);
             verifyEmptyMDC();
-            assertThat(filter.getPostProcessedData(), is(""));
+            assertThat(filter.getPostProcessedData()).isEqualTo("");
         }
     }
 
     private void verifyEmptyMDC() {
-        assertThat(MDC.getCopyOfContextMap(), nullValue());
+        assertThat(MDC.getCopyOfContextMap()).isNull();
     }
 
     private class MockHttpWorkFilter extends AbstractHttpWorkFilter<HttpWork> {

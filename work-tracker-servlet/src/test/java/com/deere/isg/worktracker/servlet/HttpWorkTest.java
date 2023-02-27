@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 package com.deere.isg.worktracker.servlet;
 
@@ -30,8 +29,7 @@ import java.util.regex.Pattern;
 
 import static com.deere.isg.worktracker.servlet.HttpWork.*;
 import static net.logstash.logback.argument.StructuredArguments.keyValue;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -65,86 +63,86 @@ public class HttpWorkTest {
     public void getMetadataContainsPath() {
         work.setService(PATH_VALUE);
 
-        assertThat(work.getMetadata(), hasItem(keyValue(PATH, PATH_VALUE)));
+        assertThat(work.getMetadata()).contains(keyValue(PATH, PATH_VALUE));
     }
 
     @Test
     public void valuesAddedInMDC() {
         work.setRemoteAddress(REMOTE_ADDRESS_VALUE);
-        assertThat(MDC.get(REMOTE_ADDRESS), is(REMOTE_ADDRESS_VALUE));
+        assertThat(MDC.get(REMOTE_ADDRESS)).isEqualTo(REMOTE_ADDRESS_VALUE);
 
         work.setRemoteUser(REMOTE_USER_VALUE);
-        assertThat(MDC.get(REMOTE_USER), is(REMOTE_USER_VALUE));
+        assertThat(MDC.get(REMOTE_USER)).isEqualTo(REMOTE_USER_VALUE);
 
         work.setService(PATH_VALUE);
-        assertThat(MDC.get(PATH), is(PATH_VALUE));
+        assertThat(MDC.get(PATH)).isEqualTo(PATH_VALUE);
 
         work.setSessionId(SESSION_ID_VALUE);
-        assertThat(MDC.get(SESSION_ID), is(SESSION_ID_VALUE));
+        assertThat(MDC.get(SESSION_ID)).isEqualTo(SESSION_ID_VALUE);
 
         work.setAcceptHeader(ACCEPT_HEADER_VALUE);
-        assertThat(MDC.get(ACCEPT), is(ACCEPT_HEADER_VALUE));
+        assertThat(MDC.get(ACCEPT)).isEqualTo(ACCEPT_HEADER_VALUE);
     }
 
     @Test
     public void getMetadataContainsRemoteAddress() {
         work.setRemoteAddress(REMOTE_ADDRESS_VALUE);
 
-        assertThat(work.getMetadata(), hasItem(keyValue(REMOTE_ADDRESS, REMOTE_ADDRESS_VALUE)));
+        assertThat(work.getMetadata()).contains(keyValue(REMOTE_ADDRESS, REMOTE_ADDRESS_VALUE));
     }
 
     @Test
     public void getMetadataContainsRemoteUser() {
         work.setRemoteUser(REMOTE_USER_VALUE);
 
-        assertThat(work.getMetadata(), hasItem(keyValue(REMOTE_USER, REMOTE_USER_VALUE)));
+        assertThat(work.getMetadata()).contains(keyValue(REMOTE_USER, REMOTE_USER_VALUE));
     }
 
     @Test
     public void getMetadataContainsSessionId() {
         work.setSessionId(SESSION_ID_VALUE);
 
-        assertThat(work.getMetadata(), hasItem(keyValue(SESSION_ID, SESSION_ID_VALUE)));
+        assertThat(work.getMetadata()).contains(keyValue(SESSION_ID, SESSION_ID_VALUE));
     }
 
     @Test
     public void getMetadataContainsRequestId() {
-        assertThat(containsKVPattern(work, REQUEST_ID, UUID_PATTERN), is(true));
+        assertThat(containsKVPattern(work, REQUEST_ID, UUID_PATTERN)).isTrue();
     }
 
     @Test
     public void getMetadataContainsElapsedMillis() {
-        assertThat(containsKVPattern(work, ELAPSED_MS, MILLIS_PATTERN), is(true));
+        assertThat(containsKVPattern(work, ELAPSED_MS, MILLIS_PATTERN)).isTrue();
     }
 
     @Test
     public void getMetadataContainsThreadName() {
-        assertThat(work.getMetadata(), hasItem(keyValue(THREAD_NAME, MAIN_THREAD_VALUE)));
+        assertThat(work.getMetadata()).contains(keyValue(THREAD_NAME, MAIN_THREAD_VALUE));
     }
 
     @Test
     public void getMetadataContainsZombie() {
-        assertThat(work.getMetadata(), hasItem(keyValue(ZOMBIE, false)));
+        assertThat(work.getMetadata()).contains(keyValue(ZOMBIE, false));
     }
 
     @Test
     public void httpWorkDefaultConstructorHasEmptyValues() {
         HttpWork httpWork = new HttpWork(null);
 
-        assertThat(httpWork.getService(), nullValue());
-        assertThat(httpWork.getRemoteAddress(), nullValue());
-        assertThat(httpWork.getRemoteUser(), nullValue());
-        assertThat(httpWork.getSessionId(), nullValue());
+        assertThat(httpWork.getService()).isNull();
+        assertThat(httpWork.getRemoteAddress()).isNull();
+        assertThat(httpWork.getRemoteUser()).isNull();
+        assertThat(httpWork.getSessionId()).isNull();
     }
 
     @Test
     public void mapsRequestToHttpWork() {
         HttpWork httpWork = new HttpWork(getMockRequest());
 
-        assertThat(httpWork.getRemoteAddress(), is("addr"));
-        assertThat(httpWork.getSessionId(), is("session1234"));
-        assertThat(httpWork.getRemoteUser(), is("John Doe"));
-        assertThat(httpWork.getService(), is("GET this/path"));
+        assertThat(httpWork.getRemoteAddress()).isEqualTo("addr");
+        assertThat(httpWork.getSessionId()).isEqualTo("session1234");
+        assertThat(httpWork.getRemoteUser()).isEqualTo("John Doe");
+        assertThat(httpWork.getService()).isEqualTo("GET this/path");
     }
 
     private HttpServletRequest getMockRequest() {

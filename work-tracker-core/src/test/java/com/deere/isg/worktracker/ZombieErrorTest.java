@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-
 package com.deere.isg.worktracker;
 
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ZombieErrorTest {
 
@@ -42,7 +40,7 @@ public class ZombieErrorTest {
         try {
             throw new ZombieError(ERROR_MESSAGE);
         } catch (ZombieError e) {
-            assertThat(e.getMessage(), is(ERROR_MESSAGE));
+            assertThat(e.getMessage()).isEqualTo(ERROR_MESSAGE);
         }
     }
 
@@ -51,8 +49,8 @@ public class ZombieErrorTest {
         try {
             throw new ZombieError(ERROR_MESSAGE, new Throwable(ERROR_CAUSE));
         } catch (ZombieError e) {
-            assertThat(e.getMessage(), is(ERROR_MESSAGE));
-            assertThat(e.getCause().getMessage(), is(ERROR_CAUSE));
+            assertThat(e.getMessage()).isEqualTo(ERROR_MESSAGE);
+            assertThat(e.getCause().getMessage()).isEqualTo(ERROR_CAUSE);
         }
     }
 
@@ -61,7 +59,7 @@ public class ZombieErrorTest {
         try {
             throw new ZombieError(new Throwable(ERROR_CAUSE));
         } catch (ZombieError e) {
-            assertThat(e.getCause().getMessage(), is(ERROR_CAUSE));
+            assertThat(e.getCause().getMessage()).isEqualTo(ERROR_CAUSE);
         }
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.deere.isg.worktracker.servlet;
 
 import EDU.oswego.cs.dl.util.concurrent.PooledExecutor;
@@ -25,8 +24,8 @@ import org.slf4j.MDC;
 
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MdcOswegoExecutorTest {
     private static final String PARENT = "parent";
@@ -60,7 +59,7 @@ public class MdcOswegoExecutorTest {
 
         awaitTermination();
 
-        assertThat(runnable.getValue(TASK_CLASS_NAME), containsString("MdcOswegoExecutorTest"));
+        assertThat(runnable.getValue(TASK_CLASS_NAME)).contains("MdcOswegoExecutorTest");
     }
 
     @Test
@@ -72,9 +71,9 @@ public class MdcOswegoExecutorTest {
 
         awaitTermination();
 
-        assertThat(runnable.getValue(PARENT), is(TEST));
-        assertThat(runnable.getValue("parent_endpoint"), is("test_endpoint"));
-        assertThat(runnable.getValue("exception_name"), nullValue());
+        assertThat(runnable.getValue(PARENT)).isEqualTo(TEST);
+        assertThat(runnable.getValue("parent_endpoint")).isEqualTo("test_endpoint");
+        assertThat(runnable.getValue("exception_name")).isNull();
     }
 
     private void awaitTermination() throws InterruptedException {

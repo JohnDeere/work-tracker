@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-
 package com.deere.isg.worktracker.spring.boot;
 
 import com.deere.isg.worktracker.spring.SpringWork;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.IsNull.notNullValue;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 public class SpringBootWorkFilterTest {
 
@@ -33,7 +32,7 @@ public class SpringBootWorkFilterTest {
 
         SpringWork work = filter.createWork(new MockHttpServletRequest());
 
-        assertThat(work, notNullValue());
+        assertThat(work).isNotNull();
     }
 
     private class MockBootWorkFilter extends SpringBootWorkFilter<SpringWork> {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 package com.deere.isg.worktracker.servlet;
 
@@ -34,10 +33,7 @@ import java.util.stream.Stream;
 
 import static com.deere.isg.worktracker.servlet.TestWorkUtils.createAllConditionsList;
 import static com.deere.isg.worktracker.servlet.TestWorkUtils.createWorkList;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
@@ -74,28 +70,28 @@ public class HttpFloodSensorTest {
     public void servletResponseMayProceed() {
         ServletResponse servletResp = mock(ServletResponse.class);
 
-        assertThat(floodSensor.mayProceedOrRedirectTooManyRequest(servletResp), is(true));
+        assertThat(floodSensor.mayProceedOrRedirectTooManyRequest(servletResp)).isTrue();
     }
 
     @Test
     public void canProceedIfExactTooManyTotalLimit() {
         setCurrentStream(new HttpWork(null), createWorkList(limit.getConnectionLimit(ConnectionLimits.TOTAL).getLimit()));
 
-        assertThat(floodSensor.mayProceedOrRedirectTooManyRequest(response), is(true));
+        assertThat(floodSensor.mayProceedOrRedirectTooManyRequest(response)).isTrue();
     }
 
     @Test
     public void cannotProceedIfExceedTooManyTotalLimit() {
         setCurrentStream(new HttpWork(null), createWorkList(limit.getConnectionLimit(ConnectionLimits.TOTAL).getLimit() + 1));
 
-        assertThat(floodSensor.mayProceedOrRedirectTooManyRequest(response), is(false));
+        assertThat(floodSensor.mayProceedOrRedirectTooManyRequest(response)).isFalse();
     }
 
     @Test
     public void canProceedIfUnderTooManyTotalLimit() {
         setCurrentStream(new HttpWork(null), createWorkList(limit.getConnectionLimit(ConnectionLimits.TOTAL).getLimit() - 1));
 
-        assertThat(floodSensor.mayProceedOrRedirectTooManyRequest(response), is(true));
+        assertThat(floodSensor.mayProceedOrRedirectTooManyRequest(response)).isTrue();
     }
 
     @Test
@@ -266,7 +262,7 @@ public class HttpFloodSensorTest {
 
         boolean proceed = eFloodSensor.mayProceedOrRedirectTooManyRequest(response);
 
-        assertThat(proceed, is(true));
+        assertThat(proceed).isTrue();
     }
 
     @Test
@@ -278,7 +274,7 @@ public class HttpFloodSensorTest {
         MockFloodSensor mockFloodSensor = new MockFloodSensor(outstanding);
         boolean proceed = mockFloodSensor.mayProceedOrRedirectTooManyRequest(response);
 
-        assertThat(proceed, is(false));
+        assertThat(proceed).isFalse();
     }
 
     @Test
@@ -330,9 +326,9 @@ public class HttpFloodSensorTest {
     }
 
     private void assertLimits(HttpWork work, boolean mayProceed, String... items) {
-        assertThat(floodSensor.mayProceedOrRedirectTooManyRequest(response), is(mayProceed));
-        assertThat(work.getLimits(), hasItems(items));
-        assertThat(work.getLimits(), hasSize(items.length));
+        assertThat(floodSensor.mayProceedOrRedirectTooManyRequest(response)).isEqualTo(mayProceed);
+        assertThat(work.getLimits()).contains(items);
+        assertThat(work.getLimits()).hasSize(items.length);
     }
 
     private HttpWork setSameUserStream(int limit) {

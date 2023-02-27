@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package integration;
 
 import com.deere.isg.worktracker.OutstandingWork;
@@ -23,6 +22,7 @@ import com.deere.isg.worktracker.servlet.HttpFloodSensor;
 import com.deere.isg.worktracker.servlet.RequestBouncerFilter;
 import com.deere.isg.worktracker.spring.SpringWork;
 import com.deere.isg.worktracker.spring.SpringWorkFilter;
+import integration.helpers.Conditions;
 import integration.helpers.MockController;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,11 +44,11 @@ import java.util.stream.IntStream;
 
 import static com.deere.isg.worktracker.servlet.WorkContextListener.FLOOD_SENSOR_ATTR;
 import static com.deere.isg.worktracker.servlet.WorkContextListener.OUTSTANDING_ATTR;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.isEmptyString;
-import static org.hamcrest.beans.HasPropertyWithValue.hasProperty;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -86,12 +86,7 @@ public class FloodSensorTest {
 
     @Test
     public void limitsInCorrectOrder() {
-        assertThat(limit.getConnectionLimits(), contains(
-                hasProperty(TYPE_NAME, is("session")),
-                hasProperty(TYPE_NAME, is("user")),
-                hasProperty(TYPE_NAME, is("service")),
-                hasProperty(TYPE_NAME, is("total"))
-        ));
+        Conditions.assertConditionTypes(limit.getConnectionLimits());
     }
 
     @Test
@@ -139,10 +134,10 @@ public class FloodSensorTest {
 
     private void assertTooMany(MvcResult result, String message) throws UnsupportedEncodingException {
         MockHttpServletResponse response = result.getResponse();
-        assertThat(response.getStatus(), is(HttpStatus.TOO_MANY_REQUESTS.value()));
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS.value());
 
         String content = response.getContentAsString();
-        assertThat(content, isEmptyString());
+        assertThat(content).isEmpty();
         verify(logger).warn(eq(message), (Object[]) any());
     }
 

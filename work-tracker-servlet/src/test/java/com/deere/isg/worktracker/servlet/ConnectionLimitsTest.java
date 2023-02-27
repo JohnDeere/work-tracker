@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-
 package com.deere.isg.worktracker.servlet;
 
 import com.deere.isg.worktracker.FloodSensor;
+import org.assertj.core.api.Condition;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,13 +27,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.*;
-import static org.hamcrest.beans.HasPropertyWithValue.hasProperty;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
 
 public class ConnectionLimitsTest {
@@ -51,59 +46,59 @@ public class ConnectionLimitsTest {
     @Test
     public void createsDefaultOnlyIfTrue() {
         ConnectionLimits<HttpWork> connectionLimitsFalse = new ConnectionLimits<>(false);
-        assertThat(connectionLimitsFalse.getConnectionLimits(), empty());
+        assertThat(connectionLimitsFalse.getConnectionLimits()).isEmpty();
 
         ConnectionLimits<HttpWork> connectionLimitsTrue = new ConnectionLimits<>(true);
-        assertThat(connectionLimitsTrue.getConnectionLimits(), hasSize(4));
+        assertThat(connectionLimitsTrue.getConnectionLimits()).hasSize(4);
     }
 
     @Test
     public void createsDefaultLimitsAndAssertOrder() {
         List<ConnectionLimits<HttpWork>.Limit> connections = connectionLimits.getConnectionLimits();
 
-        assertThat(connections, hasSize(4));
-        assertThat(connections, contains(
-                hasProperty(TYPE_NAME, is("session")),
-                hasProperty(TYPE_NAME, is(USER_TYPE)),
-                hasProperty(TYPE_NAME, is("service")),
-                hasProperty(TYPE_NAME, is("total"))
-        ));
+        assertThat(connections).hasSize(4);
+
+        assertThat(connections)
+                .haveAtLeastOne(new TypeNamed("session"))
+                .haveAtLeastOne(new TypeNamed(USER_TYPE))
+                .haveAtLeastOne(new TypeNamed("session"))
+                .haveAtLeastOne(new TypeNamed("total"));
     }
 
     @Test
     public void correctDefaultLimits() {
-        assertThat(connectionLimits.getConnectionLimit(ConnectionLimits.TOTAL).getLimit(), is((int) (60 * .9)));
-        assertThat(connectionLimits.getConnectionLimit(ConnectionLimits.SERVICE).getLimit(), is((int) (60 * .6)));
-        assertThat(connectionLimits.getConnectionLimit(ConnectionLimits.USER).getLimit(), is((int) (60 * .5)));
-        assertThat(connectionLimits.getConnectionLimit(ConnectionLimits.SESSION).getLimit(), is((int) (60 * .4)));
+        assertThat(connectionLimits.getConnectionLimit(ConnectionLimits.TOTAL).getLimit()).isEqualTo((int) (60 * .9));
+        assertThat(connectionLimits.getConnectionLimit(ConnectionLimits.SERVICE).getLimit()).isEqualTo((int) (60 * .6));
+        assertThat(connectionLimits.getConnectionLimit(ConnectionLimits.USER).getLimit()).isEqualTo((int) (60 * .5));
+        assertThat(connectionLimits.getConnectionLimit(ConnectionLimits.SESSION).getLimit()).isEqualTo((int) (60 * .4));
     }
 
     @Test
     public void replacesLimit() {
         connectionLimits.addConnectionLimit(10, ConnectionLimits.TOTAL).test(x -> true);
 
-        assertThat(connectionLimits.getConnectionLimit(ConnectionLimits.TOTAL).getLimit(), is(10));
+        assertThat(connectionLimits.getConnectionLimit(ConnectionLimits.TOTAL).getLimit()).isEqualTo(10);
     }
 
     @Test
     public void addsIfAbsent() {
         ConnectionLimits<HttpWork>.Limit test = connectionLimits.getConnectionLimit("test");
-        assertThat(test, nullValue());
+        assertThat(test).isNull();
 
         connectionLimits.addConnectionLimit(10, "test").test(x -> true);
 
         ConnectionLimits<HttpWork>.Limit finalTest = connectionLimits.getConnectionLimit("test");
-        assertThat(finalTest, notNullValue());
-        assertThat(finalTest.getLimit(), is(10));
+        assertThat(finalTest).isNotNull();
+        assertThat(finalTest.getLimit()).isEqualTo(10);
     }
 
     @Test
     public void returnsMessage() {
         String messageTotal = connectionLimits.getConnectionLimit(ConnectionLimits.TOTAL).getMessage();
-        assertThat(messageTotal, is(TOTAL_MESSAGE));
+        assertThat(messageTotal).isEqualTo(TOTAL_MESSAGE);
 
         String messageType = connectionLimits.getConnectionLimit(ConnectionLimits.USER).getMessage();
-        assertThat(messageType, is(USER_MESSAGE));
+        assertThat(messageType).isEqualTo(USER_MESSAGE);
     }
 
     @Test(expected = AssertionError.class)
@@ -120,11 +115,11 @@ public class ConnectionLimitsTest {
     public void updatesLimit() {
         ConnectionLimits<HttpWork>.Limit limit = connectionLimits.getConnectionLimit(ConnectionLimits.TOTAL);
         int initialLimit = limit.getLimit();
-        assertThat(initialLimit, is((int) (60 * .9)));
+        assertThat(initialLimit).isEqualTo((int) (60 * .9));
 
         connectionLimits.updateLimit(10, ConnectionLimits.TOTAL);
         int finalLimit = limit.getLimit();
-        assertThat(finalLimit, is(10));
+        assertThat(finalLimit).isEqualTo(10);
     }
 
     @Test
@@ -132,13 +127,13 @@ public class ConnectionLimitsTest {
         connectionLimits.updateLimit(10, "test");
         ConnectionLimits<HttpWork>.Limit test = connectionLimits.getConnectionLimit("test");
 
-        assertThat(test, nullValue());
+        assertThat(test).isNull();
     }
 
     @Test
     public void helperReturnsLimit() {
         int limit = connectionLimits.getLimit(ConnectionLimits.TOTAL);
-        assertThat(limit, is((int) (60 * .9)));
+        assertThat(limit).isEqualTo((int) (60 * .9));
     }
 
     @Test
@@ -158,7 +153,7 @@ public class ConnectionLimitsTest {
         Optional<Integer> result = limit.shouldRetryLater(sensor, incoming);
 
         verify(sensor).shouldRetryLater(eq(incoming), eq(expectedTest), eq(2), eq(USER_TYPE), eq(USER_MESSAGE));
-        assertThat(result, is(expectedrResult));
+        assertThat(result).isEqualTo(expectedrResult);
     }
 
     @Test
@@ -181,7 +176,7 @@ public class ConnectionLimitsTest {
         Optional<Integer> result = limit.shouldRetryLater(sensor, incoming);
         verify(sensor).shouldRetryLater(eq(incoming), eq(expectedTest), eq(2), eq(USER_TYPE), eq(USER_MESSAGE));
 
-        assertThat(result, is(expectedrResult));
+        assertThat(result).isEqualTo(expectedrResult);
     }
 
     @Test
@@ -204,7 +199,7 @@ public class ConnectionLimitsTest {
         Optional<Integer> result = limit.shouldRetryLater(sensor, incoming);
         verify(sensor).shouldRetryLater(eq(incoming), eq(expectedMethod), eq(2), eq(USER_TYPE), eq(USER_MESSAGE));
 
-        assertThat(result, is(expectedrResult));
+        assertThat(result).isEqualTo(expectedrResult);
     }
 
     @Test
@@ -243,7 +238,21 @@ public class ConnectionLimitsTest {
 
         Optional<Integer> result = limit.shouldRetryLater(sensor, incoming);
 
-        assertThat(result, is(expectedResult));
+        assertThat(result).isEqualTo(expectedResult);
         verify(sensor).logFloodDetected(eq(limit), eq(result));
+    }
+
+    private static class TypeNamed extends Condition<ConnectionLimits<HttpWork>.Limit> {
+
+        private final String type;
+
+        public TypeNamed(String typeName) {
+            type = typeName;
+        }
+
+        @Override
+        public boolean matches(ConnectionLimits<HttpWork>.Limit value) {
+            return value.getTypeName().equals(type);
+        }
     }
 }

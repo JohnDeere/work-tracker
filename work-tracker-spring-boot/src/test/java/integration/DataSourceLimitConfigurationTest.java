@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-
 package integration;
 
+import com.deere.isg.worktracker.servlet.ConnectionLimits;
+import com.deere.isg.worktracker.spring.SpringWork;
+import integration.helpers.Conditions;
 import integration.helpers.MockWorkConfiguration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,13 +32,14 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.List;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = LimitConfigurationTest.MockLimitWorkConfiguration.class)
-public class DataSourceLimitConfigurationTest extends BaseMockConnectionLimit {
+public class DataSourceLimitConfigurationTest {
     private static final int LIMIT = 25;
 
     @Autowired
@@ -44,7 +47,10 @@ public class DataSourceLimitConfigurationTest extends BaseMockConnectionLimit {
 
     @Test
     public void connectionLimitsSet() {
-        assertConnectionLimits(configuration.connectionLimits().getConnectionLimits(), LIMIT);
+        List<ConnectionLimits<SpringWork>.Limit> limits = configuration.connectionLimits().getConnectionLimits();
+        Conditions.assertConnectionLimitsNumbers(limits, LIMIT);
+        Conditions.assertConditionTypes(limits);
+
     }
 
     @Configuration

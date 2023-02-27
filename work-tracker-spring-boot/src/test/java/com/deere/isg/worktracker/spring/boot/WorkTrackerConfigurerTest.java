@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package com.deere.isg.worktracker.spring.boot;
 
 import com.deere.isg.worktracker.OutstandingWork;
@@ -28,6 +27,7 @@ import com.deere.isg.worktracker.spring.SpringLoggerHandlerInterceptor;
 import com.deere.isg.worktracker.spring.SpringRequestBouncerHandlerInterceptor;
 import com.deere.isg.worktracker.spring.SpringWork;
 import com.deere.isg.worktracker.spring.SpringWorkPostAuthFilter;
+import integration.helpers.Conditions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,15 +45,15 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.function.Function;
 
 import static com.deere.isg.worktracker.servlet.WorkContextListener.*;
 import static com.deere.isg.worktracker.spring.boot.WorkTrackerConfigurer.DATA_SOURCE;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.hamcrest.Matchers.contains;
+
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -92,25 +92,25 @@ public class WorkTrackerConfigurerTest {
 
     @Test
     public void instancesAreCreated() {
-        assertThat(configurer.workContextListener(mock(WorkConfig.class)), notNullValue());
-        assertThat(configurer.keyCleanser(), notNullValue());
+        assertThat(configurer.workContextListener(mock(WorkConfig.class))).isNotNull();
+        assertThat(configurer.keyCleanser()).isNotNull();
     }
 
     @Test
     public void logbackServletInstantiated() {
         ServletRegistrationBean bean = configurer.logbackStatusServlet();
 
-        assertThat(bean.getServletName(), is("viewStatusMessagesServlet"));
-        assertThat(bean.getUrlMappings(), contains("/lbClassicStatus"));
+        assertThat(bean.getServletName()).isEqualTo("viewStatusMessagesServlet");
+        assertThat(bean.getUrlMappings()).contains("/lbClassicStatus");
     }
 
     @Test
     public void workConfigInstantiated() {
         WorkConfig<SpringWork> config = configurer.workConfig();
 
-        assertThat(config.getOutstanding(), notNullValue());
-        assertThat(config.getFloodSensor(), nullValue());
-        assertThat(config.getDetector(), notNullValue());
+        assertThat(config.getOutstanding()).isNotNull();
+        assertThat(config.getFloodSensor()).isNull();
+        assertThat(config.getDetector()).isNotNull();
 
         verify(logger).warn(NO_FLOOD_SENSOR_WARNING);
     }
@@ -120,9 +120,9 @@ public class WorkTrackerConfigurerTest {
         setupDataSource(DATA_SOURCE, DATA_SOURCE_LIMIT);
         WorkConfig<SpringWork> config = configurer.workConfig();
 
-        assertThat(config.getOutstanding(), notNullValue());
-        assertThat(config.getFloodSensor(), notNullValue());
-        assertThat(config.getDetector(), notNullValue());
+        assertThat(config.getOutstanding()).isNotNull();
+        assertThat(config.getFloodSensor()).isNotNull();
+        assertThat(config.getDetector()).isNotNull();
 
         verify(logger, never()).warn(NO_FLOOD_SENSOR_WARNING);
     }
@@ -131,7 +131,7 @@ public class WorkTrackerConfigurerTest {
     public void defaultLimitsSet() {
         ConnectionLimits<SpringWork> limit = configurer.connectionLimits();
 
-        assertThat(limit, nullValue());
+        assertThat(limit).isNull();
         verify(logger).warn(eq(NO_DATA_SOURCE_MSG + "'dataSource'"));
     }
 
@@ -140,7 +140,7 @@ public class WorkTrackerConfigurerTest {
         configurer.setDataSourceName(ANY_DATA_SOURCE);
         ConnectionLimits<SpringWork> limit = configurer.connectionLimits();
 
-        assertThat(limit, nullValue());
+        assertThat(limit).isNull();
         verify(logger).warn(eq(NO_DATA_SOURCE_MSG + "'" + ANY_DATA_SOURCE + "'"));
     }
 
@@ -149,19 +149,24 @@ public class WorkTrackerConfigurerTest {
         setupDataSource(DATA_SOURCE, DATA_SOURCE_LIMIT);
         ConnectionLimits<SpringWork> limit = configurer.connectionLimits();
 
-        assertThat(limit, notNullValue());
-        assertThat(limit.getConnectionLimits(), contains(
-                hasProperty(TYPE_NAME, is("session")),
-                hasProperty(TYPE_NAME, is("user")),
-                hasProperty(TYPE_NAME, is("service")),
-                hasProperty(TYPE_NAME, is("total"))
-        ));
-        assertThat(limit.getConnectionLimits(), contains(
-                hasProperty(LIMIT, is((int) (DATA_SOURCE_LIMIT * .4))),
-                hasProperty(LIMIT, is((int) (DATA_SOURCE_LIMIT * .5))),
-                hasProperty(LIMIT, is((int) (DATA_SOURCE_LIMIT * .6))),
-                hasProperty(LIMIT, is((int) (DATA_SOURCE_LIMIT * .9)))
-        ));
+        assertThat(limit).isNotNull();
+
+        List<ConnectionLimits<SpringWork>.Limit> limits = limit.getConnectionLimits();
+        Conditions.assertConnectionLimitsNumbers(limits, DATA_SOURCE_LIMIT);
+        Conditions.assertConditionTypes(limits);
+
+        //        assertThat(limit.getConnectionLimits(), contains(
+//                hasProperty(TYPE_NAME).isEqualTo("session")),
+//                hasProperty(TYPE_NAME).isEqualTo("user")),
+//                hasProperty(TYPE_NAME).isEqualTo("service")),
+//                hasProperty(TYPE_NAME).isEqualTo("total"))
+//        ));
+//        assertThat(limit.getConnectionLimits(), contains(
+//                hasProperty(LIMIT).isEqualTo((int) (DATA_SOURCE_LIMIT * .4))),
+//                hasProperty(LIMIT).isEqualTo((int) (DATA_SOURCE_LIMIT * .5))),
+//                hasProperty(LIMIT).isEqualTo((int) (DATA_SOURCE_LIMIT * .6))),
+//                hasProperty(LIMIT).isEqualTo((int) (DATA_SOURCE_LIMIT * .9)))
+//        ));
         verify(logger, never()).warn(eq(NO_DATA_SOURCE_MSG + "dataSource"), ArgumentMatchers.isA(Exception.class));
     }
 
@@ -171,7 +176,7 @@ public class WorkTrackerConfigurerTest {
 
         ConnectionLimits<SpringWork> limit = configurer.connectionLimits();
 
-        assertThat(limit, notNullValue());
+        assertThat(limit).isNotNull();
     }
 
     @Test
@@ -180,7 +185,7 @@ public class WorkTrackerConfigurerTest {
 
         ConnectionLimits<SpringWork> limit = configurer.connectionLimits();
 
-        assertThat(limit, notNullValue());
+        assertThat(limit).isNotNull();
     }
 
     @Test
@@ -189,7 +194,7 @@ public class WorkTrackerConfigurerTest {
 
         ConnectionLimits<SpringWork> limit = configurer.connectionLimits();
 
-        assertThat(limit, nullValue());
+        assertThat(limit).isNull();
 
     }
 
@@ -197,9 +202,9 @@ public class WorkTrackerConfigurerTest {
     public void getComponentsFromContext() {
         configurer.setServletContext(config.getServletContext());
 
-        assertThat(configurer.outstanding(), is(outstanding));
-        assertThat(configurer.floodSensor(), is(floodSensor));
-        assertThat(configurer.zombieDetector(), is(detector));
+        assertThat(configurer.outstanding()).isEqualTo(outstanding);
+        assertThat(configurer.floodSensor()).isEqualTo(floodSensor);
+        assertThat(configurer.zombieDetector()).isEqualTo(detector);
     }
 
     @Test
@@ -217,7 +222,7 @@ public class WorkTrackerConfigurerTest {
     public void excludeUrlPatterns() {
         configurer.excludePathPatterns("/test/**");
 
-        assertThat(configurer.getExcludePathPatterns(), arrayContaining("/test/**"));
+        assertThat(configurer.getExcludePathPatterns()).contains("/test/**");
     }
 
     @Test(expected = AssertionError.class)
@@ -227,22 +232,22 @@ public class WorkTrackerConfigurerTest {
 
     @Test
     public void defaultOutstandingPath() {
-        assertThat(configurer.getOutstandingPath(), is("/health/outstanding"));
+        assertThat(configurer.getOutstandingPath()).isEqualTo("/health/outstanding");
     }
 
     @Test
     public void outstandingPathUpdated() {
         configurer.setOutstandingPath("foo/bar");
 
-        assertThat(configurer.getOutstandingPath(), is("foo/bar"));
+        assertThat(configurer.getOutstandingPath()).isEqualTo("foo/bar");
     }
 
     @Test
     public void filtersAreAdded() {
-        assertThat(configurer.springWorkFilter(), instanceOf(SpringBootWorkFilter.class));
-        assertThat(configurer.requestBouncerFilter(), instanceOf(RequestBouncerFilter.class));
-        assertThat(configurer.zombieFilter(), instanceOf(ZombieFilter.class));
-        assertThat(configurer.authFilter(), instanceOf(SpringWorkPostAuthFilter.class));
+        assertThat(configurer.springWorkFilter()).isInstanceOf(SpringBootWorkFilter.class);
+        assertThat(configurer.requestBouncerFilter()).isInstanceOf(RequestBouncerFilter.class);
+        assertThat(configurer.zombieFilter()).isInstanceOf(ZombieFilter.class);
+        assertThat(configurer.authFilter()).isInstanceOf(SpringWorkPostAuthFilter.class);
     }
 
     @Test
@@ -251,7 +256,7 @@ public class WorkTrackerConfigurerTest {
 
         int limit = configurer.determineLimit();
 
-        assertThat(limit, is(DATA_SOURCE_LIMIT));
+        assertThat(limit).isEqualTo(DATA_SOURCE_LIMIT);
     }
 
     @Test
@@ -261,14 +266,14 @@ public class WorkTrackerConfigurerTest {
 
         int limit = configurer.determineLimit();
 
-        assertThat(limit, is(DATA_SOURCE_LIMIT));
+        assertThat(limit).isEqualTo(DATA_SOURCE_LIMIT);
     }
 
     @Test
     public void returnDefinedLimit() {
         configurer.setLimit(DATA_SOURCE_LIMIT);
 
-        assertThat(configurer.determineLimit(), is(DATA_SOURCE_LIMIT));
+        assertThat(configurer.determineLimit()).isEqualTo(DATA_SOURCE_LIMIT);
     }
 
     @Test(expected = AssertionError.class)
@@ -280,7 +285,7 @@ public class WorkTrackerConfigurerTest {
     public void getsExceptionIfEqualToTenForLimit() {
         configurer.setLimit(10);
 
-        assertThat(configurer.determineLimit(), is(10));
+        assertThat(configurer.determineLimit()).isEqualTo(10);
     }
 
     @Test
@@ -288,7 +293,7 @@ public class WorkTrackerConfigurerTest {
         ApplicationContext applicationContext = mock(ApplicationContext.class);
         configurer.setApplicationContext(applicationContext);
 
-        assertThat(configurer.determineLimit(), is(9));
+        assertThat(configurer.determineLimit()).isEqualTo(9);
     }
 
     private void setupDataSource(String dataSourceName, int dataSourceLimit) throws SQLException {

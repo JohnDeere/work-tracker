@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package com.deere.isg.worktracker;
 
 import ch.qos.logback.core.spi.FilterReply;
@@ -23,8 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.MDC;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class RootCauseTurboFilterTest {
     private static final String TEXT = "text";
@@ -54,7 +52,7 @@ public class RootCauseTurboFilterTest {
 
         FilterReply reply = filter.decide(null, null, null, null, null, EXCEPTION);
 
-        assertThat(reply, is(FilterReply.NEUTRAL));
+        assertThat(reply).isEqualTo(FilterReply.NEUTRAL);
         assertMdcHasClassName();
     }
 
@@ -72,8 +70,8 @@ public class RootCauseTurboFilterTest {
         Throwable rootCause = filter.findRootCause(null);
         String rootCauseName = filter.getCauseClassName(rootCause);
 
-        assertThat(rootCauseName, nullValue());
-        assertThat(rootCause, nullValue());
+        assertThat(rootCauseName).isNull();
+        assertThat(rootCause).isNull();
     }
 
     @Test
@@ -81,9 +79,9 @@ public class RootCauseTurboFilterTest {
         Exception cause = new Exception(TEXT);
         Throwable rootCause = filter.findRootCause(cause);
 
-        assertThat(cause.getCause(), nullValue());
-        assertThat(rootCause, is(cause));
-        assertThat(rootCause.getMessage(), is(TEXT));
+        assertThat(cause.getCause()).isNull();
+        assertThat(rootCause).isEqualTo(cause);
+        assertThat(rootCause.getMessage()).isEqualTo(TEXT);
     }
 
     @Test
@@ -95,11 +93,11 @@ public class RootCauseTurboFilterTest {
         Throwable rootCause = filter.findRootCause(cause);
         String rootCauseName = filter.getCauseClassName(rootCause);
 
-        assertThat(causeName, is(cause.getClass().getName()));
-        assertThat(rootCauseName, is(error.getClass().getName()));
+        assertThat(causeName).isEqualTo(cause.getClass().getName());
+        assertThat(rootCauseName).isEqualTo(error.getClass().getName());
 
-        assertThat(rootCause, is(error));
-        assertThat(rootCause.getMessage(), is(TEXT));
+        assertThat(rootCause).isEqualTo(error);
+        assertThat(rootCause.getMessage()).isEqualTo(TEXT);
     }
 
     @Test
@@ -110,10 +108,10 @@ public class RootCauseTurboFilterTest {
 
         Throwable rootCause = filter.findRootCause(ex);
 
-        assertThat(rootCause, is(error));
-        assertThat(rootCause, not(innerEx));
+        assertThat(rootCause).isEqualTo(error);
+        assertThat(rootCause).isNotEqualTo(innerEx);
 
-        assertThat(rootCause.getMessage(), is(TEXT));
+        assertThat(rootCause.getMessage()).isEqualTo(TEXT);
     }
 
     @Test
@@ -123,19 +121,19 @@ public class RootCauseTurboFilterTest {
         a.initCause(b);
 
         Throwable rootCauseA = filter.findRootCause(a);
-        assertThat(rootCauseA, is(b));
+        assertThat(rootCauseA).isEqualTo(b);
 
         Throwable rootCauseB = filter.findRootCause(b);
-        assertThat(rootCauseB, is(a));
+        assertThat(rootCauseB).isEqualTo(a);
     }
 
     private void assertMdcIsNull() {
-        assertThat(MDC.get(causeFieldName), nullValue());
-        assertThat(MDC.get(rootCauseFieldName), nullValue());
+        assertThat(MDC.get(causeFieldName)).isNull();
+        assertThat(MDC.get(rootCauseFieldName)).isNull();
     }
 
     private void assertMdcHasClassName() {
-        assertThat(MDC.get(causeFieldName), is(className));
-        assertThat(MDC.get(rootCauseFieldName), is(className));
+        assertThat(MDC.get(causeFieldName)).isEqualTo(className);
+        assertThat(MDC.get(rootCauseFieldName)).isEqualTo(className);
     }
 }

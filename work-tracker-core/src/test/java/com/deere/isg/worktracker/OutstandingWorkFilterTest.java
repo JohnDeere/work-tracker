@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.deere.isg.worktracker;
 
 import org.junit.Test;
@@ -21,8 +20,7 @@ import org.junit.Test;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -37,35 +35,35 @@ public class OutstandingWorkFilterTest {
     @Test
     public void stream() {
         base.doInTransaction(new SuperWork(), ()->{
-            assertThat(filtered.stream().findFirst().isPresent(), is(false));
+            assertThat(filtered.stream().findFirst().isPresent()).isEqualTo(false);
         });
         base.doInTransaction(new AnotherWork(), ()->{
-            assertThat(filtered.stream().findFirst().isPresent(), is(false));
+            assertThat(filtered.stream().findFirst().isPresent()).isEqualTo(false);
         });
         TestWork work = new TestWork();
         base.doInTransaction(work, ()->{
-            assertThat(filtered.stream().findFirst().orElse(null), is(work));
+            assertThat(filtered.stream().findFirst().orElse(null)).isEqualTo(work);
         });
     }
 
     @Test
     public void current() {
         base.doInTransaction(new SuperWork(), ()->{
-            assertThat(filtered.current().isPresent(), is(false));
+            assertThat(filtered.current().isPresent()).isEqualTo(false);
         });
         base.doInTransaction(new AnotherWork(), ()->{
-            assertThat(filtered.current().isPresent(), is(false));
+            assertThat(filtered.current().isPresent()).isEqualTo(false);
         });
         TestWork work = new TestWork();
         base.doInTransaction(work, ()->{
-            assertThat(filtered.current().orElse(null), is(work));
+            assertThat(filtered.current().orElse(null)).isEqualTo(work);
         });
     }
 
     @Test
     public void create() {
         TestWork payload = new TestWork();
-        assertThat(filtered.create(payload).getPayload().orElse(null), is(payload));
+        assertThat(filtered.create(payload).getPayload().orElse(null)).isEqualTo(payload);
     }
 
     @Test
@@ -75,7 +73,7 @@ public class OutstandingWorkFilterTest {
         filtered.doInTransaction(payload, runnable);
         verify(runnable).run();
         filtered.doInTransaction(payload, ()->{
-            assertThat(filtered.current().orElseGet(null), is(payload));
+            assertThat(filtered.current().orElseGet(null)).isEqualTo(payload);
         });
     }
 
@@ -83,19 +81,19 @@ public class OutstandingWorkFilterTest {
     public void iterable() {
         base.doInTransaction(new SuperWork(), ()->{
             final Iterator<TestWork> iterator = filtered.iterator();
-            assertThat(iterator.hasNext(), is(false));
+            assertThat(iterator.hasNext()).isEqualTo(false);
             assertNoSuchElement(iterator);
         });
         base.doInTransaction(new AnotherWork(), ()->{
             final Iterator<TestWork> iterator = filtered.iterator();
-            assertThat(iterator.hasNext(), is(false));
+            assertThat(iterator.hasNext()).isEqualTo(false);
             assertNoSuchElement(iterator);
         });
         TestWork work = new TestWork();
         base.doInTransaction(work, ()->{
             final Iterator<TestWork> iterator = filtered.iterator();
-            assertThat(iterator.hasNext(), is(true));
-            assertThat(iterator.next(), is(work));
+            assertThat(iterator.hasNext()).isTrue();
+            assertThat(iterator.next()).isEqualTo(work);
         });
     }
 

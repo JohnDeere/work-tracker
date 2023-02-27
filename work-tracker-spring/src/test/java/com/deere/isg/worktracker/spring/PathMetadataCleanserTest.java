@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package com.deere.isg.worktracker.spring;
 
 import org.junit.Before;
@@ -24,8 +23,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class PathMetadataCleanserTest {
     private static final String BEAR = "bear";
@@ -75,92 +74,92 @@ public class PathMetadataCleanserTest {
 
     @Test
     public void reservedKeysInitialized() {
-        assertThat(Arrays.stream(RESERVED_KEYS).allMatch(metadataCleanser::containsReservedKey), is(true));
+        assertThat(Arrays.stream(RESERVED_KEYS).allMatch(metadataCleanser::containsReservedKey)).isTrue();
     }
 
     @Test
     public void bannedKeyMapInitialized() {
-        assertThat(BANNED_KEYS.entrySet().stream().allMatch(e -> metadataCleanser.getBannedKey(e.getKey()).equals(e.getValue())), is(true));
+        assertThat(BANNED_KEYS.entrySet().stream().allMatch(e -> metadataCleanser.getBannedKey(e.getKey()).equals(e.getValue()))).isTrue();
     }
 
     @Test
     public void standardMapInitialized() {
         String key1 = metadataCleanser.getStandardKey(SAD_BEAR);
-        assertThat(key1, is(BEAR));
+        assertThat(key1).isEqualTo(BEAR);
 
         String key2 = metadataCleanser.getStandardKey(SNAKE_CASE_TEST);
-        assertThat(key2, is(SOME_TEST));
+        assertThat(key2).isEqualTo(SOME_TEST);
     }
 
     @Test
     public void addsStandardKey() {
         metadataCleanser.addStandard(KEY, SOME_KEY);
-        assertThat(metadataCleanser.getStandardKey(KEY), is(SOME_KEY));
+        assertThat(metadataCleanser.getStandardKey(KEY)).isEqualTo(SOME_KEY);
 
         metadataCleanser.addStandard("someId", "anyId");
-        assertThat(metadataCleanser.getStandardKey("some_id"), is("any_id"));
+        assertThat(metadataCleanser.getStandardKey("some_id")).isEqualTo("any_id");
     }
 
     @Test
     public void addsBannedKey() {
         metadataCleanser.addBanned(KEY, SOME_KEY);
-        assertThat(metadataCleanser.getBannedKey(KEY), is(SOME_KEY));
+        assertThat(metadataCleanser.getBannedKey(KEY)).isEqualTo(SOME_KEY);
 
         metadataCleanser.addBanned("someId", "anyId");
-        assertThat(metadataCleanser.getBannedKey("some_id"), is("any_id"));
+        assertThat(metadataCleanser.getBannedKey("some_id")).isEqualTo("any_id");
     }
 
     @Test
     public void returnsDefaultOrFalseWhenNotPresent() {
         String standardKey = metadataCleanser.getStandardKey(KEY);
-        assertThat(standardKey, is(KEY));
+        assertThat(standardKey).isEqualTo(KEY);
 
         String bannedKey = metadataCleanser.getBannedKey(KEY);
-        assertThat(bannedKey, is(KEY));
+        assertThat(bannedKey).isEqualTo(KEY);
 
         boolean reservedKey = metadataCleanser.containsReservedKey(KEY);
-        assertThat(reservedKey, is(false));
+        assertThat(reservedKey).isFalse();
     }
 
     @Test
     public void convertsCamelToSnakeCaseForStandardMap() {
         String snakeKey = metadataCleanser.getStandardKey(SNAKE_CASE_TEST);
-        assertThat(snakeKey, is(SOME_TEST));
+        assertThat(snakeKey).isEqualTo(SOME_TEST);
     }
 
     @Test
     public void addContextIfFoundInReserved() {
         String key = metadataCleanser.cleanse(LOWER_ID, "/some id", "/testId/some id/");
 
-        assertThat(key, is(TEST_ID));
+        assertThat(key).isEqualTo(TEST_ID);
     }
 
     @Test
     public void removesSFromContext() {
         String key = metadataCleanser.cleanse(LOWER_ID, "/some id", "/tests/some id");
 
-        assertThat(key, is(TEST_ID));
+        assertThat(key).isEqualTo(TEST_ID);
     }
 
     @Test
     public void withoutSlashFromValue() {
         String key = metadataCleanser.cleanse(LOWER_ID, "some id", "/tests/some id");
 
-        assertThat(key, is(TEST_ID));
+        assertThat(key).isEqualTo(TEST_ID);
     }
 
     @Test
     public void handlesSpecialCharactersInValue() {
         String key = metadataCleanser.cleanse(LOWER_ID, "\\.[]{}()<>*+-=?^$|", "/tests/\\.[]{}()<>*+-=?^$|");
 
-        assertThat(key, is(TEST_ID));
+        assertThat(key).isEqualTo(TEST_ID);
     }
 
     @Test
     public void upperCaseKey() {
         String key = metadataCleanser.cleanse("ID", "some id", "/tests/some id/");
 
-        assertThat(key, is(TEST_ID));
+        assertThat(key).isEqualTo(TEST_ID);
     }
 
     @Test
@@ -168,7 +167,7 @@ public class PathMetadataCleanserTest {
         metadataCleanser.addStandard(TEST_ID, TESTING_ID);
         String key = metadataCleanser.cleanse(LOWER_ID, "some id", "/tests/some id");
 
-        assertThat(key, is(TESTING_ID));
+        assertThat(key).isEqualTo(TESTING_ID);
     }
 
     @Test
@@ -176,21 +175,21 @@ public class PathMetadataCleanserTest {
         metadataCleanser.setTransformFunction(this::transformFunction);
         String key = metadataCleanser.cleanse(LOWER_ID, "some id", "/tests/some id");
 
-        assertThat(key, is("test_id_anything"));
+        assertThat(key).isEqualTo("test_id_anything");
     }
 
     @Test
     public void removesBannedKeys() {
         String key = metadataCleanser.cleanse(LOWER_ID, "some id", "/some id");
 
-        assertThat(key, is(UNKNOWN_ID));
+        assertThat(key).isEqualTo(UNKNOWN_ID);
     }
 
     @Test
     public void handlesDashes() {
         String oauthToken = metadataCleanser.cleanse("token", "some id", "/oauth-token/some id");
 
-        assertThat(oauthToken, is("oauth_token"));
+        assertThat(oauthToken).isEqualTo("oauth_token");
     }
 
     @Test
@@ -198,7 +197,7 @@ public class PathMetadataCleanserTest {
         PathMetadataCleanser cleanser = new PathMetadataCleanser(null);
         cleanser.addStandard("key", "some_key");
 
-        assertThat(cleanser.getStandardKey("key"), is("some_key"));
+        assertThat(cleanser.getStandardKey("key")).isEqualTo("some_key");
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -213,23 +212,23 @@ public class PathMetadataCleanserTest {
 
     @Test
     public void standardMapsHasDefaultPathUserName() {
-        assertThat(metadataCleanser.getStandardKey("username"), is(PATH_USER_NAME));
-        assertThat(metadataCleanser.getStandardKey("user"), is(PATH_USER_NAME));
-        assertThat(metadataCleanser.getStandardKey("user_id"), is(PATH_USER_NAME));
-        assertThat(metadataCleanser.getStandardKey("user_name"), is(PATH_USER_NAME));
+        assertThat(metadataCleanser.getStandardKey("username")).isEqualTo(PATH_USER_NAME);
+        assertThat(metadataCleanser.getStandardKey("user")).isEqualTo(PATH_USER_NAME);
+        assertThat(metadataCleanser.getStandardKey("user_id")).isEqualTo(PATH_USER_NAME);
+        assertThat(metadataCleanser.getStandardKey("user_name")).isEqualTo(PATH_USER_NAME);
     }
 
     @Test
     public void cleanseKeyWhenBlankURIOrValue() {
-        assertThat(metadataCleanser.cleanse("id", null, null), is(UNKNOWN_ID));
-        assertThat(metadataCleanser.cleanse("id", null, "     "), is(UNKNOWN_ID));
-        assertThat(metadataCleanser.cleanse("id", null, "a"), is(UNKNOWN_ID));
-        assertThat(metadataCleanser.cleanse("id", "   ", "a"), is(UNKNOWN_ID));
+        assertThat(metadataCleanser.cleanse("id", null, null)).isEqualTo(UNKNOWN_ID);
+        assertThat(metadataCleanser.cleanse("id", null, "     ")).isEqualTo(UNKNOWN_ID);
+        assertThat(metadataCleanser.cleanse("id", null, "a")).isEqualTo(UNKNOWN_ID);
+        assertThat(metadataCleanser.cleanse("id", "   ", "a")).isEqualTo(UNKNOWN_ID);
     }
 
     @Test
     public void underscoreArgsAreHandled() {
-        assertThat(metadataCleanser.cleanse("_", null, null), is(UNKNOWN_TYPE));
+        assertThat(metadataCleanser.cleanse("_", null, null)).isEqualTo(UNKNOWN_TYPE);
     }
 
     private String transformFunction(String key) {

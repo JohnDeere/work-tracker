@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 package com.deere.isg.worktracker.spring;
 
@@ -37,8 +36,8 @@ import java.util.Optional;
 
 import static com.deere.isg.worktracker.servlet.WorkContextListener.FLOOD_SENSOR_ATTR;
 import static com.deere.isg.worktracker.spring.TestWorkUtils.SIZE;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -84,56 +83,56 @@ public class SpringRequestBouncerHandlerInterceptorTest {
     public void preHandleIsTrueIfMayProceedSameUser() throws Exception {
         limit.addConnectionLimit(SIZE, ConnectionLimits.USER).method(SpringWork::getRemoteUser);
 
-        assertThat(handlerInterceptor.preHandle(request, response, handler), is(true));
+        assertThat(handlerInterceptor.preHandle(request, response, handler)).isTrue();
     }
 
     @Test
     public void preHandleIsFalseIfMayNotProceedSameUser() throws Exception {
         limit.addConnectionLimit(SIZE - 1, ConnectionLimits.USER).method(SpringWork::getRemoteUser);
 
-        assertThat(handlerInterceptor.preHandle(request, response, handler), is(false));
+        assertThat(handlerInterceptor.preHandle(request, response, handler)).isFalse();
     }
 
     @Test
     public void preHandleIsTrueIfMayProceedSameService() throws Exception {
         limit.addConnectionLimit(SIZE, ConnectionLimits.SERVICE).method(SpringWork::getService);
 
-        assertThat(handlerInterceptor.preHandle(request, response, handler), is(true));
+        assertThat(handlerInterceptor.preHandle(request, response, handler)).isTrue();
     }
 
     @Test
     public void preHandleIsFalseIfMayNotProceedSameService() throws Exception {
         limit.addConnectionLimit(SIZE - 1, ConnectionLimits.SERVICE).method(SpringWork::getService);
 
-        assertThat(handlerInterceptor.preHandle(request, response, handler), is(false));
+        assertThat(handlerInterceptor.preHandle(request, response, handler)).isFalse();
     }
 
     @Test
     public void preHandleIsTrueIfMayProceedSameSession() throws Exception {
         limit.addConnectionLimit(SIZE, ConnectionLimits.SESSION).method(SpringWork::getSessionId);
 
-        assertThat(handlerInterceptor.preHandle(request, response, handler), is(true));
+        assertThat(handlerInterceptor.preHandle(request, response, handler)).isTrue();
     }
 
     @Test
     public void preHandleIsFalseIfMayNotProceedSameSession() throws Exception {
         limit.addConnectionLimit(SIZE - 1, ConnectionLimits.SESSION).method(SpringWork::getSessionId);
 
-        assertThat(handlerInterceptor.preHandle(request, response, handler), is(false));
+        assertThat(handlerInterceptor.preHandle(request, response, handler)).isFalse();
     }
 
     @Test
     public void preHandleIsTrueIfMayProceedTooManyTotal() throws Exception {
         limit.addConnectionLimit(SIZE, ConnectionLimits.TOTAL).test(x -> true);
 
-        assertThat(handlerInterceptor.preHandle(request, response, handler), is(true));
+        assertThat(handlerInterceptor.preHandle(request, response, handler)).isTrue();
     }
 
     @Test
     public void preHandleIsFalseIfMayNotProceedTooManyTotal() throws Exception {
         limit.addConnectionLimit(SIZE - 1, ConnectionLimits.TOTAL).test(x -> true);
 
-        assertThat(handlerInterceptor.preHandle(request, response, handler), is(false));
+        assertThat(handlerInterceptor.preHandle(request, response, handler)).isFalse();
     }
 
     @Test
@@ -141,6 +140,6 @@ public class SpringRequestBouncerHandlerInterceptorTest {
         when(context.getAttribute(FLOOD_SENSOR_ATTR)).thenReturn(null);
         handlerInterceptor.setServletContext(context);
 
-        assertThat(handlerInterceptor.preHandle(request, response, handler), is(true));
+        assertThat(handlerInterceptor.preHandle(request, response, handler)).isTrue();
     }
 }

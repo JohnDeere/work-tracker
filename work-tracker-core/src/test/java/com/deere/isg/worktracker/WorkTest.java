@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 package com.deere.isg.worktracker;
 
@@ -30,9 +29,7 @@ import java.util.regex.Pattern;
 import static com.deere.isg.worktracker.MockTimeUtils.*;
 import static com.deere.isg.worktracker.Work.*;
 import static net.logstash.logback.argument.StructuredArguments.keyValue;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class WorkTest {
     private static final String MAIN_THREAD = "main";
@@ -68,30 +65,30 @@ public class WorkTest {
     public void elapsedMillisIs5minAfterFreeze() {
         freezeClock();
 
-        assertThat(work.getElapsedMillis(), is(MINUTE_5));
+        assertThat(work.getElapsedMillis()).isEqualTo(MINUTE_5);
     }
 
     @Test
     public void workHasThreadNameInMdc() {
-        assertThat(work.getThreadName(), is(MAIN_THREAD));
-        assertThat(MDC.get(THREAD_NAME), is(MAIN_THREAD));
+        assertThat(work.getThreadName()).isEqualTo(MAIN_THREAD);
+        assertThat(MDC.get(THREAD_NAME)).isEqualTo(MAIN_THREAD);
     }
 
     @Test
     public void requestIdHasRandomUUID() {
         boolean match = UUID_PATTERN.matcher(work.getRequestId()).matches();
 
-        assertThat(match, is(true));
+        assertThat(match).isTrue();
     }
 
     @Test
     public void currentThreadIsNamedMain() {
-        assertThat(work.getThreadName(), is(MAIN_THREAD));
+        assertThat(work.getThreadName()).isEqualTo(MAIN_THREAD);
     }
 
     @Test
     public void multipleWorkOnMultipleThreadsHaveDifferentThreadNames() throws InterruptedException {
-        assertThat(work.getThreadName(), is(MAIN_THREAD));
+        assertThat(work.getThreadName()).isEqualTo(MAIN_THREAD);
 
         HelperThread testThread = new HelperThread("testThread");
         testThread.start();
@@ -100,11 +97,11 @@ public class WorkTest {
         anotherThread.start();
 
         testThread.join(1000);
-        assertThat(testThread.isThreadNameEqual(), is(true));
+        assertThat(testThread.isThreadNameEqual()).isTrue();
         anotherThread.join(1000);
-        assertThat(anotherThread.isThreadNameEqual(), is(true));
+        assertThat(anotherThread.isThreadNameEqual()).isTrue();
 
-        assertThat(work.getThreadName(), is(MAIN_THREAD));
+        assertThat(work.getThreadName()).isEqualTo(MAIN_THREAD);
 
     }
 
@@ -113,36 +110,36 @@ public class WorkTest {
         String actual = MDC.get(REQUEST_ID);
         boolean match = UUID_PATTERN.matcher(actual).matches();
 
-        assertThat(match, is(true));
+        assertThat(match).isTrue();
     }
 
     @Test
     public void maxTimeIsOverriddenOnSetter() {
-        assertThat(work.getMaxTime(), is(MINUTE_5));
+        assertThat(work.getMaxTime()).isEqualTo(MINUTE_5);
 
         work.setMaxTime(SECOND_10);
-        assertThat(work.getMaxTime(), is(SECOND_10));
+        assertThat(work.getMaxTime()).isEqualTo(SECOND_10);
     }
 
     @Test
     public void workIsNotZombieIfLessThanMaxTime() {
         freezeClockOffset(-1L);
 
-        assertThat(work.isZombie(), is(false));
+        assertThat(work.isZombie()).isEqualTo(false);
     }
 
     @Test
     public void workIsNotZombieIfEqualToMaxTime() {
         freezeClock();
 
-        assertThat(work.isZombie(), is(false));
+        assertThat(work.isZombie()).isEqualTo(false);
     }
 
     @Test
     public void workIsZombieIfMoreThanMaxTime() {
         freezeClockOffset(1L);
 
-        assertThat(work.isZombie(), is(true));
+        assertThat(work.isZombie()).isTrue();
     }
 
     @Test
@@ -153,27 +150,27 @@ public class WorkTest {
         thread.run();
         thread.join(1000);
 
-        assertThat(thread.isFirstInterrupt(), is(false));
-        assertThat(thread.isSecondInterrupt(), is(true));
+        assertThat(thread.isFirstInterrupt()).isEqualTo(false);
+        assertThat(thread.isSecondInterrupt()).isTrue();
     }
 
     @Test
     public void getMetadataReturnsArrayOfSArgs() {
         List<StructuredArgument> metadata = work.getMetadata();
 
-        assertThat(metadata, hasSize(equalTo(4)));
+        assertThat(metadata).hasSize(4);
 
-        assertThat(metadata, hasItem(keyValue(REQUEST_ID, work.getRequestId())));
-        assertThat(metadata, hasItem(keyValue(ELAPSED_MS, work.getElapsedMillis())));
-        assertThat(metadata, hasItem(keyValue(THREAD_NAME, work.getThreadName())));
-        assertThat(metadata, hasItem(keyValue(ZOMBIE, work.isZombie())));
+        assertThat(metadata).contains(keyValue(REQUEST_ID, work.getRequestId()));
+        assertThat(metadata).contains(keyValue(ELAPSED_MS, work.getElapsedMillis()));
+        assertThat(metadata).contains(keyValue(THREAD_NAME, work.getThreadName()));
+        assertThat(metadata).contains(keyValue(ZOMBIE, work.isZombie()));
     }
 
     @Test
     public void addInfoToMDC() {
         work.addToMDC(SOME_KEY, SOME_VALUE);
 
-        assertThat(MDC.get(SOME_KEY), is(SOME_VALUE));
+        assertThat(MDC.get(SOME_KEY)).isEqualTo(SOME_VALUE);
     }
 
     @Test
@@ -182,13 +179,13 @@ public class WorkTest {
             @Override
             protected void validateKey(String key) {
                 if(!(REQUEST_ID.equals(key) || THREAD_NAME.equals(key))) {
-                    assertThat(key, is("bad.key"));
+                    assertThat(key).isEqualTo("bad.key");
                 }
             }
         };
 
         work.addToMDC("bad.key", SOME_VALUE);
-        assertThat(MDC.get("bad.key"), is(SOME_VALUE));
+        assertThat(MDC.get("bad.key")).isEqualTo(SOME_VALUE);
     }
 
     @Test(expected = TestableIllegalArgumentException.class)
@@ -232,37 +229,37 @@ public class WorkTest {
     public void trimKeyWhenPutInMDC() {
         work.addToMDC("    a_bs   ", SOME_VALUE);
 
-        assertThat(MDC.get("a_bs"), is(SOME_VALUE));
+        assertThat(MDC.get("a_bs")).isEqualTo(SOME_VALUE);
     }
 
     @Test
     public void trimsValueWhenPutInMDC() {
         work.addToMDC(SOME_KEY, NON_TRIM_VALUE);
 
-        assertThat(MDC.get(SOME_KEY), is(TRIM_VALUE));
+        assertThat(MDC.get(SOME_KEY)).isEqualTo(TRIM_VALUE);
     }
 
     @Test
     public void doesNotPutEmptyValuesInMDC() {
         work.addToMDC(SOME_KEY, "    ");
 
-        assertThat(MDC.get(SOME_KEY), nullValue());
+        assertThat(MDC.get(SOME_KEY)).isNull();
     }
 
     @Test
     public void putInMDCReturnsValue() {
         String value = work.addToMDC(SOME_KEY, SOME_VALUE);
 
-        assertThat(value, is(SOME_VALUE));
+        assertThat(value).isEqualTo(SOME_VALUE);
     }
 
     @Test
     public void getThreadInfoReturnsListOfSArgs() {
         final List<StructuredArgument> threadInfo = work.getThreadInfo();
 
-        assertThat(threadInfo, hasItem(keyValue(ZOMBIE, false)));
-        assertThat(threadInfo, hasItem(keyValue(ELAPSED_MS, work.getElapsedMillis())));
-        assertThat(threadInfo, hasSize(2));
+        assertThat(threadInfo).contains(keyValue(ZOMBIE, false));
+        assertThat(threadInfo).contains(keyValue(ELAPSED_MS, work.getElapsedMillis()));
+        assertThat(threadInfo).hasSize(2);
     }
 
     @Test
@@ -277,44 +274,44 @@ public class WorkTest {
 
     @Test
     public void blankLimitReturnsFalse() {
-        assertThat(work.checkLimit(null), is(false));
-        assertThat(work.checkLimit(""), is(false));
-        assertThat(work.checkLimit("            "), is(false));
+        assertThat(work.checkLimit(null)).isEqualTo(false);
+        assertThat(work.checkLimit("")).isEqualTo(false);
+        assertThat(work.checkLimit("            ")).isEqualTo(false);
     }
 
     @Test
     public void limitIsAddedIfNotThere() {
-        assertThat(work.checkLimit(USER), is(false));
+        assertThat(work.checkLimit(USER)).isEqualTo(false);
 
-        assertThat(work.checkLimit(USER), is(true));
+        assertThat(work.checkLimit(USER)).isTrue();
     }
 
     @Test
     public void moreThanOneLimitCheck() {
-        assertThat(work.checkLimit(USER), is(false));
-        assertThat(work.checkLimit(SERVICE), is(false));
+        assertThat(work.checkLimit(USER)).isEqualTo(false);
+        assertThat(work.checkLimit(SERVICE)).isEqualTo(false);
 
-        assertThat(work.checkLimit(USER), is(true));
-        assertThat(work.checkLimit(SERVICE), is(true));
+        assertThat(work.checkLimit(USER)).isTrue();
+        assertThat(work.checkLimit(SERVICE)).isTrue();
     }
 
     @Test
     public void removesALimit() {
-        assertThat(work.checkLimit(USER), is(false));
-        assertThat(work.checkLimit(USER), is(true));
-        assertThat(work.removeLimit(USER), is(true));
+        assertThat(work.checkLimit(USER)).isEqualTo(false);
+        assertThat(work.checkLimit(USER)).isTrue();
+        assertThat(work.removeLimit(USER)).isTrue();
     }
 
     @Test
     public void hasExtensionPoints() {
-        assertThat(work.getService(), nullValue(String.class));
-        assertThat(work.getExtraInfo(), nullValue(String.class));
+        assertThat(work.getService()).isNull();
+        assertThat(work.getExtraInfo()).isNull();
     }
 
     private void assertIntervalInfo(List<StructuredArgument> endInfo, String end) {
-        assertThat(endInfo, hasItem(keyValue(ZOMBIE, false)));
-        assertThat(endInfo, hasItem(keyValue(ELAPSED_MS, work.getElapsedMillis())));
-        assertThat(endInfo, hasItem(keyValue("time_interval", end)));
+        assertThat(endInfo).contains(keyValue(ZOMBIE, false));
+        assertThat(endInfo).contains(keyValue(ELAPSED_MS, work.getElapsedMillis()));
+        assertThat(endInfo).contains(keyValue("time_interval", end));
     }
 
     private static class TestableIllegalArgumentException extends IllegalArgumentException {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.deere.isg.worktracker;
 
 import com.deere.isg.worktracker.ExecutorTestUtils.MockCallable;
 import com.deere.isg.worktracker.ExecutorTestUtils.MockRunnable;
 import net.logstash.logback.marker.SingleFieldAppendingMarker;
-import org.hamcrest.CustomMatcher;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,14 +26,10 @@ import org.mockito.ArgumentMatchers;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
 
-import java.util.regex.Pattern;
-
 import static com.deere.isg.worktracker.ExecutorTestUtils.UUID_PATTERN;
 import static java.util.Collections.emptyMap;
 import static net.logstash.logback.argument.StructuredArguments.kv;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -78,10 +72,10 @@ public class ContextualTaskDecoratorTest {
         verify(logger).info("Task started", kv("time_interval", "start"));
 
         verify(logger).info(ArgumentMatchers.startsWith("Task ended after {} ms"), timeCapture.capture(), eq(kv("time_interval", "end")));
-        assertThat(timeCapture.getValue().getFieldName(), is("elapsed_ms"));
-        assertThat(timeCapture.getValue().toString(), matches(".*(\\d{4}).*"));
-        assertThat(uuidMatch, is(true));
-        assertThat(runnable.getValue(TASK_CLASS_NAME), containsString("MockRunnable"));
+        assertThat(timeCapture.getValue().getFieldName()).isEqualTo("elapsed_ms");
+        assertThat(timeCapture.getValue().toString()).matches(".*(\\d{4}).*");
+        assertThat(uuidMatch).isTrue();
+        assertThat(runnable.getValue(TASK_CLASS_NAME)).contains("MockRunnable");
     }
 
     @Test
@@ -96,10 +90,10 @@ public class ContextualTaskDecoratorTest {
         verify(logger).info("Task started", kv("time_interval", "start"));
 
         verify(logger).info(ArgumentMatchers.startsWith("Task ended after {} ms"), timeCapture.capture(), eq(kv("time_interval", "end")));
-        assertThat(timeCapture.getValue().getFieldName(), is("elapsed_ms"));
-        assertThat(timeCapture.getValue().toString(), matches(".*(\\d{4}).*"));
-        assertThat(uuidMatch, is(true));
-        assertThat(runnable.getValue(TASK_CLASS_NAME), containsString("MockRunnable"));
+        assertThat(timeCapture.getValue().getFieldName()).isEqualTo("elapsed_ms");
+        assertThat(timeCapture.getValue().toString()).matches(".*(\\d{4}).*");
+        assertThat(uuidMatch).isTrue();
+        assertThat(runnable.getValue(TASK_CLASS_NAME)).contains("MockRunnable");
     }
 
     @Test
@@ -108,7 +102,7 @@ public class ContextualTaskDecoratorTest {
         taskDecorator.decorate(emptyMap(), runnable).run();
 
 
-        assertThat(runnable.getValue(TEST_KEY), is(TEST_VALUE));
+        assertThat(runnable.getValue(TEST_KEY)).isEqualTo(TEST_VALUE);
     }
 
     @Test
@@ -116,17 +110,6 @@ public class ContextualTaskDecoratorTest {
         MDC.put(TEST_KEY, TEST_VALUE);
         taskDecorator.decorate(emptyMap(), callable).call();
 
-        assertThat(callable.getValue(TEST_KEY), is(TEST_VALUE));
-    }
-
-    private CustomMatcher<String> matches(String regex) {
-        return new CustomMatcher<String>(regex) {
-            @Override
-            public boolean matches(Object item) {
-                return Pattern.compile(regex)
-                        .matcher((String) item)
-                        .matches();
-            }
-        };
+        assertThat(callable.getValue(TEST_KEY)).isEqualTo(TEST_VALUE);
     }
 }

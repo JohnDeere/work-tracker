@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-
 package com.deere.isg.worktracker.servlet;
 
 import com.deere.isg.worktracker.OutstandingWork;
-import com.deere.isg.worktracker.OutstandingWorkTracker;
 import com.deere.isg.worktracker.Work;
 import com.deere.isg.worktracker.ZombieDetector;
 import org.junit.Before;
@@ -26,8 +24,7 @@ import org.junit.Test;
 
 import javax.servlet.http.HttpServletResponse;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 public class WorkConfigTest {
@@ -73,7 +70,7 @@ public class WorkConfigTest {
                     .setHttpFloodSensor(null);
 
         } catch (AssertionError e) {
-            assertThat(e.getMessage(), is("Outstanding cannot be null"));
+            assertThat(e.getMessage()).isEqualTo("Outstanding cannot be null");
         }
     }
 
@@ -85,7 +82,7 @@ public class WorkConfigTest {
                     .setHttpFloodSensor(null);
 
         } catch (AssertionError e) {
-            assertThat(e.getMessage(), is("Detector cannot be null"));
+            assertThat(e.getMessage()).isEqualTo("Detector cannot be null");
         }
     }
 
@@ -97,7 +94,7 @@ public class WorkConfigTest {
                     .setHttpFloodSensor(null);
 
         } catch (AssertionError e) {
-            assertThat(e.getMessage(), is("FloodSensor cannot be null"));
+            assertThat(e.getMessage()).isEqualTo("FloodSensor cannot be null");
         }
     }
 
@@ -109,7 +106,7 @@ public class WorkConfigTest {
                     .setHttpFloodSensorWithLimit(null);
 
         } catch (AssertionError e) {
-            assertThat(e.getMessage(), is("Connection Limit cannot be null"));
+            assertThat(e.getMessage()).isEqualTo("Connection Limit cannot be null");
         }
     }
 
@@ -120,10 +117,10 @@ public class WorkConfigTest {
                 .withZombieDetector()
                 .build();
 
-        assertThat(config.getOutstanding(), is(outstanding));
-        assertThat(config.getAllOutstanding(), is(outstanding));
-        assertThat(config.getFloodSensor(), notNullValue());
-        assertThat(config.getDetector(), notNullValue());
+        assertThat(config.getOutstanding()).isEqualTo(outstanding);
+        assertThat(config.getAllOutstanding()).isEqualTo(outstanding);
+        assertThat(config.getFloodSensor()).isNotNull();
+        assertThat(config.getDetector()).isNotNull();
     }
 
     @Test
@@ -131,10 +128,10 @@ public class WorkConfigTest {
         WorkConfig<HttpWork> config = new WorkConfig.Builder<>(outstanding)
                 .build();
 
-        assertThat(config.getOutstanding(), is(outstanding));
-        assertThat(config.getAllOutstanding(), is(outstanding));
-        assertThat(config.getFloodSensor(), nullValue());
-        assertThat(config.getDetector(), nullValue());
+        assertThat(config.getOutstanding()).isEqualTo(outstanding);
+        assertThat(config.getAllOutstanding()).isEqualTo(outstanding);
+        assertThat(config.getFloodSensor()).isNull();
+        assertThat(config.getDetector()).isNull();
     }
 
     @Test
@@ -143,10 +140,10 @@ public class WorkConfigTest {
                 .withHttpFloodSensor()
                 .build();
 
-        assertThat(config.getOutstanding(), is(outstanding));
-        assertThat(config.getAllOutstanding(), is(outstanding));
-        assertThat(config.getFloodSensor(), notNullValue());
-        assertThat(config.getDetector(), nullValue());
+        assertThat(config.getOutstanding()).isEqualTo(outstanding);
+        assertThat(config.getAllOutstanding()).isEqualTo(outstanding);
+        assertThat(config.getFloodSensor()).isNotNull();
+        assertThat(config.getDetector()).isNull();
     }
 
     @Test
@@ -155,10 +152,10 @@ public class WorkConfigTest {
                 .withZombieDetector()
                 .build();
 
-        assertThat(config.getOutstanding(), is(outstanding));
-        assertThat(config.getAllOutstanding(), is(outstanding));
-        assertThat(config.getFloodSensor(), nullValue());
-        assertThat(config.getDetector(), notNullValue());
+        assertThat(config.getOutstanding()).isEqualTo(outstanding);
+        assertThat(config.getAllOutstanding()).isEqualTo(outstanding);
+        assertThat(config.getFloodSensor()).isNull();
+        assertThat(config.getDetector()).isNotNull();
     }
 
     @Test
@@ -169,7 +166,7 @@ public class WorkConfigTest {
                 .setHttpFloodSensor(new HttpFloodSensor<>(outstanding))
                 .build();
 
-        assertThat(config.getFloodSensor().getConnectionLimit(ConnectionLimits.TOTAL).getLimit(), is(defaultTotalLimit));
+        assertThat(config.getFloodSensor().getConnectionLimit(ConnectionLimits.TOTAL).getLimit()).isEqualTo(defaultTotalLimit);
 
     }
 
@@ -182,7 +179,7 @@ public class WorkConfigTest {
                 .setHttpFloodSensorWithLimit(limit)
                 .build();
 
-        assertThat(config.getFloodSensor().getConnectionLimit(ConnectionLimits.TOTAL).getLimit(), is(newTotalLimit));
+        assertThat(config.getFloodSensor().getConnectionLimit(ConnectionLimits.TOTAL).getLimit()).isEqualTo(newTotalLimit);
     }
 
     @Test
@@ -192,17 +189,17 @@ public class WorkConfigTest {
                 .withZombieDetector()
                 .build();
 
-        assertThat(config.getOutstanding(), notNullValue(OutstandingWorkTracker.class));
-        assertThat(config.getAllOutstanding(), is(allOutstanding));
-        assertThat(config.getFloodSensor(), notNullValue());
-        assertThat(config.getDetector(), notNullValue());
+        assertThat(config.getOutstanding()).isNotNull();
+        assertThat(config.getAllOutstanding()).isEqualTo(allOutstanding);
+        assertThat(config.getFloodSensor()).isNotNull();
+        assertThat(config.getDetector()).isNotNull();
 
         Work otherWork = mock(Work.class);
         when(otherWork.isZombie()).thenReturn(true);
         allOutstanding.create(otherWork);
 
-        assertThat(config.getOutstanding().current().isPresent(), is(false));
-        assertThat(config.getAllOutstanding().current().orElse(null), is(otherWork));
+        assertThat(config.getOutstanding().current().isPresent()).isFalse();
+        assertThat(config.getAllOutstanding().current().orElse(null)).isEqualTo(otherWork);
 
         config.getDetector().killRunaway(); // no exception should be thrown
         verify(otherWork, times(0)).isZombie();
@@ -214,6 +211,6 @@ public class WorkConfigTest {
             allOutstanding.create(otherWork);
         }
         HttpServletResponse response = mock(HttpServletResponse.class);
-        assertThat(config.getFloodSensor().mayProceedOrRedirectTooManyRequest(response), is(true));
+        assertThat(config.getFloodSensor().mayProceedOrRedirectTooManyRequest(response)).isTrue();
     }
 }

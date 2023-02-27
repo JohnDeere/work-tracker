@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 package com.deere.isg.worktracker.servlet;
 
@@ -32,8 +31,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
 import static com.deere.isg.worktracker.servlet.WorkContextListener.*;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
@@ -84,7 +83,7 @@ public class WorkContextListenerTest {
         try {
             new WorkContextListener(null);
         } catch (AssertionError e) {
-            assertThat(e.getMessage(), is("WorkConfig cannot be null"));
+            assertThat(e.getMessage()).isEqualTo("WorkConfig cannot be null");
         }
     }
 

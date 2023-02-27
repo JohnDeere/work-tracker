@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package com.deere.isg.worktracker.spring;
 
 import com.deere.isg.worktracker.ZombieError;
@@ -24,8 +23,8 @@ import org.junit.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ZombieExceptionHandlerTest {
     private static final String MESSAGE = "This is a message";
@@ -41,12 +40,12 @@ public class ZombieExceptionHandlerTest {
         ResponseEntity<Object> response = handler
                 .handleZombieEx(new Exception(new ZombieError(MESSAGE)));
 
-        assertThat(response.getStatusCode(), is(HttpStatus.GATEWAY_TIMEOUT));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.GATEWAY_TIMEOUT);
 
         ExceptionResponse body = (ExceptionResponse) response.getBody();
-        assertThat(body.getMessage(), is(MESSAGE));
-        assertThat(body.getCode(), is(HttpStatus.GATEWAY_TIMEOUT.value()));
-        assertThat(body.getStatus(), is(HttpStatus.GATEWAY_TIMEOUT.getReasonPhrase()));
+        assertThat(body.getMessage()).isEqualTo(MESSAGE);
+        assertThat(body.getCode()).isEqualTo(HttpStatus.GATEWAY_TIMEOUT.value());
+        assertThat(body.getStatus()).isEqualTo(HttpStatus.GATEWAY_TIMEOUT.getReasonPhrase());
     }
 
     @Test
@@ -54,12 +53,12 @@ public class ZombieExceptionHandlerTest {
         ResponseEntity<Object> response = handler
                 .handleZombieEx(new Exception(new ZombieException(MESSAGE)));
 
-        assertThat(response.getStatusCode(), is(HttpStatus.GATEWAY_TIMEOUT));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.GATEWAY_TIMEOUT);
 
         ExceptionResponse body = (ExceptionResponse) response.getBody();
-        assertThat(body.getMessage(), is(MESSAGE));
-        assertThat(body.getCode(), is(HttpStatus.GATEWAY_TIMEOUT.value()));
-        assertThat(body.getStatus(), is(HttpStatus.GATEWAY_TIMEOUT.getReasonPhrase()));
+        assertThat(body.getMessage()).isEqualTo(MESSAGE);
+        assertThat(body.getCode()).isEqualTo(HttpStatus.GATEWAY_TIMEOUT.value());
+        assertThat(body.getStatus()).isEqualTo(HttpStatus.GATEWAY_TIMEOUT.getReasonPhrase());
     }
 
     @Test
@@ -67,24 +66,24 @@ public class ZombieExceptionHandlerTest {
         ResponseEntity<Object> response = handler
                 .handleZombieEx(new ZombieException(MESSAGE));
 
-        assertThat(response.getStatusCode(), is(HttpStatus.GATEWAY_TIMEOUT));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.GATEWAY_TIMEOUT);
 
         ExceptionResponse body = (ExceptionResponse) response.getBody();
-        assertThat(body.getMessage(), is(MESSAGE));
-        assertThat(body.getCode(), is(HttpStatus.GATEWAY_TIMEOUT.value()));
-        assertThat(body.getStatus(), is(HttpStatus.GATEWAY_TIMEOUT.getReasonPhrase()));
+        assertThat(body.getMessage()).isEqualTo(MESSAGE);
+        assertThat(body.getCode()).isEqualTo(HttpStatus.GATEWAY_TIMEOUT.value());
+        assertThat(body.getStatus()).isEqualTo(HttpStatus.GATEWAY_TIMEOUT.getReasonPhrase());
     }
 
     @Test
     public void fallbackForExceptionsReturns500() {
         ResponseEntity<Object> response = handler.handleAllEx(new Exception(MESSAGE));
 
-        assertThat(response.getStatusCode(), is(HttpStatus.INTERNAL_SERVER_ERROR));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
 
         ExceptionResponse body = (ExceptionResponse) response.getBody();
-        assertThat(body.getMessage(), is(MESSAGE));
-        assertThat(body.getCode(), is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
-        assertThat(body.getStatus(), is(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase()));
+        assertThat(body.getMessage()).isEqualTo(MESSAGE);
+        assertThat(body.getCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        assertThat(body.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
     }
 
     @Test
@@ -92,11 +91,11 @@ public class ZombieExceptionHandlerTest {
         ResponseEntity<Object> response = handler
                 .handleAllEx(new Exception(new ZombieError(MESSAGE)));
 
-        assertThat(response.getStatusCode(), is(HttpStatus.GATEWAY_TIMEOUT));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.GATEWAY_TIMEOUT);
 
         ExceptionResponse body = (ExceptionResponse) response.getBody();
-        assertThat(body.getMessage(), is(MESSAGE));
-        assertThat(body.getCode(), is(HttpStatus.GATEWAY_TIMEOUT.value()));
-        assertThat(body.getStatus(), is(HttpStatus.GATEWAY_TIMEOUT.getReasonPhrase()));
+        assertThat(body.getMessage()).isEqualTo(MESSAGE);
+        assertThat(body.getCode()).isEqualTo(HttpStatus.GATEWAY_TIMEOUT.value());
+        assertThat(body.getStatus()).isEqualTo(HttpStatus.GATEWAY_TIMEOUT.getReasonPhrase());
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 package com.deere.isg.worktracker.servlet;
 
@@ -44,8 +43,8 @@ import static com.deere.isg.worktracker.servlet.TestWorkUtils.createWorkList;
 import static com.deere.isg.worktracker.servlet.WorkContextListener.ALL_OUTSTANDING_ATTR;
 import static com.deere.isg.worktracker.servlet.WorkHttpServlet.TEMPLATE_PATH;
 import static com.deere.isg.worktracker.servlet.WorkHttpServlet.WORK_LIST;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
 
@@ -92,11 +91,11 @@ public class WorkHttpServletTest {
 
     @Test
     public void rendererPathIsSet() throws ServletException {
-        assertThat(servlet.getTemplatePath(), nullValue());
+        assertThat(servlet.getTemplatePath()).isNull();
 
         initPath(TEST_PATH);
 
-        assertThat(servlet.getTemplatePath(), is(TEST_PATH));
+        assertThat(servlet.getTemplatePath()).isEqualTo(TEST_PATH);
     }
 
     @Test
@@ -117,7 +116,7 @@ public class WorkHttpServletTest {
 
         servlet.doGet(request, response);
 
-        assertThat(servlet.getTemplatePath(), nullValue());
+        assertThat(servlet.getTemplatePath()).isNull();
         verify(config.getServletContext().getRequestDispatcher(null), never())
                 .forward(request, response);
 
@@ -132,11 +131,11 @@ public class WorkHttpServletTest {
         servlet.doGet(request, response);
 
         verify(request).setAttribute(strCaptor.capture(), workSummaryCaptor.capture());
-        assertThat(strCaptor.getValue(), is(WORK_LIST));
+        assertThat(strCaptor.getValue()).isEqualTo(WORK_LIST);
 
         List<WorkSummary> workSummaries = workSummaryCaptor.getValue();
         for (WorkSummary summary : workSummaries) {
-            assertThat(hasSameValues(summary), is(true));
+            assertThat(hasSameValues(summary)).isTrue();
         }
     }
 
@@ -149,11 +148,11 @@ public class WorkHttpServletTest {
         servlet.doGet(request, response);
 
         verify(request).setAttribute(strCaptor.capture(), workSummaryCaptor.capture());
-        assertThat(strCaptor.getValue(), is(WORK_LIST));
+        assertThat(strCaptor.getValue()).isEqualTo(WORK_LIST);
 
         List<WorkSummary> workSummaries = workSummaryCaptor.getValue();
         for (WorkSummary summary : workSummaries) {
-            assertThat(hasSameValues(summary), is(true));
+            assertThat(hasSameValues(summary)).isTrue();
         }
     }
 
@@ -178,14 +177,14 @@ public class WorkHttpServletTest {
             }
         }
 
-        assertThat(count, is(0));
-        assertThat(total, is(WORK_SUMMARIES.size() * 6));
+        assertThat(count).isEqualTo(0);
+        assertThat(total).isEqualTo(WORK_SUMMARIES.size() * 6);
     }
 
     @Test
     public void headerValidation() {
         String html = PAGE.render(WORK_SUMMARIES);
-        assertThat(html, containsString("<tr>" +
+        assertThat(html).contains("<tr>" +
                 "<th>Service</th>" +
                 "<th>Request Id</th>" +
                 "<th>Start Time</th>" +
@@ -193,7 +192,7 @@ public class WorkHttpServletTest {
                 "<th>Thread Name</th>" +
                 "<th>Accept Headers</th>" +
                 "</tr>"
-        ));
+        );
     }
 
     @Test
@@ -213,7 +212,7 @@ public class WorkHttpServletTest {
         List<WorkSummary<? extends Work>> zombieSummaries = Collections.singletonList(zombieSummary);
 
         String html = PAGE.render(zombieSummaries);
-        assertThat(html, containsString("<tr class='red'>"));
+        assertThat(html).contains("<tr class='red'>");
     }
 
     @Test
@@ -222,8 +221,8 @@ public class WorkHttpServletTest {
         List<WorkSummary<? extends Work>> zombieSummaries = Collections.singletonList(zombieSummary);
 
         String html = PAGE.render(zombieSummaries);
-        assertThat(html, containsString("<tr>"));
-        assertThat(html, not(containsString("class='red'")));
+        assertThat(html).contains("<tr>");
+        assertThat(html).doesNotContain("class='red'");
     }
 
     private boolean hasSameValues(WorkSummary workSummary) {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 package com.deere.isg.worktracker.servlet;
 
@@ -34,8 +33,8 @@ import javax.servlet.ServletResponse;
 import java.io.IOException;
 
 import static com.deere.isg.worktracker.servlet.WorkContextListener.*;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -64,9 +63,9 @@ public class BaseFilterTest {
 
         workFilter.init(config);
 
-        assertThat(workFilter.getOutstanding(), is(outstanding));
-        assertThat(workFilter.getFloodSensor(), is(floodSensor));
-        assertThat(workFilter.getDetector(), is(detector));
+        assertThat(workFilter.getOutstanding()).isEqualTo(outstanding);
+        assertThat(workFilter.getFloodSensor()).isEqualTo(floodSensor);
+        assertThat(workFilter.getDetector()).isEqualTo(detector);
     }
 
     private class MockBaseFilter extends BaseFilter {

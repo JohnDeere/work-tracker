@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.deere.isg.worktracker.spring;
 
 import org.junit.After;
@@ -22,8 +21,8 @@ import org.junit.Test;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 public class ServletEndpointRegistryTest {
 
@@ -38,10 +37,10 @@ public class ServletEndpointRegistryTest {
         ServletEndpointRegistry.populate("/test/another/thing");
         ServletEndpointRegistry.populate("/yet/some/thing");
 
-        assertThat(ServletEndpointRegistry.contains("/yet/some/thing"), is(true));
-        assertThat(ServletEndpointRegistry.contains("/test/value/thing"), is(true));
-        assertThat(ServletEndpointRegistry.contains("/test/another/thing"), is(true));
-        assertThat(ServletEndpointRegistry.contains("/yet/here/thing"), is(false));
+        assertThat(ServletEndpointRegistry.contains("/yet/some/thing")).isTrue();
+        assertThat(ServletEndpointRegistry.contains("/test/value/thing")).isTrue();
+        assertThat(ServletEndpointRegistry.contains("/test/another/thing")).isTrue();
+        assertThat(ServletEndpointRegistry.contains("/yet/here/thing")).isFalse();
     }
 
     @Test
@@ -52,11 +51,11 @@ public class ServletEndpointRegistryTest {
         ServletEndpointRegistry.populate("*.jsp");
         ServletEndpointRegistry.populate("something");
 
-        assertThat(ServletEndpointRegistry.contains((HttpServletRequest) null), is(false));
-        assertThat(ServletEndpointRegistry.contains((String) null), is(false));
-        assertThat(ServletEndpointRegistry.contains("/"), is(false));
-        assertThat(ServletEndpointRegistry.contains("*.jsp"), is(false));
-        assertThat(ServletEndpointRegistry.contains("something"), is(false));
+        assertThat(ServletEndpointRegistry.contains((HttpServletRequest) null)).isFalse();
+        assertThat(ServletEndpointRegistry.contains((String) null)).isFalse();
+        assertThat(ServletEndpointRegistry.contains("/")).isFalse();
+        assertThat(ServletEndpointRegistry.contains("*.jsp")).isFalse();
+        assertThat(ServletEndpointRegistry.contains("something")).isFalse();
     }
 
     @Test
@@ -64,12 +63,12 @@ public class ServletEndpointRegistryTest {
         TestServletContext sc = new TestServletContext();
 
         ServletEndpointRegistry.populate(sc);
-        assertThat(ServletEndpointRegistry.contains("/serve/1"), is(true));
-        assertThat(ServletEndpointRegistry.contains("/reg/abc"), is(true));
-        assertThat(ServletEndpointRegistry.contains("/reg/xyz"), is(true));
-        assertThat(ServletEndpointRegistry.contains("/"), is(false));
-        assertThat(ServletEndpointRegistry.contains("something"), is(false));
-        assertThat(ServletEndpointRegistry.contains("/something/else"), is(false));
+        assertThat(ServletEndpointRegistry.contains("/serve/1")).isTrue();
+        assertThat(ServletEndpointRegistry.contains("/reg/abc")).isTrue();
+        assertThat(ServletEndpointRegistry.contains("/reg/xyz")).isTrue();
+        assertThat(ServletEndpointRegistry.contains("/")).isFalse();
+        assertThat(ServletEndpointRegistry.contains("something")).isFalse();
+        assertThat(ServletEndpointRegistry.contains("/something/else")).isFalse();
     }
 
 }

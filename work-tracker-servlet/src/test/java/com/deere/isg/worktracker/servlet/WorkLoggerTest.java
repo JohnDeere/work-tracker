@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 package com.deere.isg.worktracker.servlet;
 
@@ -37,10 +36,7 @@ import static com.deere.isg.worktracker.Work.REQUEST_URL;
 import static com.deere.isg.worktracker.servlet.HttpWork.STATUS_CODE;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 import static net.logstash.logback.argument.StructuredArguments.keyValue;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -91,8 +87,8 @@ public class WorkLoggerTest {
         List<StructuredArgument> startInfo = work.getStartInfo();
         startInfo.add(keyValue(REQUEST_URL, TEST_URI));
 
-        assertThat(messageCaptor.getValue(), is("Start of Request: url=" + TEST_URI));
-        assertThat(saCaptor.getAllValues(), is(startInfo));
+        assertThat(messageCaptor.getValue()).isEqualTo("Start of Request: url=" + TEST_URI);
+        assertThat(saCaptor.getAllValues()).isEqualTo(startInfo);
     }
 
     @Test
@@ -109,9 +105,9 @@ public class WorkLoggerTest {
         endInfo.add(keyValue(STATUS_CODE, statusCode));
         endInfo.add(keyValue(REQUEST_URL, TEST_URI));
 
-        assertThat(messageCaptor.getValue(), is("End of Request: status_code=" +
-                statusCode + ", url=" + TEST_URI));
-        assertThat(saCaptor.getAllValues(), is(endInfo));
+        assertThat(messageCaptor.getValue()).isEqualTo("End of Request: status_code=" +
+                statusCode + ", url=" + TEST_URI);
+        assertThat(saCaptor.getAllValues()).isEqualTo(endInfo);
     }
 
     @Test
@@ -139,13 +135,14 @@ public class WorkLoggerTest {
     @Test
     public void excludesUrls() {
         workLogger.excludeUrls("/**", "/", "");
-        assertThat(workLogger.getExcludeUrls(), empty());
+        assertThat(workLogger.getExcludeUrls()).isEmpty();
 
         workLogger.excludeUrls((String[]) null);
-        assertThat(workLogger.getExcludeUrls(), empty());
+        assertThat(workLogger.getExcludeUrls()).isEmpty();
 
         workLogger.excludeUrls("/test/**", "/thing/*", "/another/", "/yet");
-        assertThat(workLogger.getExcludeUrls(), containsInAnyOrder("/test/", "/thing/", "/another/", "/yet"));
+        assertThat(workLogger.getExcludeUrls())
+                .containsExactlyInAnyOrder("/test/", "/thing/", "/another/", "/yet");
 
     }
 

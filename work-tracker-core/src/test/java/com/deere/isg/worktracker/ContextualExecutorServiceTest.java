@@ -1,5 +1,5 @@
 /**
- * Copyright 2018-2021 Deere & Company
+ * Copyright 2018-2023 Deere & Company
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.deere.isg.worktracker;
 
 import com.deere.isg.worktracker.ExecutorTestUtils.MockCallable;
@@ -29,8 +28,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static com.deere.isg.worktracker.ExecutorTestUtils.UUID_PATTERN;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -103,9 +101,9 @@ public class ContextualExecutorServiceTest extends ExecutorTestHelper {
 
         boolean match = UUID_PATTERN.matcher(runnable.getValue("task_id")).matches();
 
-        assertThat(match, is(true));
-        assertThat(output, is(nullValue()));
-        assertThat(runnable.getValue("task_class_name"), containsString("MockRunnable"));
+        assertThat(match).isTrue();
+        assertThat(output).isNull();
+        assertThat(runnable.getValue("task_class_name")).contains("MockRunnable");
     }
 
     @Test
@@ -151,9 +149,9 @@ public class ContextualExecutorServiceTest extends ExecutorTestHelper {
     private void assertTaskHasMetadata(String output, String taskClassName, MockTask task) {
         boolean match = UUID_PATTERN.matcher(task.getValue("task_id")).matches();
 
-        assertThat(match, is(true));
-        assertThat(output, is("test"));
-        assertThat(task.getValue("task_class_name"), containsString(taskClassName));
+        assertThat(match).isTrue();
+        assertThat(output).isEqualTo("test");
+        assertThat(task.getValue("task_class_name")).contains(taskClassName);
     }
 
     private void resetInterruptOrIgnoreTest() {
